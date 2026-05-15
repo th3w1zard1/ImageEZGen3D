@@ -1,0 +1,57 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "setup: create venv and install app",
+            "type": "shell",
+            "command": "python -m venv .venv && .venv/bin/python -m pip install -U pip && .venv/bin/python -m pip install -e .[app,dev]",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "env: create .env from example",
+            "type": "shell",
+            "command": "test -f .env || cp .env.example .env",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "app: run gradio",
+            "type": "shell",
+            "command": ".venv/bin/python app.py",
+            "isBackground": true,
+            "dependsOn": [
+                "env: create .env from example"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "test: unittest",
+            "type": "shell",
+            "command": "PYTHONPATH=src .venv/bin/python -m unittest discover -s tests",
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "check: compile",
+            "type": "shell",
+            "command": "PYTHONPATH=src .venv/bin/python -m compileall -q app.py src tests scripts",
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "check: future annotations",
+            "type": "shell",
+            "command": "PYTHONPATH=src .venv/bin/python scripts/check_python_style.py",
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "hf: show deployment commands",
+            "type": "shell",
+            "command": "PYTHONPATH=src .venv/bin/python scripts/hf_space_check.py",
+            "group": "build",
+            "problemMatcher": []
+        }
+    ]
+}

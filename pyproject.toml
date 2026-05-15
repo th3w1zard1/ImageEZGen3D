@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imageezgen3d"
+version = "0.1.0"
+description = "Robust gradio scaffold for guided image-to-3D generation workflows."
+requires-python = ">=3.10"
+dependencies = [
+  "Pillow>=10.0",
+  "numpy>=1.26",
+  "tomli>=2.0; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+app = ["gradio>=4.44,<7"]
+dev = []
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.imageezgen3d]
+default_config = "pyproject.toml"
+
+[tool.imageezgen3d.app]
+title = "ImageEZGen3D"
+output_dir = "outputs"
+adapter = "auto"
+cpu_adapter = "cpu-demo"
+zerogpu_adapter = "hunyuan-zerogpu"
+
+[tool.imageezgen3d.launch]
+host = "0.0.0.0"
+port = 7860
+share = false
+queue_max_size = 32
+default_concurrency_limit = 1
+
+[tool.imageezgen3d.storage]
+retention_runs = 100
+keep_failed_runs = true
+
+[tool.imageezgen3d.generation]
+seed = 42
+quality = "draft"
+texture_size = 1024
+decimation_target = 500000
+preserve_intermediates = true
+
+[tool.imageezgen3d.preprocessing]
+target_size = 768
+minimum_short_side = 256
+maximum_long_side = 4096
+blur_edge_variance_threshold = 90.0
+low_contrast_threshold = 18.0
+
+[tool.imageezgen3d.runtime]
+mode = "auto"
+prefer_zerogpu = true
+fallback_to_cpu = true
+force_cpu = false
+
+[tool.imageezgen3d.zerogpu]
+enabled = true
+default_duration_seconds = 60
+texture_duration_seconds = 180
+size = "large"
+require_spaces_runtime = true
+
+[tool.imageezgen3d.exports]
+default_format = "glb"
+formats = ["glb", "obj", "ply", "stl"]
+
+[tool.pyright]
+include = ["app.py", "scripts", "src", "tests"]
+exclude = [".venv", "outputs", "tmp"]
+extraPaths = ["src"]
+venvPath = "."
+venv = ".venv"
+reportMissingTypeStubs = false
+
+[tool.unittest]
+start_directory = "tests"
+pattern = "test_*.py"
