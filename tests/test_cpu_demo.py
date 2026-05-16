@@ -12,6 +12,15 @@ from imageezgen3d.orchestrator import ImageEZOrchestrator
 
 
 class CpuDemoTests(unittest.TestCase):
+    def test_adapter_choices_hide_unconfigured_backends(self) -> None:
+        orchestrator = ImageEZOrchestrator(AppConfig())
+        self.assertEqual(orchestrator.adapter_choices(), ["auto", "cpu-demo"])
+
+    def test_select_adapter_rejects_unconfigured_backend(self) -> None:
+        orchestrator = ImageEZOrchestrator(AppConfig())
+        with self.assertRaisesRegex(ValueError, "not enabled yet"):
+            orchestrator.select_adapter("hunyuan-zerogpu")
+
     def test_generate_creates_artifacts_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             config = AppConfig(

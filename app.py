@@ -19,17 +19,19 @@ from imageezgen3d.orchestrator import ImageEZOrchestrator  # noqa: E402
 from imageezgen3d.runtime import runtime_status  # noqa: E402
 
 
+_EXAMPLE_SPECS = [
+    ("teal_block.png", (31, 147, 139), "Block"),
+    ("red_vase.png", (191, 57, 72), "Vase"),
+]
+
+
 def _ensure_examples() -> list[list[str]]:
     from PIL import Image, ImageDraw
 
     examples_dir = Path("assets/examples")
     examples_dir.mkdir(parents=True, exist_ok=True)
     examples: list[list[str]] = []
-    specs = [
-        ("teal_block.png", (31, 147, 139), "Block"),
-        ("red_vase.png", (191, 57, 72), "Vase"),
-    ]
-    for filename, color, label in specs:
+    for filename, color, label in _EXAMPLE_SPECS:
         path = examples_dir / filename
         if not path.exists():
             image = Image.new("RGBA", (640, 640), (245, 247, 250, 255))
@@ -89,6 +91,10 @@ def build_demo():
     config = load_config()
     orchestrator = ImageEZOrchestrator(config)
     status = runtime_status(config)
+    backend_choices = orchestrator.adapter_choices()
+    backend_value = (
+        config.app.adapter if config.app.adapter in backend_choices else "auto"
+    )
 
     with gr.Blocks(title=config.app.title) as demo:
         gr.Markdown(f"# {config.app.title}")
@@ -122,13 +128,14 @@ def build_demo():
                     inputs=[primary],
                     label="Samples",
                     examples_per_page=2,
+                    example_labels=[label for _, _, label in _EXAMPLE_SPECS],
                 )
 
                 with gr.Row():
                     adapter = gr.Dropdown(
                         label="Backend",
-                        choices=orchestrator.adapter_choices(),
-                        value=config.app.adapter,
+                        choices=backend_choices,
+                        value=backend_value,
                         info="auto prefers ZeroGPU and falls back to CPU only when ZeroGPU is not usable.",
                     )
                     quality = gr.Dropdown(

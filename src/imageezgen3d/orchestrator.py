@@ -26,7 +26,12 @@ class ImageEZOrchestrator:
         }
 
     def adapter_choices(self) -> list[str]:
-        return ["auto", *sorted(self.adapters)]
+        configured = [
+            name
+            for name, adapter in self.adapters.items()
+            if adapter.capabilities.configured
+        ]
+        return ["auto", *sorted(configured)]
 
     def select_adapter(
         self, adapter_name: str | None
@@ -37,6 +42,10 @@ class ImageEZOrchestrator:
             if adapter is None:
                 raise ValueError(
                     f"Unknown adapter '{requested}'. Available: {', '.join(self.adapter_choices())}"
+                )
+            if not adapter.capabilities.configured:
+                raise ValueError(
+                    f"Adapter '{requested}' is not enabled yet. Choose one of: {', '.join(self.adapter_choices())}"
                 )
             return requested, adapter, None
 

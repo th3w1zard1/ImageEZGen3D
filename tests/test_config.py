@@ -1,15 +1,18 @@
 from __future__ import annotations
 
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from imageezgen3d.config import load_config
 
 
 class ConfigTests(unittest.TestCase):
     def test_load_defaults_when_missing(self) -> None:
-        config = load_config(Path("missing.yaml"))
+        with patch.dict(os.environ, {}, clear=True):
+            config = load_config(Path("missing.yaml"))
         self.assertEqual(config.app.title, "ImageEZGen3D")
         self.assertEqual(config.app.adapter, "auto")
         self.assertTrue(config.runtime.prefer_zerogpu)
@@ -27,7 +30,8 @@ class ConfigTests(unittest.TestCase):
                 "formats = ['glb', 'obj']\n",
                 encoding="utf-8",
             )
-            config = load_config(path)
+            with patch.dict(os.environ, {}, clear=True):
+                config = load_config(path)
             self.assertEqual(config.app.title, "Demo")
             self.assertEqual(config.app.output_dir, Path("out"))
             self.assertEqual(config.exports.formats, ("glb", "obj"))
