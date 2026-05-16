@@ -54,6 +54,13 @@
             "problemMatcher": []
         },
         {
+            "label": "gh: show deployment commands",
+            "type": "shell",
+            "command": "PYTHONPATH=src .venv/bin/python scripts/gh_repo_check.py",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
             "label": "release: show plan",
             "type": "shell",
             "command": "PYTHONPATH=src .venv/bin/python scripts/release_plan_check.py",

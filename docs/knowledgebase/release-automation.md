@@ -36,6 +36,7 @@ Optional GitLab registry auth can also use `GITLAB_USERNAME`; the workflow falls
 Use the local scripts before pushing workflow changes.
 
 ```bash
+PYTHONPATH=src .venv/bin/python scripts/gh_repo_check.py
 PYTHONPATH=src .venv/bin/python scripts/release_plan_check.py
 PYTHONPATH=src .venv/bin/python scripts/forge_sync.py
 PYTHONPATH=src .venv/bin/python scripts/hf_space_sync.py
@@ -43,6 +44,8 @@ PYTHONPATH=src .venv/bin/python scripts/render_deploy_assets.py --image ghcr.io/
 ```
 
 These are also exposed as VS Code tasks.
+
+`scripts/gh_repo_check.py` and `scripts/hf_space_check.py` are the dry-run CLI mirrors for the GitHub release-asset and Hugging Face Space workflows. They exist so local operators can verify auth, resolved destinations, and the exact recommended commands before a branch push triggers workflow execution.
 
 ## Target Sources
 

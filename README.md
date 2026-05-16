@@ -79,7 +79,7 @@ See [docs/knowledgebase/release-automation.md](docs/knowledgebase/release-automa
 
 ## VS Code
 
-Use the tasks in [.vscode/tasks.json](.vscode/tasks.json) for setup, `.env` creation, testing, compile checks, style checks, the Gradio app, `hf` helper output, release dry-run previews, forge mirror previews, and deploy-asset rendering. Debug configurations live in [.vscode/launch.json](.vscode/launch.json).
+Use the tasks in [.vscode/tasks.json](.vscode/tasks.json) for setup, `.env` creation, testing, compile checks, style checks, the Gradio app, `hf` and `gh` helper output, release dry-run previews, forge mirror previews, and deploy-asset rendering. Debug configurations live in [.vscode/launch.json](.vscode/launch.json).
 
 ## Verification
 

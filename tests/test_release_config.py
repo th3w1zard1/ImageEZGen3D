@@ -71,12 +71,31 @@ class ReleaseConfigTests(unittest.TestCase):
         self.assertEqual(resolved.owner, "th3w1zard1")
         self.assertEqual(resolved.repo, "ImageEZGen3D")
 
+    def test_resolve_repository_ref_uses_git_remote_when_github_repository_missing(self) -> None:
+        settings = load_release_settings(Path("missing.toml"))
+        with patch(
+            "imageezgen3d.release_config._remote_repository_slug",
+            return_value="th3w1zard1/ImageEZGen3D",
+        ):
+            resolved = resolve_repository_ref(settings, {})
+        self.assertEqual(resolved.owner, "th3w1zard1")
+        self.assertEqual(resolved.repo, "ImageEZGen3D")
+
     def test_resolve_target_repo_slug_defaults_to_current_repository(self) -> None:
         settings = load_release_settings(Path("missing.toml"))
         slug = resolve_target_repo_slug(
             settings,
             env={"GITHUB_REPOSITORY": "th3w1zard1/ImageEZGen3D"},
         )
+        self.assertEqual(slug, "th3w1zard1/ImageEZGen3D")
+
+    def test_resolve_target_repo_slug_uses_git_remote_when_environment_missing(self) -> None:
+        settings = load_release_settings(Path("missing.toml"))
+        with patch(
+            "imageezgen3d.release_config._remote_repository_slug",
+            return_value="th3w1zard1/ImageEZGen3D",
+        ):
+            slug = resolve_target_repo_slug(settings, env={})
         self.assertEqual(slug, "th3w1zard1/ImageEZGen3D")
 
     def test_resolve_registry_image_uses_lowercase_defaults(self) -> None:

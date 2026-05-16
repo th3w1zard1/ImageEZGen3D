@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -77,6 +78,26 @@ def _short_sha(env: dict[str, str]) -> str:
 
 def _has_values(*values: str) -> bool:
     return all(value.strip() for value in values)
+
+
+def _remote_repository_slug(cwd: Path | None = None) -> str:
+    try:
+        result = subprocess.run(
+            ["git", "config", "--get", "remote.origin.url"],
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=str(cwd or Path.cwd()),
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return ""
+    remote_url = result.stdout.strip()
+    if not remote_url:
+        return ""
+    match = re.search(r"github\.com[:/]([^/]+)/([^/]+?)(?:\.git)?$", remote_url)
+    if not match:
+        return ""
+    return f"{match.group(1)}/{match.group(2)}"
 
 
 @dataclass(frozen=True)
@@ -493,6 +514,11 @@ def resolve_repository_ref(
         current_owner, current_repo = repository.split("/", 1)
         owner = owner or current_owner
         repo = repo or current_repo
+    remote_repository = _remote_repository_slug()
+    if remote_repository and "/" in remote_repository:
+        remote_owner, remote_repo = remote_repository.split("/", 1)
+        owner = owner or remote_owner
+        repo = repo or remote_repo
     owner = owner or current.get("GITHUB_REPOSITORY_OWNER", "")
     repo = repo or Path.cwd().name
     return RepositoryRef(owner=owner, repo=repo)
