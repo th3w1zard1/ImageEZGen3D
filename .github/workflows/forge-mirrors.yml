@@ -1,76 +1,76 @@
 name: Forge Mirrors
 
 on:
-  push:
-    branches:
-      - main
-      - master
-  pull_request:
-  workflow_dispatch:
+    push:
+        branches:
+            - main
+            - master
+    pull_request:
+    workflow_dispatch:
 
 permissions:
-  contents: read
+    contents: read
 
 concurrency:
-  group: forge-mirrors-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    group: forge-mirrors-${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
-  plan:
-    runs-on: ubuntu-latest
-    outputs:
-      gitlab_action: ${{ steps.outputs.outputs.gitlab_action }}
-      codeberg_action: ${{ steps.outputs.outputs.codeberg_action }}
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+    plan:
+        runs-on: ubuntu-latest
+        outputs:
+            gitlab_action: ${{ steps.outputs.outputs.gitlab_action }}
+            codeberg_action: ${{ steps.outputs.outputs.codeberg_action }}
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.12"
+                  cache: pip
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e ".[app,dev]"
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  python -m pip install -e ".[app,dev]"
 
-      - name: Show forge mirror plan
-        run: |
-          echo "## Forge mirror plan" >> "$GITHUB_STEP_SUMMARY"
-          PYTHONPATH=src python scripts/release_plan_check.py >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "## Forge sync commands" >> "$GITHUB_STEP_SUMMARY"
-          PYTHONPATH=src python scripts/forge_sync.py >> "$GITHUB_STEP_SUMMARY"
+            - name: Show forge mirror plan
+              run: |
+                  echo "## Forge mirror plan" >> "$GITHUB_STEP_SUMMARY"
+                  PYTHONPATH=src python scripts/release_plan_check.py >> "$GITHUB_STEP_SUMMARY"
+                  echo "" >> "$GITHUB_STEP_SUMMARY"
+                  echo "## Forge sync commands" >> "$GITHUB_STEP_SUMMARY"
+                  PYTHONPATH=src python scripts/forge_sync.py >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Emit workflow outputs
-        id: outputs
-        run: PYTHONPATH=src python scripts/release_workflow_outputs.py
+            - name: Emit workflow outputs
+              id: outputs
+              run: PYTHONPATH=src python scripts/release_workflow_outputs.py
 
-  sync:
-    if: github.event_name != 'pull_request' && (needs.plan.outputs.gitlab_action == 'push' || needs.plan.outputs.codeberg_action == 'push')
-    runs-on: ubuntu-latest
-    needs: plan
-    env:
-      GITLAB_TOKEN: ${{ secrets[format('{0}_{1}', 'GITLAB', 'TOKEN')] }}
-      CODEBERG_TOKEN: ${{ secrets[format('{0}_{1}', 'CODEBERG', 'TOKEN')] }}
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    sync:
+        if: github.event_name != 'pull_request' && (needs.plan.outputs.gitlab_action == 'push' || needs.plan.outputs.codeberg_action == 'push')
+        runs-on: ubuntu-latest
+        needs: plan
+        env:
+            GITLAB_TOKEN: ${{ secrets[format('{0}_{1}', 'GITLAB', 'TOKEN')] }}
+            CODEBERG_TOKEN: ${{ secrets[format('{0}_{1}', 'CODEBERG', 'TOKEN')] }}
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.12"
+                  cache: pip
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e ".[app,dev]"
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  python -m pip install -e ".[app,dev]"
 
-      - name: Sync forge mirrors
-        run: PYTHONPATH=src python scripts/forge_sync.py --execute
+            - name: Sync forge mirrors
+              run: PYTHONPATH=src python scripts/forge_sync.py --execute
