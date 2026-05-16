@@ -1,0 +1,75 @@
+name: Hugging Face Space
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hf-space-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      huggingface_action: ${{ steps.outputs.outputs.huggingface_action }}
+      huggingface_destination: ${{ steps.outputs.outputs.huggingface_destination }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[app,dev]"
+          python -m pip install "huggingface_hub[cli]"
+
+      - name: Show release plan
+        run: |
+          echo "## Hugging Face plan" >> "$GITHUB_STEP_SUMMARY"
+          PYTHONPATH=src python scripts/release_plan_check.py >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Hugging Face commands" >> "$GITHUB_STEP_SUMMARY"
+          PYTHONPATH=src python scripts/hf_space_check.py >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Emit workflow outputs
+        id: outputs
+        run: PYTHONPATH=src python scripts/release_workflow_outputs.py
+
+  sync:
+    if: github.event_name != 'pull_request' && needs.plan.outputs.huggingface_action == 'push'
+    runs-on: ubuntu-latest
+    needs: plan
+    env:
+      HF_TOKEN: ${{ secrets[format('{0}_{1}', 'HF', 'TOKEN')] }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[app,dev]"
+          python -m pip install "huggingface_hub[cli]"
+
+      - name: Sync Hugging Face Space
+        run: PYTHONPATH=src python scripts/hf_space_sync.py --execute

@@ -10,6 +10,7 @@ class HfCliTests(unittest.TestCase):
         status = hf_cli_status("user/space")
         joined = "\n".join(status.recommended_commands)
         self.assertIn("hf auth whoami", joined)
+        self.assertIn("hf repos create space --repo-type space --space-sdk gradio --exist-ok", joined)
         self.assertIn("hf upload user/space", joined)
 
 

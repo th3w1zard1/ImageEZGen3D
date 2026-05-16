@@ -52,6 +52,34 @@
             "command": "PYTHONPATH=src .venv/bin/python scripts/hf_space_check.py",
             "group": "build",
             "problemMatcher": []
+        },
+        {
+            "label": "release: show plan",
+            "type": "shell",
+            "command": "PYTHONPATH=src .venv/bin/python scripts/release_plan_check.py",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "release: show forge sync plan",
+            "type": "shell",
+            "command": "PYTHONPATH=src .venv/bin/python scripts/forge_sync.py",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "release: show hf sync plan",
+            "type": "shell",
+            "command": "PYTHONPATH=src .venv/bin/python scripts/hf_space_sync.py",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "release: render deploy assets",
+            "type": "shell",
+            "command": "PYTHONPATH=src .venv/bin/python scripts/render_deploy_assets.py --image ghcr.io/th3w1zard1/imageezgen3d:latest --output-dir tmp/release-assets",
+            "group": "build",
+            "problemMatcher": []
         }
     ]
 }

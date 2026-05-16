@@ -65,9 +65,21 @@ Future GPU adapters should:
 
 See [docs/knowledgebase/deployment-hf-cli.md](docs/knowledgebase/deployment-hf-cli.md).
 
+## Automation
+
+The repo now includes three deployment-oriented GitHub Actions workflows in addition to CI.
+
+- `Forge Mirrors` plans GitLab and Codeberg repository sync on pull requests and creates or reuses those repos on `main`, `master`, or `workflow_dispatch` when credentials are present.
+- `Hugging Face Space` shows the exact `hf` commands on pull requests and performs create-or-upload on default-branch pushes or manual dispatch when `HF_TOKEN` is available.
+- `Runtime Artifacts` resolves one image tag, builds one OCI image, renders Helm/Kubernetes/Nomad/Podman assets from that same image reference, and publishes to enabled registries.
+
+The default behavior matches the rest of the repo: pull requests are dry-run only, default-branch pushes use intuitive defaults such as `latest`, and missing credentials cause a clear skip instead of hidden partial failure unless a target is explicitly made required.
+
+See [docs/knowledgebase/release-automation.md](docs/knowledgebase/release-automation.md).
+
 ## VS Code
 
-Use the tasks in [.vscode/tasks.json](.vscode/tasks.json) for setup, `.env` creation, testing, compile checks, style checks, the Gradio app, and `hf` helper output. Debug configurations live in [.vscode/launch.json](.vscode/launch.json).
+Use the tasks in [.vscode/tasks.json](.vscode/tasks.json) for setup, `.env` creation, testing, compile checks, style checks, the Gradio app, `hf` helper output, release dry-run previews, forge mirror previews, and deploy-asset rendering. Debug configurations live in [.vscode/launch.json](.vscode/launch.json).
 
 ## Verification
 

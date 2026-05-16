@@ -1,0 +1,13 @@
+replicaCount: 1
+
+image:
+  repository: __IMAGE_REPOSITORY__
+  tag: "__IMAGE_TAG__"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: __SERVICE_PORT__
+  targetPort: __CONTAINER_PORT__
+
+resources: {}

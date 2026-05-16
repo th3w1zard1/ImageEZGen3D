@@ -1,0 +1,33 @@
+job "__APP_NAME__" {
+  datacenters = ["dc1"]
+  type = "service"
+
+  group "app" {
+    count = 1
+
+    network {
+      port "http" {
+        to = __CONTAINER_PORT__
+      }
+    }
+
+    task "__APP_NAME__" {
+      driver = "docker"
+
+      config {
+        image = "__IMAGE_REFERENCE__"
+        ports = ["http"]
+      }
+
+      service {
+        name = "__APP_NAME__"
+        port = "http"
+      }
+
+      resources {
+        cpu    = 500
+        memory = 1024
+      }
+    }
+  }
+}

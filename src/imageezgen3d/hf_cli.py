@@ -13,17 +13,22 @@ class HfCliStatus:
     recommended_commands: tuple[str, ...]
 
 
-def hf_cli_status(space_id: str = "YOUR_USERNAME/ImageEZGen3D") -> HfCliStatus:
+def hf_cli_status(
+    space_id: str = "YOUR_USERNAME/ImageEZGen3D",
+    *,
+    space_sdk: str = "gradio",
+) -> HfCliStatus:
     executable = shutil.which("hf")
     if executable is None:
         sibling = Path(sys.executable).with_name("hf")
         if sibling.is_file():
             executable = str(sibling)
     command = executable or "hf"
+    repo_name = space_id.split("/", 1)[1] if "/" in space_id else space_id
     commands = (
         f"{command} auth whoami",
         f"{command} env",
-        f"{command} repos create ImageEZGen3D --repo-type space --space-sdk gradio --exist-ok",
+        f"{command} repos create {repo_name} --repo-type space --space-sdk {space_sdk} --exist-ok",
         f"{command} download tencent/Hunyuan3D-2.1 --dry-run",
         f"{command} cache ls",
         f"{command} cache verify tencent/Hunyuan3D-2.1",

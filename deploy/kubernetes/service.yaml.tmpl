@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: __APP_NAME__
+  labels:
+    app.kubernetes.io/name: __APP_NAME__
+spec:
+  selector:
+    app.kubernetes.io/name: __APP_NAME__
+  ports:
+    - protocol: TCP
+      port: __SERVICE_PORT__
+      targetPort: __CONTAINER_PORT__
+  type: ClusterIP

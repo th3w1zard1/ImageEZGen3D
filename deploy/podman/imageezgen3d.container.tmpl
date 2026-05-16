@@ -1,0 +1,10 @@
+[Unit]
+Description=__APP_NAME__ container
+
+[Container]
+ContainerName=__APP_NAME__
+Image=__IMAGE_REFERENCE__
+PublishPort=__SERVICE_PORT__:__CONTAINER_PORT__
+
+[Install]
+WantedBy=default.target

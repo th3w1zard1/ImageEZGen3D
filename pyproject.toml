@@ -72,6 +72,76 @@ require_spaces_runtime = true
 default_format = "glb"
 formats = ["glb", "obj", "ply", "stl"]
 
+[tool.imageezgen3d.release]
+create_missing_targets = true
+
+[tool.imageezgen3d.release.repository]
+owner = ""
+repo = ""
+
+[tool.imageezgen3d.release.branches]
+primary_branch = "main"
+fallback_branches = ["master"]
+publish_latest_branches = ["main", "master"]
+
+[tool.imageezgen3d.release.tags]
+default_image_tag = "latest"
+immutable_tag_prefix = "sha"
+pr_tag_prefix = "pr"
+publish_latest_by_default = true
+
+[tool.imageezgen3d.release.forge.gitlab]
+enabled = true
+required = false
+owner = ""
+repo = ""
+visibility = "public"
+base_url = "https://gitlab.com"
+
+[tool.imageezgen3d.release.forge.codeberg]
+enabled = true
+required = false
+owner = ""
+repo = ""
+visibility = "public"
+base_url = "https://codeberg.org"
+
+[tool.imageezgen3d.release.forge.huggingface]
+enabled = true
+required = false
+owner = ""
+repo = "ImageEZGen3D"
+repo_type = "space"
+space_sdk = "gradio"
+
+[tool.imageezgen3d.release.registry.ghcr]
+enabled = true
+required = false
+namespace = ""
+image = ""
+registry = "ghcr.io"
+
+[tool.imageezgen3d.release.registry.dockerhub]
+enabled = false
+required = false
+namespace = ""
+image = ""
+registry = "docker.io"
+
+[tool.imageezgen3d.release.registry.gitlab]
+enabled = false
+required = false
+namespace = ""
+image = ""
+registry = "registry.gitlab.com"
+
+[tool.imageezgen3d.release.artifacts]
+helm_enabled = true
+kubernetes_enabled = true
+nomad_enabled = true
+podman_enabled = true
+attach_to_github_release = true
+
 [tool.pyright]
 include = ["app.py", "scripts", "src", "tests"]
 exclude = [".venv", "outputs", "tmp"]
