@@ -14,7 +14,10 @@ class GhCliTests(unittest.TestCase):
         self.assertIn("gh workflow list --repo owner/repo", joined)
         self.assertIn("gh release view sha-abcdef0 --repo owner/repo", joined)
         self.assertIn("gh release create sha-abcdef0 --repo owner/repo", joined)
-        self.assertIn("gh release upload sha-abcdef0 dist/runtime-artifacts/runtime-artifacts.tgz --repo owner/repo --clobber", joined)
+        self.assertIn(
+            "gh release upload sha-abcdef0 dist/runtime-artifacts/runtime-artifacts.tgz --repo owner/repo --clobber",
+            joined,
+        )
 
 
 if __name__ == "__main__":

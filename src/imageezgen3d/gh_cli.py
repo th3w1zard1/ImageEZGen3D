@@ -24,7 +24,9 @@ def gh_cli_status(
         if sibling.is_file():
             executable = str(sibling)
     command = executable or "gh"
-    repo_view = f"{command} repo view {repository}" if repository else f"{command} repo view"
+    repo_view = (
+        f"{command} repo view {repository}" if repository else f"{command} repo view"
+    )
     workflow_list = (
         f"{command} workflow list --repo {repository}"
         if repository

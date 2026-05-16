@@ -170,10 +170,14 @@ class RegistrySettings:
         default_factory=lambda: RegistryTargetSettings(enabled=True, registry="ghcr.io")
     )
     dockerhub: RegistryTargetSettings = field(
-        default_factory=lambda: RegistryTargetSettings(enabled=False, registry="docker.io")
+        default_factory=lambda: RegistryTargetSettings(
+            enabled=False, registry="docker.io"
+        )
     )
     gitlab: RegistryTargetSettings = field(
-        default_factory=lambda: RegistryTargetSettings(enabled=False, registry="registry.gitlab.com")
+        default_factory=lambda: RegistryTargetSettings(
+            enabled=False, registry="registry.gitlab.com"
+        )
     )
 
 
@@ -254,7 +258,9 @@ def load_release_settings(path: str | Path | None = None) -> ReleaseSettings:
         branches=BranchSettings(
             primary_branch=_env_str(
                 "IMAGEEZ_RELEASE_PRIMARY_BRANCH",
-                _str_value(branches_raw, "primary_branch", BranchSettings.primary_branch),
+                _str_value(
+                    branches_raw, "primary_branch", BranchSettings.primary_branch
+                ),
             ),
             fallback_branches=_env_csv(
                 "IMAGEEZ_RELEASE_FALLBACK_BRANCHES",
@@ -274,7 +280,9 @@ def load_release_settings(path: str | Path | None = None) -> ReleaseSettings:
         tags=TagSettings(
             default_image_tag=_env_str(
                 "IMAGEEZ_RELEASE_DEFAULT_IMAGE_TAG",
-                _str_value(tags_raw, "default_image_tag", TagSettings.default_image_tag),
+                _str_value(
+                    tags_raw, "default_image_tag", TagSettings.default_image_tag
+                ),
             ),
             immutable_tag_prefix=_env_str(
                 "IMAGEEZ_RELEASE_IMMUTABLE_TAG_PREFIX",
@@ -321,7 +329,9 @@ def load_release_settings(path: str | Path | None = None) -> ReleaseSettings:
                 ),
                 visibility=_env_str(
                     "IMAGEEZ_RELEASE_GITLAB_VISIBILITY",
-                    _str_value(gitlab_raw, "visibility", MirrorTargetSettings.visibility),
+                    _str_value(
+                        gitlab_raw, "visibility", MirrorTargetSettings.visibility
+                    ),
                 ),
                 base_url=_env_str(
                     "IMAGEEZ_RELEASE_GITLAB_BASE_URL",
@@ -335,7 +345,9 @@ def load_release_settings(path: str | Path | None = None) -> ReleaseSettings:
                 ),
                 required=_env_bool(
                     "IMAGEEZ_RELEASE_CODEBERG_REQUIRED",
-                    _bool_value(codeberg_raw, "required", MirrorTargetSettings.required),
+                    _bool_value(
+                        codeberg_raw, "required", MirrorTargetSettings.required
+                    ),
                 ),
                 owner=_env_str(
                     "IMAGEEZ_RELEASE_CODEBERG_OWNER",
@@ -347,7 +359,9 @@ def load_release_settings(path: str | Path | None = None) -> ReleaseSettings:
                 ),
                 visibility=_env_str(
                     "IMAGEEZ_RELEASE_CODEBERG_VISIBILITY",
-                    _str_value(codeberg_raw, "visibility", MirrorTargetSettings.visibility),
+                    _str_value(
+                        codeberg_raw, "visibility", MirrorTargetSettings.visibility
+                    ),
                 ),
                 base_url=_env_str(
                     "IMAGEEZ_RELEASE_CODEBERG_BASE_URL",
@@ -357,11 +371,15 @@ def load_release_settings(path: str | Path | None = None) -> ReleaseSettings:
             huggingface=HuggingFaceSettings(
                 enabled=_env_bool(
                     "IMAGEEZ_RELEASE_HF_ENABLED",
-                    _bool_value(huggingface_raw, "enabled", HuggingFaceSettings.enabled),
+                    _bool_value(
+                        huggingface_raw, "enabled", HuggingFaceSettings.enabled
+                    ),
                 ),
                 required=_env_bool(
                     "IMAGEEZ_RELEASE_HF_REQUIRED",
-                    _bool_value(huggingface_raw, "required", HuggingFaceSettings.required),
+                    _bool_value(
+                        huggingface_raw, "required", HuggingFaceSettings.required
+                    ),
                 ),
                 owner=_env_str(
                     "IMAGEEZ_RELEASE_HF_OWNER",
@@ -460,7 +478,9 @@ def load_release_settings(path: str | Path | None = None) -> ReleaseSettings:
         artifacts=ArtifactSettings(
             helm_enabled=_env_bool(
                 "IMAGEEZ_RELEASE_HELM_ENABLED",
-                _bool_value(artifacts_raw, "helm_enabled", ArtifactSettings.helm_enabled),
+                _bool_value(
+                    artifacts_raw, "helm_enabled", ArtifactSettings.helm_enabled
+                ),
             ),
             kubernetes_enabled=_env_bool(
                 "IMAGEEZ_RELEASE_KUBERNETES_ENABLED",
@@ -472,7 +492,9 @@ def load_release_settings(path: str | Path | None = None) -> ReleaseSettings:
             ),
             nomad_enabled=_env_bool(
                 "IMAGEEZ_RELEASE_NOMAD_ENABLED",
-                _bool_value(artifacts_raw, "nomad_enabled", ArtifactSettings.nomad_enabled),
+                _bool_value(
+                    artifacts_raw, "nomad_enabled", ArtifactSettings.nomad_enabled
+                ),
             ),
             podman_enabled=_env_bool(
                 "IMAGEEZ_RELEASE_PODMAN_ENABLED",
@@ -563,14 +585,18 @@ def resolve_image_tags(
     default_branches = resolve_default_branch_names(settings)
     publish_latest_branches = _unique_items(*settings.branches.publish_latest_branches)
     is_default_branch = branch in default_branches
-    requested_tag = image_tag.strip() or current.get("IMAGEEZ_RELEASE_IMAGE_TAG", "").strip()
+    requested_tag = (
+        image_tag.strip() or current.get("IMAGEEZ_RELEASE_IMAGE_TAG", "").strip()
+    )
     sha_tag = _slugify_tag(
         f"{settings.tags.immutable_tag_prefix}-{_short_sha(current)}",
         default=settings.tags.default_image_tag,
     )
     source = "default"
     if requested_tag:
-        primary_tag = _slugify_tag(requested_tag, default=settings.tags.default_image_tag)
+        primary_tag = _slugify_tag(
+            requested_tag, default=settings.tags.default_image_tag
+        )
         source = "input"
     elif event_name == "pull_request":
         number = _pull_request_number(current)
@@ -603,9 +629,7 @@ def resolve_image_tags(
     if publish_latest is not None:
         should_publish_latest = publish_latest
     additional_tags = tuple(
-        tag
-        for tag in _unique_items(sha_tag)
-        if tag and tag != primary_tag
+        tag for tag in _unique_items(sha_tag) if tag and tag != primary_tag
     )
     return ImageTagResolution(
         primary_tag=primary_tag,
@@ -628,14 +652,22 @@ def resolve_target_enablement(
     if force:
         if credentials_present:
             return TargetDecision(action="push", reason="target forced on")
-        return TargetDecision(action="fail", reason="target forced on but credentials are missing")
+        return TargetDecision(
+            action="fail", reason="target forced on but credentials are missing"
+        )
     if not enabled:
         return TargetDecision(action="skip", reason="target disabled")
     if credentials_present:
-        return TargetDecision(action="push", reason="target enabled and credentials available")
+        return TargetDecision(
+            action="push", reason="target enabled and credentials available"
+        )
     if required:
-        return TargetDecision(action="fail", reason="required target is missing credentials")
-    return TargetDecision(action="skip", reason="target enabled but credentials are missing")
+        return TargetDecision(
+            action="fail", reason="required target is missing credentials"
+        )
+    return TargetDecision(
+        action="skip", reason="target enabled but credentials are missing"
+    )
 
 
 def summarize_skipped_target_reason(
