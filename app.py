@@ -117,7 +117,7 @@ def build_demo():
                     right = gr.Image(
                         label="Right", type="pil", sources=["upload", "clipboard"]
                     )
-                examples = gr.Examples(
+                gr.Examples(
                     examples=_ensure_examples(),
                     inputs=[primary],
                     label="Samples",

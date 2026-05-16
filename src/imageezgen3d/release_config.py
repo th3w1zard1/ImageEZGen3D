@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from imageezgen3d.config import (
-    _as_bool,
     _bool_value,
     _env_bool,
     _env_str,
@@ -15,7 +14,6 @@ from imageezgen3d.config import (
     _load_pyproject,
     _section,
     _str_value,
-    _str_tuple_value,
 )
 
 

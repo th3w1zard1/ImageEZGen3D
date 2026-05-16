@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from PIL import Image, ImageChops, ImageOps, ImageStat
+from PIL import Image, ImageOps, ImageStat
 
 from .storage import atomic_write_json
 
