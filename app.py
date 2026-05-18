@@ -357,6 +357,17 @@ def _hero_shell_html(title: str, resolution: AdapterResolution) -> str:
         )
         for label, value in chips
     )
+    quick_html = "".join(
+        (
+            '<article class="hero-idea-card">'
+            f'<span class="hero-idea-badge">{escape(str(template["badge"]))}</span>'
+            f"<h3>{escape(str(template['title']))}</h3>"
+            f"<p>{escape(str(template['summary']))}</p>"
+            f'<span class="hero-idea-meta">{escape(_STARTER_FLOW_BY_KEY[str(template["starter"])] ["label"])} · {escape(str(template["quality"]).title())}</span>'
+            "</article>"
+        )
+        for template in _PROMPT_TEMPLATES[:3]
+    )
     return "\n".join(
         [
             '<section class="hero-shell">',
@@ -372,17 +383,8 @@ def _hero_shell_html(title: str, resolution: AdapterResolution) -> str:
             f'<div class="hero-chip-row">{chip_html}</div>',
             "</div>",
             '<div class="hero-ideas">',
-            '<div class="hero-ideas-header">Flow</div>',
-            '<article class="hero-idea-card">',
-            '<span class="hero-idea-badge">Step 1</span>',
-            "<h3>Upload and brief</h3>",
-            "<p>Drop one clean hero frame, keep the brief specific, and run a fast draft first.</p>",
-            "</article>",
-            '<article class="hero-idea-card">',
-            '<span class="hero-idea-badge">Step 2</span>',
-            "<h3>Apply a launch kit</h3>",
-            "<p>Use Prompt Lab presets for repeatable starting points before detailed tuning.</p>",
-            "</article>",
+            '<div class="hero-ideas-header">Quick starts</div>',
+            quick_html,
             "</div>",
             "</section>",
         ]
@@ -892,66 +894,76 @@ def build_demo():
                                                     elem_classes="note-panel compact-note",
                                                 )
 
-                        with gr.Group(elem_classes="workspace-panel template-panel"):
-                            gr.HTML(
-                                _surface_header_html(
-                                    "Prompt Lab",
-                                    "Apply visual launch kits",
-                                    "Keep quick starts visual, compact, and immediately actionable instead of burying them in plain text.",
+                        with gr.Accordion(
+                            "Launch kits",
+                            open=False,
+                            elem_classes="launch-kits-accordion",
+                        ):
+                            with gr.Group(elem_classes="workspace-panel template-panel"):
+                                gr.HTML(
+                                    _surface_header_html(
+                                        "Prompt Lab",
+                                        "Apply visual launch kits",
+                                        "Keep quick starts visual, compact, and immediately actionable instead of burying them in plain text.",
+                                    )
                                 )
-                            )
-                            template_buttons: list[tuple[Any, str]] = []
-                            for row_start in range(0, len(_PROMPT_TEMPLATES), 3):
-                                with gr.Row(
-                                    equal_height=True,
-                                    elem_classes="template-grid-row",
-                                ):
-                                    for template in _PROMPT_TEMPLATES[
-                                        row_start : row_start + 3
-                                    ]:
-                                        with gr.Column(scale=1, min_width=220):
-                                            with gr.Group(elem_classes="template-card"):
-                                                gr.HTML(
-                                                    _prompt_template_card_html(template)
-                                                )
-                                                template_button = gr.Button(
-                                                    f"Use {template['title']}",
-                                                    variant="secondary",
-                                                    elem_classes="template-apply",
-                                                )
-                                                template_buttons.append(
-                                                    (
-                                                        template_button,
-                                                        str(template["key"]),
+                                template_buttons: list[tuple[Any, str]] = []
+                                for row_start in range(0, len(_PROMPT_TEMPLATES), 3):
+                                    with gr.Row(
+                                        equal_height=True,
+                                        elem_classes="template-grid-row",
+                                    ):
+                                        for template in _PROMPT_TEMPLATES[
+                                            row_start : row_start + 3
+                                        ]:
+                                            with gr.Column(scale=1, min_width=220):
+                                                with gr.Group(elem_classes="template-card"):
+                                                    gr.HTML(
+                                                        _prompt_template_card_html(template)
                                                     )
-                                                )
+                                                    template_button = gr.Button(
+                                                        f"Use {template['title']}",
+                                                        variant="secondary",
+                                                        elem_classes="template-apply",
+                                                    )
+                                                    template_buttons.append(
+                                                        (
+                                                            template_button,
+                                                            str(template["key"]),
+                                                        )
+                                                    )
 
-                        with gr.Group(elem_classes="workspace-panel discover-panel"):
-                            gr.HTML(
-                                _surface_header_html(
-                                    "Discover",
-                                    "Browse repo-local starter captures",
-                                    "Keep the strongest browse behavior from the reference apps: image-led starter choices that are visible before you commit to a run.",
+                        with gr.Accordion(
+                            "Sample captures",
+                            open=False,
+                            elem_classes="discover-accordion",
+                        ):
+                            with gr.Group(elem_classes="workspace-panel discover-panel"):
+                                gr.HTML(
+                                    _surface_header_html(
+                                        "Discover",
+                                        "Browse repo-local starter captures",
+                                        "Keep the strongest browse behavior from the reference apps: image-led starter choices that are visible before you commit to a run.",
+                                    )
                                 )
-                            )
-                            gr.Markdown(
-                                _sample_packs_note(sample_packs),
-                                elem_classes="subtle-note discover-note",
-                            )
-                            with gr.Row(
-                                equal_height=False, elem_classes="sample-pack-row"
-                            ):
-                                for pack in sample_packs:
-                                    with gr.Column(scale=1, min_width=210):
-                                        with gr.Group(
-                                            elem_classes="sample-pack-surface"
-                                        ):
-                                            gr.HTML(_sample_pack_header_html(pack))
-                                            gr.Examples(
-                                                examples=pack["examples"],
-                                                inputs=[primary],
-                                                examples_per_page=pack["count"],
-                                            )
+                                gr.Markdown(
+                                    _sample_packs_note(sample_packs),
+                                    elem_classes="subtle-note discover-note",
+                                )
+                                with gr.Row(
+                                    equal_height=False, elem_classes="sample-pack-row"
+                                ):
+                                    for pack in sample_packs:
+                                        with gr.Column(scale=1, min_width=210):
+                                            with gr.Group(
+                                                elem_classes="sample-pack-surface"
+                                            ):
+                                                gr.HTML(_sample_pack_header_html(pack))
+                                                gr.Examples(
+                                                    examples=pack["examples"],
+                                                    inputs=[primary],
+                                                    examples_per_page=pack["count"],
+                                                )
 
                     with gr.Column(scale=5, min_width=360, elem_classes="rail-column"):
                         with gr.Group(elem_classes="workspace-panel rail-panel"):
@@ -2034,6 +2046,32 @@ _CSS = """
 .template-panel {
     background: var(--iez-surface) !important;
     border-color: var(--iez-line) !important;
+}
+
+.launch-kits-accordion,
+.discover-accordion {
+    border-radius: var(--r-card);
+    border: 1px solid var(--iez-line);
+    background: var(--iez-surface);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.launch-kits-accordion > button,
+.discover-accordion > button {
+    min-height: 52px !important;
+    padding: 0 18px !important;
+    background: var(--iez-surface-2) !important;
+    color: var(--iez-ink) !important;
+    font-weight: 700 !important;
+    border-bottom: 1px solid var(--iez-line) !important;
+    text-transform: none;
+    letter-spacing: 0.01em;
+}
+
+.launch-kits-accordion > button:hover,
+.discover-accordion > button:hover {
+    background: var(--iez-surface-3) !important;
 }
 
 .template-panel .surface-header-copy .surface-copy,
