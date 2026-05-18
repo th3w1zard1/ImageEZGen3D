@@ -783,19 +783,6 @@ def build_demo():
                                         placeholder="Subject, must-keep details, and target export quality.",
                                         elem_classes="brief-field composer-brief",
                                     )
-                                    with gr.Row(
-                                        equal_height=False,
-                                        elem_classes="action-row composer-footer",
-                                    ):
-                                        generate = gr.Button(
-                                            "Generate Mesh",
-                                            variant="primary",
-                                            elem_classes="generate-button composer-cta",
-                                        )
-                                        gr.Markdown(
-                                            "Generate early, then refine with presets or advanced controls.",
-                                            elem_classes="subtle-note action-note",
-                                        )
                                     primary = gr.Image(
                                         label="Primary image",
                                         type="pil",
@@ -833,6 +820,19 @@ def build_demo():
                                     min_width=300,
                                     elem_classes="composer-control-column",
                                 ):
+                                    with gr.Row(
+                                        equal_height=False,
+                                        elem_classes="action-row composer-footer",
+                                    ):
+                                        generate = gr.Button(
+                                            "Generate Mesh",
+                                            variant="primary",
+                                            elem_classes="generate-button composer-cta",
+                                        )
+                                        gr.Markdown(
+                                            "Generate early, then refine with presets or advanced controls.",
+                                            elem_classes="subtle-note action-note",
+                                        )
                                     starter = gr.Dropdown(
                                         label="Starter flow",
                                         choices=[
