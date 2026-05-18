@@ -357,35 +357,32 @@ def _hero_shell_html(title: str, resolution: AdapterResolution) -> str:
         )
         for label, value in chips
     )
-    cue_html = "".join(
-        (
-            '<article class="hero-idea-card">'
-            f'<span class="hero-idea-badge">{escape(str(template["badge"]))}</span>'
-            f"<h3>{escape(str(template['title']))}</h3>"
-            f"<p>{escape(str(template['summary']))}</p>"
-            f'<span class="hero-idea-meta">{escape(_STARTER_FLOW_BY_KEY[str(template["starter"])]["label"])} · {escape(str(template["quality"]).title())}</span>'
-            "</article>"
-        )
-        for template in _PROMPT_TEMPLATES[:3]
-    )
     return "\n".join(
         [
             '<section class="hero-shell">',
             '<div class="hero-copy">',
-            '<p class="surface-eyebrow">Creative Reconstruction Workspace</p>',
+            '<p class="surface-eyebrow">Create</p>',
             f"<h1>{escape(title)}</h1>",
             (
                 '<p class="hero-copy-text">'
-                "Build a run from a hero frame, keep every export tied to a stored brief, "
-                "and reopen prior experiments without leaving the same shell."
+                "Start with one primary image and a short brief. Generate quickly, then refine with presets and optional views."
                 "</p>"
             ),
             f'<p class="hero-runtime-note">{escape(resolution.message)}</p>',
             f'<div class="hero-chip-row">{chip_html}</div>',
             "</div>",
             '<div class="hero-ideas">',
-            '<div class="hero-ideas-header">Launch Kits</div>',
-            cue_html,
+            '<div class="hero-ideas-header">Flow</div>',
+            '<article class="hero-idea-card">',
+            '<span class="hero-idea-badge">Step 1</span>',
+            "<h3>Upload and brief</h3>",
+            "<p>Drop one clean hero frame, keep the brief specific, and run a fast draft first.</p>",
+            "</article>",
+            '<article class="hero-idea-card">',
+            '<span class="hero-idea-badge">Step 2</span>',
+            "<h3>Apply a launch kit</h3>",
+            "<p>Use Prompt Lab presets for repeatable starting points before detailed tuning.</p>",
+            "</article>",
             "</div>",
             "</section>",
         ]
@@ -781,9 +778,9 @@ def build_demo():
                                 ):
                                     project_brief = gr.Textbox(
                                         label="Project brief",
-                                        lines=6,
+                                        lines=4,
                                         value=_starter_spec(_DEFAULT_STARTER)["brief"],
-                                        placeholder="Describe the object, must-keep details, and intended export.",
+                                        placeholder="Subject, must-keep details, and target export quality.",
                                         elem_classes="brief-field composer-brief",
                                     )
                                     primary = gr.Image(
@@ -818,6 +815,19 @@ def build_demo():
                                                 type="pil",
                                                 sources=["upload", "clipboard"],
                                             )
+                                    with gr.Row(
+                                        equal_height=False,
+                                        elem_classes="action-row composer-footer",
+                                    ):
+                                        generate = gr.Button(
+                                            "Generate Mesh",
+                                            variant="primary",
+                                            elem_classes="generate-button composer-cta",
+                                        )
+                                        gr.Markdown(
+                                            "Primary action first: generate a draft, then refine settings or presets.",
+                                            elem_classes="subtle-note action-note",
+                                        )
                                 with gr.Column(
                                     scale=4,
                                     min_width=300,
@@ -837,53 +847,50 @@ def build_demo():
                                         value=config.generation.quality,
                                         elem_classes="quality-pills composer-control",
                                     )
-                                    adapter = gr.Dropdown(
-                                        label="Backend",
-                                        choices=backend_choices,
-                                        value=backend_value,
-                                        info="auto prefers ZeroGPU and falls back to CPU when ZeroGPU is not usable.",
-                                        elem_classes="composer-control",
-                                    )
-                                    seed = gr.Number(
-                                        label="Seed",
-                                        value=config.generation.seed,
-                                        precision=0,
-                                        elem_classes="composer-control",
-                                    )
-                                    reference_brief = gr.File(
-                                        label="Optional reference brief",
-                                        type="filepath",
-                                        elem_classes="reference-brief",
-                                    )
-                                    with gr.Row(
-                                        equal_height=False,
-                                        elem_classes="support-grid compact-support-grid",
+                                    with gr.Accordion(
+                                        "Advanced run controls",
+                                        open=False,
+                                        elem_classes="advanced-accordion",
                                     ):
-                                        with gr.Column(scale=1, min_width=220):
-                                            starter_help = gr.Markdown(
-                                                _starter_markdown(_DEFAULT_STARTER),
-                                                elem_classes="note-panel compact-note",
-                                            )
-                                        with gr.Column(scale=1, min_width=220):
-                                            quality_help = gr.Markdown(
-                                                _quality_markdown(
-                                                    config.generation.quality
-                                                ),
-                                                elem_classes="note-panel compact-note",
-                                            )
-                            with gr.Row(
-                                equal_height=False,
-                                elem_classes="action-row composer-footer",
-                            ):
-                                generate = gr.Button(
-                                    "Generate Mesh",
-                                    variant="primary",
-                                    elem_classes="generate-button",
-                                )
-                                gr.Markdown(
-                                    "Outputs stay empty until verified files exist, then preview and downloads light up together.",
-                                    elem_classes="subtle-note action-note",
-                                )
+                                        adapter = gr.Dropdown(
+                                            label="Backend",
+                                            choices=backend_choices,
+                                            value=backend_value,
+                                            info="auto prefers ZeroGPU and falls back to CPU when ZeroGPU is not usable.",
+                                            elem_classes="composer-control",
+                                        )
+                                        seed = gr.Number(
+                                            label="Seed",
+                                            value=config.generation.seed,
+                                            precision=0,
+                                            elem_classes="composer-control",
+                                        )
+                                        reference_brief = gr.File(
+                                            label="Optional reference brief",
+                                            type="filepath",
+                                            elem_classes="reference-brief",
+                                        )
+                                    with gr.Accordion(
+                                        "Live guidance",
+                                        open=False,
+                                        elem_classes="helper-accordion",
+                                    ):
+                                        with gr.Row(
+                                            equal_height=False,
+                                            elem_classes="support-grid compact-support-grid",
+                                        ):
+                                            with gr.Column(scale=1, min_width=220):
+                                                starter_help = gr.Markdown(
+                                                    _starter_markdown(_DEFAULT_STARTER),
+                                                    elem_classes="note-panel compact-note",
+                                                )
+                                            with gr.Column(scale=1, min_width=220):
+                                                quality_help = gr.Markdown(
+                                                    _quality_markdown(
+                                                        config.generation.quality
+                                                    ),
+                                                    elem_classes="note-panel compact-note",
+                                                )
 
                         with gr.Group(elem_classes="workspace-panel template-panel"):
                             gr.HTML(
@@ -1566,11 +1573,11 @@ _CSS = """
 /* ─── Hero ───────────────────────────────────────────────────────────────── */
 .hero-shell {
     display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.7fr);
-    gap: 32px;
-    padding: 48px 52px;
+    grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.8fr);
+    gap: 22px;
+    padding: 26px 30px;
     border-radius: var(--r-xl);
-    margin-bottom: 28px;
+    margin-bottom: 18px;
     overflow: hidden;
     position: relative;
     background: var(--iez-ink);
@@ -1621,24 +1628,24 @@ _CSS = """
 }
 
 .hero-copy h1 {
-    margin: 0 0 18px;
-    font-size: var(--font-display);
-    line-height: 0.9;
+    margin: 0 0 10px;
+    font-size: clamp(2rem, 2.5vw + 0.8rem, 3.2rem);
+    line-height: 0.92;
     letter-spacing: -0.055em;
     color: white;
     font-weight: 800;
 }
 
 .hero-copy-text {
-    max-width: 44ch;
-    margin: 0 0 16px;
+    max-width: 56ch;
+    margin: 0 0 10px;
     color: rgba(255, 255, 255, 0.68);
     font-size: 1.05rem;
     line-height: 1.7;
 }
 
 .hero-runtime-note {
-    margin: 0 0 24px;
+    margin: 0 0 14px;
     color: rgba(255, 255, 255, 0.50);
     font-size: 0.88rem;
 }
@@ -1651,7 +1658,7 @@ _CSS = """
 }
 
 .hero-chip {
-    padding: 12px 16px;
+    padding: 9px 12px;
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.07);
     border: 1px solid rgba(255, 255, 255, 0.10);
@@ -1681,7 +1688,7 @@ _CSS = """
     position: relative;
     z-index: 1;
     display: grid;
-    gap: 10px;
+    gap: 8px;
     align-content: start;
 }
 
@@ -1696,7 +1703,7 @@ _CSS = """
 }
 
 .hero-idea-card {
-    padding: 16px 18px;
+    padding: 12px 14px;
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.10);
@@ -1725,7 +1732,7 @@ _CSS = """
 
 .hero-idea-card h3 {
     margin: 0 0 5px;
-    font-size: 1.05rem;
+    font-size: 0.96rem;
     font-weight: 700;
     line-height: 1.2;
     color: white;
@@ -1734,7 +1741,7 @@ _CSS = """
 .hero-idea-card p {
     margin: 0 0 10px;
     color: rgba(255, 255, 255, 0.58);
-    font-size: 0.88rem;
+    font-size: 0.82rem;
     line-height: 1.55;
 }
 
@@ -1837,13 +1844,13 @@ _CSS = """
 
 .composer-panel .surface-header-copy h2 {
     color: white !important;
-    font-size: var(--font-section);
-    max-width: 15ch;
+    font-size: clamp(1.65rem, 1.7vw + 0.9rem, 2.2rem);
+    max-width: 22ch;
 }
 
 .composer-panel .surface-header-copy .surface-copy {
     color: rgba(255, 255, 255, 0.60) !important;
-    max-width: 52ch;
+    max-width: 62ch;
 }
 
 /* Composer sub-grid */
@@ -1896,9 +1903,9 @@ _CSS = """
 }
 
 .composer-panel .composer-brief textarea {
-    min-height: 200px !important;
-    font-size: 1.04rem !important;
-    line-height: 1.72 !important;
+    min-height: 128px !important;
+    font-size: 0.98rem !important;
+    line-height: 1.6 !important;
     font-weight: 400;
 }
 
@@ -1959,12 +1966,32 @@ _CSS = """
 .composer-footer {
     position: relative;
     z-index: 1;
-    margin-top: 16px;
+    margin-top: 8px;
     padding: 16px 20px;
     border-radius: 18px;
     border: 1px solid rgba(255, 255, 255, 0.09);
     background: rgba(255, 255, 255, 0.05);
     align-items: center;
+}
+
+.composer-cta {
+    min-width: 230px;
+}
+
+.advanced-accordion,
+.helper-accordion {
+    border-radius: 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.advanced-accordion > button,
+.helper-accordion > button {
+    min-height: 44px !important;
+    font-size: 0.84rem !important;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.78) !important;
 }
 
 .composer-footer .action-note,
@@ -2007,6 +2034,11 @@ _CSS = """
 .template-panel {
     background: var(--iez-surface) !important;
     border-color: var(--iez-line) !important;
+}
+
+.template-panel .surface-header-copy .surface-copy,
+.discover-panel .surface-header-copy .surface-copy {
+    max-width: 70ch;
 }
 
 .template-grid-row {
@@ -2501,7 +2533,7 @@ button {
     }
 
     .hero-shell {
-        padding: 32px 28px;
+        padding: 20px 18px;
     }
 
     .hero-ideas {
