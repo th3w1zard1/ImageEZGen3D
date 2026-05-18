@@ -406,9 +406,10 @@ def _sample_pack_header_html(pack: dict[str, Any]) -> str:
 
 def _prompt_template_card_html(template: dict[str, Any]) -> str:
     starter = _STARTER_FLOW_BY_KEY[str(template["starter"])]
+    tone = str(template["key"]).replace("_", "-")
     return "\n".join(
         [
-            '<div class="template-card-copy">',
+            f'<div class="template-card-copy template-tone-{escape(tone)}">',
             '<div class="template-card-top">',
             f'<span class="template-card-badge">{escape(str(template["badge"]))}</span>',
             f'<span class="template-card-quality">{escape(str(template["quality"]).title())}</span>',
@@ -454,8 +455,12 @@ def _history_overview_html(items: list[dict[str, Any]]) -> str:
             "<h2>Reopen local runs in context</h2>",
             (
                 '<p class="surface-copy">'
-                f"Latest run <strong>{escape(latest_run)}</strong> keeps its starter flow, backend choice, and exported bundle attached."
-                "</p>"
+                + (
+                    "Generate a first preview to populate recent runs, starter flow context, and export recovery."
+                    if not items
+                    else f"Latest run <strong>{escape(latest_run)}</strong> keeps its starter flow, backend choice, and exported bundle attached."
+                )
+                + "</p>"
             ),
             f'<p class="history-overview-latest">{escape(latest_flow)}</p>',
             "</div>",
@@ -758,68 +763,134 @@ def build_demo():
                 gr.HTML(_hero_shell_html(config.app.title, resolution))
                 with gr.Row(equal_height=False, elem_classes="workspace-layout"):
                     with gr.Column(scale=7, min_width=720, elem_classes="main-column"):
-                        with gr.Group(elem_classes="workspace-panel strategy-panel"):
+                        with gr.Group(elem_classes="workspace-panel composer-panel"):
                             gr.HTML(
                                 _surface_header_html(
-                                    "Agent Brief",
-                                    "Compose the run like a modern creative suite",
-                                    "Blend a clear starter, a quality lane, and a real project brief before touching generation.",
+                                    "Create",
+                                    "Lead with one dominant composer",
+                                    "Borrow the strongest pattern from the five reference apps: keep the brief, hero image, controls, and action in one unmistakable creation surface.",
                                 )
                             )
-                            with gr.Row(equal_height=False, elem_classes="strategy-grid"):
-                                with gr.Column(scale=4, min_width=240):
+                            with gr.Row(
+                                equal_height=False, elem_classes="composer-grid"
+                            ):
+                                with gr.Column(
+                                    scale=6,
+                                    min_width=360,
+                                    elem_classes="composer-media-column",
+                                ):
+                                    project_brief = gr.Textbox(
+                                        label="Project brief",
+                                        lines=6,
+                                        value=_starter_spec(_DEFAULT_STARTER)["brief"],
+                                        placeholder="Describe the object, must-keep details, and intended export.",
+                                        elem_classes="brief-field composer-brief",
+                                    )
+                                    primary = gr.Image(
+                                        label="Primary image",
+                                        type="pil",
+                                        sources=["upload", "clipboard"],
+                                        elem_classes="primary-input composer-primary",
+                                    )
+                                    with gr.Accordion(
+                                        "Optional labeled views",
+                                        open=False,
+                                        elem_classes="views-accordion",
+                                    ):
+                                        with gr.Row(equal_height=False):
+                                            front = gr.Image(
+                                                label="Front",
+                                                type="pil",
+                                                sources=["upload", "clipboard"],
+                                            )
+                                            back = gr.Image(
+                                                label="Back",
+                                                type="pil",
+                                                sources=["upload", "clipboard"],
+                                            )
+                                            left = gr.Image(
+                                                label="Left",
+                                                type="pil",
+                                                sources=["upload", "clipboard"],
+                                            )
+                                            right = gr.Image(
+                                                label="Right",
+                                                type="pil",
+                                                sources=["upload", "clipboard"],
+                                            )
+                                with gr.Column(
+                                    scale=4,
+                                    min_width=300,
+                                    elem_classes="composer-control-column",
+                                ):
                                     starter = gr.Dropdown(
                                         label="Starter flow",
-                                        choices=[item["key"] for item in _STARTER_FLOWS],
+                                        choices=[
+                                            item["key"] for item in _STARTER_FLOWS
+                                        ],
                                         value=_DEFAULT_STARTER,
+                                        elem_classes="composer-control",
                                     )
                                     quality = gr.Radio(
                                         label="Quality mode",
                                         choices=["draft", "balanced", "high"],
                                         value=config.generation.quality,
-                                        elem_classes="quality-pills",
+                                        elem_classes="quality-pills composer-control",
                                     )
                                     adapter = gr.Dropdown(
                                         label="Backend",
                                         choices=backend_choices,
                                         value=backend_value,
                                         info="auto prefers ZeroGPU and falls back to CPU when ZeroGPU is not usable.",
+                                        elem_classes="composer-control",
                                     )
                                     seed = gr.Number(
                                         label="Seed",
                                         value=config.generation.seed,
                                         precision=0,
-                                    )
-                                with gr.Column(scale=6, min_width=320):
-                                    project_brief = gr.Textbox(
-                                        label="Project brief",
-                                        lines=6,
-                                        value=_starter_spec(_DEFAULT_STARTER)["brief"],
-                                        placeholder="Describe the object, must-keep details, and intended export.",
-                                        elem_classes="brief-field",
+                                        elem_classes="composer-control",
                                     )
                                     reference_brief = gr.File(
                                         label="Optional reference brief",
                                         type="filepath",
+                                        elem_classes="reference-brief",
                                     )
-                            with gr.Row(equal_height=False, elem_classes="support-grid"):
-                                with gr.Column(scale=1, min_width=250):
-                                    starter_help = gr.Markdown(
-                                        _starter_markdown(_DEFAULT_STARTER),
-                                        elem_classes="note-panel",
-                                    )
-                                with gr.Column(scale=1, min_width=250):
-                                    quality_help = gr.Markdown(
-                                        _quality_markdown(config.generation.quality),
-                                        elem_classes="note-panel",
-                                    )
+                                    with gr.Row(
+                                        equal_height=False,
+                                        elem_classes="support-grid compact-support-grid",
+                                    ):
+                                        with gr.Column(scale=1, min_width=220):
+                                            starter_help = gr.Markdown(
+                                                _starter_markdown(_DEFAULT_STARTER),
+                                                elem_classes="note-panel compact-note",
+                                            )
+                                        with gr.Column(scale=1, min_width=220):
+                                            quality_help = gr.Markdown(
+                                                _quality_markdown(
+                                                    config.generation.quality
+                                                ),
+                                                elem_classes="note-panel compact-note",
+                                            )
+                            with gr.Row(
+                                equal_height=False,
+                                elem_classes="action-row composer-footer",
+                            ):
+                                generate = gr.Button(
+                                    "Generate Mesh",
+                                    variant="primary",
+                                    elem_classes="generate-button",
+                                )
+                                gr.Markdown(
+                                    "Outputs stay empty until verified files exist, then preview and downloads light up together.",
+                                    elem_classes="subtle-note action-note",
+                                )
 
                         with gr.Group(elem_classes="workspace-panel template-panel"):
                             gr.HTML(
                                 _surface_header_html(
                                     "Prompt Lab",
-                                    "Apply one-click launch kits",
-                                    "Borrow the best part of the five reference apps: visible quick starts that actually configure the workspace instead of acting like dead marketing cards.",
+                                    "Apply visual launch kits",
+                                    "Keep quick starts visual, compact, and immediately actionable instead of burying them in plain text.",
                                 )
                             )
                             template_buttons: list[tuple[Any, str]] = []
@@ -848,73 +919,32 @@ def build_demo():
                                                     )
                                                 )
 
-                        with gr.Group(elem_classes="workspace-panel capture-panel"):
+                        with gr.Group(elem_classes="workspace-panel discover-panel"):
                             gr.HTML(
                                 _surface_header_html(
-                                    "Capture",
-                                    "Load hero shots and visual starters",
-                                    "Blend Gemini-style style picks and Midjourney-style browsing into a repo-local gallery that never breaks hosted parity.",
+                                    "Discover",
+                                    "Browse repo-local starter captures",
+                                    "Keep the strongest browse behavior from the reference apps: image-led starter choices that are visible before you commit to a run.",
                                 )
                             )
-                            primary = gr.Image(
-                                label="Primary image",
-                                type="pil",
-                                sources=["upload", "clipboard"],
-                                elem_classes="primary-input",
-                            )
-                            with gr.Accordion(
-                                "Optional labeled views",
-                                open=False,
-                                elem_classes="views-accordion",
-                            ):
-                                with gr.Row(equal_height=False):
-                                    front = gr.Image(
-                                        label="Front",
-                                        type="pil",
-                                        sources=["upload", "clipboard"],
-                                    )
-                                    back = gr.Image(
-                                        label="Back",
-                                        type="pil",
-                                        sources=["upload", "clipboard"],
-                                    )
-                                    left = gr.Image(
-                                        label="Left",
-                                        type="pil",
-                                        sources=["upload", "clipboard"],
-                                    )
-                                    right = gr.Image(
-                                        label="Right",
-                                        type="pil",
-                                        sources=["upload", "clipboard"],
-                                    )
                             gr.Markdown(
                                 _sample_packs_note(sample_packs),
-                                elem_classes="subtle-note",
+                                elem_classes="subtle-note discover-note",
                             )
-                            with gr.Row(equal_height=False, elem_classes="sample-pack-row"):
+                            with gr.Row(
+                                equal_height=False, elem_classes="sample-pack-row"
+                            ):
                                 for pack in sample_packs:
                                     with gr.Column(scale=1, min_width=210):
-                                        with gr.Group(elem_classes="sample-pack-surface"):
+                                        with gr.Group(
+                                            elem_classes="sample-pack-surface"
+                                        ):
                                             gr.HTML(_sample_pack_header_html(pack))
                                             gr.Examples(
                                                 examples=pack["examples"],
                                                 inputs=[primary],
-                                                label="Examples",
                                                 examples_per_page=pack["count"],
-                                                example_labels=pack["example_labels"],
                                             )
-
-                        with gr.Row(equal_height=False, elem_classes="action-row"):
-                            generate = gr.Button(
-                                "Generate Mesh",
-                                variant="primary",
-                                elem_classes="generate-button",
-                            )
-                            gr.Markdown(
-                                "Outputs stay empty until verified files exist, then preview and downloads light up together.",
-                                elem_classes="subtle-note action-note",
-                            )
 
                     with gr.Column(scale=5, min_width=360, elem_classes="rail-column"):
                         with gr.Group(elem_classes="workspace-panel rail-panel"):
@@ -979,13 +1009,27 @@ def build_demo():
                                     "Manifest, meshes, and ZIP stay tied to the run, with nothing shown early and nothing faked.",
                                 )
                             )
-                            with gr.Row(equal_height=False, elem_classes="artifact-row"):
-                                manifest_file = gr.File(label="Manifest", elem_classes="artifact-file")
-                                glb_file = gr.File(label="GLB", elem_classes="artifact-file")
-                                obj_file = gr.File(label="OBJ", elem_classes="artifact-file")
-                            with gr.Row(equal_height=False, elem_classes="artifact-row"):
-                                ply_file = gr.File(label="PLY", elem_classes="artifact-file")
-                                stl_file = gr.File(label="STL", elem_classes="artifact-file")
+                            with gr.Row(
+                                equal_height=False, elem_classes="artifact-row"
+                            ):
+                                manifest_file = gr.File(
+                                    label="Manifest", elem_classes="artifact-file"
+                                )
+                                glb_file = gr.File(
+                                    label="GLB", elem_classes="artifact-file"
+                                )
+                                obj_file = gr.File(
+                                    label="OBJ", elem_classes="artifact-file"
+                                )
+                            with gr.Row(
+                                equal_height=False, elem_classes="artifact-row"
+                            ):
+                                ply_file = gr.File(
+                                    label="PLY", elem_classes="artifact-file"
+                                )
+                                stl_file = gr.File(
+                                    label="STL", elem_classes="artifact-file"
+                                )
                                 bundle_file = gr.File(
                                     label="All artifacts (ZIP)",
                                     elem_classes="artifact-file",
@@ -1016,7 +1060,9 @@ def build_demo():
                                 value=history_default,
                                 elem_classes="history-run-list",
                             )
-                            with gr.Row(equal_height=False, elem_classes="history-action-row"):
+                            with gr.Row(
+                                equal_height=False, elem_classes="history-action-row"
+                            ):
                                 history_refresh = gr.Button(
                                     "Refresh",
                                     variant="secondary",
@@ -1055,11 +1101,21 @@ def build_demo():
                                     "Everything stays attached to the selected run so comparison and rollback remain explicit.",
                                 )
                             )
-                            history_manifest = gr.File(label="Manifest", elem_classes="artifact-file")
-                            history_glb = gr.File(label="GLB", elem_classes="artifact-file")
-                            history_obj = gr.File(label="OBJ", elem_classes="artifact-file")
-                            history_ply = gr.File(label="PLY", elem_classes="artifact-file")
-                            history_stl = gr.File(label="STL", elem_classes="artifact-file")
+                            history_manifest = gr.File(
+                                label="Manifest", elem_classes="artifact-file"
+                            )
+                            history_glb = gr.File(
+                                label="GLB", elem_classes="artifact-file"
+                            )
+                            history_obj = gr.File(
+                                label="OBJ", elem_classes="artifact-file"
+                            )
+                            history_ply = gr.File(
+                                label="PLY", elem_classes="artifact-file"
+                            )
+                            history_stl = gr.File(
+                                label="STL", elem_classes="artifact-file"
+                            )
                             history_bundle = gr.File(
                                 label="All artifacts (ZIP)",
                                 elem_classes="artifact-file",
@@ -1770,6 +1826,453 @@ button {
 
     .history-stat-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Reference-inspired overrides */
+
+.surface-header-copy .surface-eyebrow {
+    margin: 0 0 10px !important;
+    color: var(--iez-accent) !important;
+    font-weight: 700;
+}
+
+.surface-header-copy h2 {
+    margin: 0 !important;
+    color: var(--iez-ink) !important;
+    font-size: clamp(1.65rem, 3vw, 2.5rem);
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+}
+
+.surface-header-copy .surface-copy {
+    margin-top: 10px !important;
+    color: var(--iez-muted) !important;
+    font-size: 1rem;
+    line-height: 1.65;
+}
+
+.main-column,
+.rail-column {
+    display: grid;
+    gap: 22px;
+    align-content: start;
+}
+
+.workspace-layout {
+    gap: 22px;
+    align-items: start;
+}
+
+.composer-panel {
+    position: relative;
+    overflow: hidden;
+    border: none !important;
+    background:
+        radial-gradient(circle at top right, rgba(106, 181, 255, 0.20), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(20, 184, 166, 0.16), transparent 30%),
+        linear-gradient(145deg, #091423, #13355b 58%, #214f87 100%) !important;
+    box-shadow: 0 34px 78px rgba(15, 23, 42, 0.24) !important;
+}
+
+.composer-panel::before {
+    content: "";
+    position: absolute;
+    inset: auto -8% -24% auto;
+    width: 320px;
+    height: 320px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 66%);
+    pointer-events: none;
+}
+
+.composer-panel .surface-header-copy .surface-eyebrow {
+    color: rgba(140, 224, 255, 0.82) !important;
+}
+
+.composer-panel .surface-header-copy h2 {
+    color: white !important;
+    font-size: clamp(2rem, 4vw, 3rem);
+    max-width: 12ch;
+}
+
+.composer-panel .surface-header-copy .surface-copy {
+    color: rgba(255, 255, 255, 0.74) !important;
+    max-width: 52ch;
+}
+
+.composer-grid {
+    gap: 18px;
+    align-items: stretch;
+}
+
+.composer-media-column,
+.composer-control-column {
+    display: grid;
+    gap: 16px;
+    align-content: start;
+}
+
+.composer-panel .block,
+.composer-panel fieldset.block,
+.composer-panel .form .block {
+    border-radius: 24px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: none !important;
+}
+
+.composer-panel [data-testid="block-info"],
+.composer-panel [data-testid="block-label"] {
+    color: rgba(255, 255, 255, 0.72) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.74rem !important;
+}
+
+.composer-panel textarea,
+.composer-panel input,
+.composer-panel .secondary-wrap,
+.composer-panel .wrap-inner,
+.composer-panel .input-container,
+.composer-panel .reference-brief button,
+.composer-panel .primary-input button {
+    background: transparent !important;
+    color: white !important;
+}
+
+.composer-panel textarea::placeholder,
+.composer-panel input::placeholder {
+    color: rgba(255, 255, 255, 0.46) !important;
+}
+
+.composer-panel .composer-brief textarea {
+    min-height: 220px !important;
+    font-size: 1.06rem !important;
+    line-height: 1.7 !important;
+    font-weight: 500;
+}
+
+.composer-panel .composer-primary,
+.composer-panel .reference-brief {
+    min-height: 148px;
+}
+
+.composer-panel .primary-input .empty,
+.composer-panel .reference-brief .empty {
+    min-height: 120px !important;
+}
+
+.composer-panel .quality-pills .wrap {
+    gap: 10px;
+}
+
+.composer-panel .quality-pills label {
+    border-radius: 999px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    padding: 10px 16px !important;
+}
+
+.composer-panel .quality-pills label.selected {
+    background: linear-gradient(135deg, #14b8a6, #2563eb) !important;
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.22);
+}
+
+.composer-panel .quality-pills label span {
+    color: white !important;
+}
+
+.compact-support-grid {
+    margin-top: 2px;
+}
+
+.composer-panel .note-panel {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+}
+
+.composer-panel .note-panel * {
+    color: rgba(255, 255, 255, 0.82) !important;
+}
+
+.composer-panel .note-panel strong {
+    color: white !important;
+}
+
+.composer-footer {
+    margin-top: 18px;
+    padding: 14px 18px;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.06);
+    align-items: center;
+}
+
+.composer-footer .action-note,
+.composer-footer .action-note * {
+    color: rgba(255, 255, 255, 0.76) !important;
+}
+
+.template-panel {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 238, 227, 0.96)) !important;
+}
+
+.template-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.template-card .block {
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 26px !important;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12) !important;
+}
+
+.template-card-copy {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 250px;
+    padding: 22px;
+    overflow: hidden;
+}
+
+.template-card-copy::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.96), transparent 42%),
+        linear-gradient(160deg, rgba(255, 255, 255, 0.94), rgba(241, 235, 223, 0.92));
+    z-index: 0;
+}
+
+.template-card-copy > * {
+    position: relative;
+    z-index: 1;
+}
+
+.template-tone-fast-silhouette::before {
+    background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.98), transparent 42%),
+        linear-gradient(160deg, #eef6ff, #f7efe4);
+}
+
+.template-tone-studio-product::before {
+    background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.98), transparent 42%),
+        linear-gradient(160deg, #fff1e6, #eef7ff);
+}
+
+.template-tone-collectible-pose::before {
+    background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.98), transparent 42%),
+        linear-gradient(160deg, #edf9ee, #edf1ff);
+}
+
+.template-tone-museum-study::before {
+    background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.98), transparent 42%),
+        linear-gradient(160deg, #f2ede5, #eff4ef);
+}
+
+.template-tone-multi-view-review::before {
+    background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.98), transparent 42%),
+        linear-gradient(160deg, #edf3ff, #eef9ff);
+}
+
+.template-card-badge {
+    color: var(--iez-ink) !important;
+    font-weight: 700;
+}
+
+.template-card-quality {
+    color: var(--iez-accent-strong) !important;
+    font-weight: 700;
+}
+
+.template-card-copy h3 {
+    margin: 0 !important;
+    color: #101828 !important;
+    font-size: 1.9rem;
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+}
+
+.template-card-summary {
+    color: #425166 !important;
+    font-size: 1.08rem;
+}
+
+.template-card-meta {
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(16, 42, 46, 0.08);
+}
+
+.template-card-meta span:first-child {
+    color: #111827 !important;
+    font-weight: 700;
+}
+
+.template-card .template-apply {
+    width: 100%;
+    margin: 0 !important;
+    border-radius: 0 0 26px 26px !important;
+    background: rgba(8, 15, 27, 0.94) !important;
+    color: white !important;
+    min-height: 58px;
+    box-shadow: none !important;
+}
+
+.template-card .template-apply:hover {
+    background: linear-gradient(135deg, #0f766e, #1d4ed8) !important;
+}
+
+.discover-panel {
+    background: linear-gradient(180deg, #fffdf8, #f5efe4) !important;
+}
+
+.discover-note {
+    margin: 0 0 10px 0;
+}
+
+.sample-pack-surface {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.sample-pack-surface .block {
+    border-radius: 24px !important;
+    border: 1px solid rgba(16, 42, 46, 0.08) !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(247, 242, 233, 0.96)) !important;
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08) !important;
+}
+
+.sample-pack-head h3 {
+    font-size: 1.55rem !important;
+    margin: 8px 0 8px !important;
+}
+
+.sample-pack-head p {
+    font-size: 0.98rem !important;
+}
+
+.discover-panel .gallery {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.discover-panel .gallery-item {
+    overflow: hidden !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(16, 42, 46, 0.10) !important;
+    background: #ffffff !important;
+    min-height: 116px;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
+}
+
+.discover-panel .gallery-item img {
+    display: block;
+    width: 100% !important;
+    height: 116px !important;
+    object-fit: cover !important;
+}
+
+.discover-panel .gallery-item .gallery {
+    padding: 0 !important;
+    color: var(--iez-ink) !important;
+    font-weight: 700 !important;
+}
+
+.history-overview-copy .surface-copy strong,
+.history-overview-latest,
+.history-stat-card strong {
+    color: var(--iez-ink) !important;
+}
+
+.runtime-panel {
+    background: linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(21, 94, 239, 0.08)) !important;
+}
+
+.runtime-panel * {
+    color: var(--iez-ink) !important;
+}
+
+.preview-panel .block,
+.validation-panel .block,
+.output-panel .block,
+.history-preview .block,
+.history-artifacts .block {
+    border-radius: 22px !important;
+}
+
+.artifact-row {
+    gap: 12px;
+}
+
+.artifact-file {
+    min-height: 112px;
+    overflow: hidden !important;
+    border: 1px solid rgba(16, 42, 46, 0.08) !important;
+    border-radius: 20px !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 242, 233, 0.94)) !important;
+    box-shadow: none !important;
+}
+
+.artifact-file label {
+    padding: 10px 12px 0 !important;
+    color: var(--iez-muted) !important;
+    font-size: 0.84rem !important;
+}
+
+.artifact-file .empty.large {
+    min-height: 74px !important;
+    height: 74px !important;
+    margin-top: 0 !important;
+}
+
+.artifact-file .icon {
+    opacity: 0.55;
+    transform: scale(0.82);
+}
+
+.artifact-file table {
+    font-size: 0.86rem;
+}
+
+.artifact-file table tr {
+    background: transparent !important;
+}
+
+@media (max-width: 1100px) {
+    .composer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .discover-panel .gallery {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .composer-panel .surface-header-copy h2,
+    .template-card-copy h3 {
+        font-size: 1.7rem;
+    }
+
+    .template-card-copy {
+        min-height: 220px;
     }
 }
 """
