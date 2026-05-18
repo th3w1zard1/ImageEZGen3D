@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import base64
+import io
+
 from PIL import Image, ImageStat
 
 from .base import AdapterCapabilities, GenerationRequest, GenerationResult
@@ -31,11 +34,17 @@ class CpuDemoAdapter:
         quality_height = {"draft": 0.85, "balanced": 1.0, "high": 1.15}.get(
             request.quality, 0.9
         )
+        # Encode the processed image as a JPEG thumbnail for use as a texture
+        thumb = image.resize((512, 512), Image.LANCZOS)
+        buf = io.BytesIO()
+        thumb.save(buf, format="JPEG", quality=85)
+        b64_img = base64.b64encode(buf.getvalue()).decode("utf-8")
         mesh = make_box_mesh(
             width=aspect,
             depth=0.72 + view_bonus,
             height=quality_height,
             color=(red, green, blue, 1.0),
+            b64_image=b64_img,
         )
         paths = export_all(mesh, request.run_dir / "exports", stem="cpu_demo_mesh")
         return GenerationResult(

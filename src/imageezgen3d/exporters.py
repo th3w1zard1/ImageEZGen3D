@@ -14,9 +14,16 @@ class SimpleMesh:
     vertices: tuple[tuple[float, float, float], ...]
     faces: tuple[tuple[int, int, int], ...]
     color: tuple[float, float, float, float]
+    b64_image: str | None = None
 
 
-def make_box_mesh(width: float, depth: float, height: float, color: tuple[float, float, float, float]) -> SimpleMesh:
+def make_box_mesh(
+    width: float,
+    depth: float,
+    height: float,
+    color: tuple[float, float, float, float],
+    b64_image: str | None = None,
+) -> SimpleMesh:
     w, d, h = width / 2, depth / 2, height / 2
     vertices = (
         (-w, -d, -h), (w, -d, -h), (w, d, -h), (-w, d, -h),
@@ -27,7 +34,7 @@ def make_box_mesh(width: float, depth: float, height: float, color: tuple[float,
         (0, 4, 5), (0, 5, 1), (1, 5, 6), (1, 6, 2),
         (2, 6, 7), (2, 7, 3), (3, 7, 4), (3, 4, 0),
     )
-    return SimpleMesh(vertices=vertices, faces=faces, color=color)
+    return SimpleMesh(vertices=vertices, faces=faces, color=color, b64_image=b64_image)
 
 
 def write_obj(mesh: SimpleMesh, path: Path) -> None:
@@ -79,28 +86,66 @@ def _pad4(data: bytes, pad_byte: bytes) -> bytes:
 def write_glb(mesh: SimpleMesh, path: Path) -> None:
     positions = b"".join(struct.pack("<3f", *vertex) for vertex in mesh.vertices)
     indices = b"".join(struct.pack("<H", index) for face in mesh.faces for index in face)
-    positions_padded = _pad4(positions, b"\x00")
-    indices_offset = len(positions_padded)
-    bin_blob = _pad4(positions_padded + indices, b"\x00")
+
     mins = [min(vertex[i] for vertex in mesh.vertices) for i in range(3)]
     maxs = [max(vertex[i] for vertex in mesh.vertices) for i in range(3)]
-    gltf = {
+
+    # Orthographic XZ projection: maps the input image across the box
+    # The front face (y-axis) will display the image facing forward
+    x_span = (maxs[0] - mins[0]) or 1.0
+    z_span = (maxs[2] - mins[2]) or 1.0
+    uvs = b"".join(
+        struct.pack(
+            "<2f",
+            (v[0] - mins[0]) / x_span,       # u: left to right
+            1.0 - (v[2] - mins[2]) / z_span,  # v: bottom to top (flip Z)
+        )
+        for v in mesh.vertices
+    )
+
+    positions_padded = _pad4(positions, b"\x00")
+    indices_padded = _pad4(indices, b"\x00")
+    uvs_padded = _pad4(uvs, b"\x00")
+
+    indices_offset = len(positions_padded)
+    uvs_offset = indices_offset + len(indices_padded)
+
+    bin_blob = _pad4(positions_padded + indices_padded + uvs_padded, b"\x00")
+
+    mat: dict = {
+        "pbrMetallicRoughness": {
+            "baseColorFactor": list(mesh.color),
+            "metallicFactor": 0.0,
+            "roughnessFactor": 0.72,
+        }
+    }
+    gltf: dict = {
         "asset": {"version": "2.0", "generator": "ImageEZGen3D CPU demo"},
         "scene": 0,
         "scenes": [{"nodes": [0]}],
         "nodes": [{"mesh": 0, "name": "ImageEZGen3D Draft"}],
-        "materials": [{"pbrMetallicRoughness": {"baseColorFactor": list(mesh.color), "metallicFactor": 0.0, "roughnessFactor": 0.72}}],
-        "meshes": [{"primitives": [{"attributes": {"POSITION": 0}, "indices": 1, "material": 0}]}],
+        "materials": [mat],
+        "meshes": [{"primitives": [{"attributes": {"POSITION": 0, "TEXCOORD_0": 2}, "indices": 1, "material": 0}]}],
         "buffers": [{"byteLength": len(bin_blob)}],
         "bufferViews": [
             {"buffer": 0, "byteOffset": 0, "byteLength": len(positions), "target": 34962},
             {"buffer": 0, "byteOffset": indices_offset, "byteLength": len(indices), "target": 34963},
+            {"buffer": 0, "byteOffset": uvs_offset, "byteLength": len(uvs), "target": 34962},
         ],
         "accessors": [
             {"bufferView": 0, "componentType": 5126, "count": len(mesh.vertices), "type": "VEC3", "min": mins, "max": maxs},
             {"bufferView": 1, "componentType": 5123, "count": len(mesh.faces) * 3, "type": "SCALAR"},
+            {"bufferView": 2, "componentType": 5126, "count": len(mesh.vertices), "type": "VEC2"},
         ],
     }
+
+    if mesh.b64_image:
+        gltf["images"] = [{"uri": "data:image/jpeg;base64," + mesh.b64_image}]
+        gltf["samplers"] = [{"magFilter": 9729, "minFilter": 9987, "wrapS": 33071, "wrapT": 33071}]
+        gltf["textures"] = [{"sampler": 0, "source": 0}]
+        mat["pbrMetallicRoughness"]["baseColorTexture"] = {"index": 0}
+        mat["pbrMetallicRoughness"]["baseColorFactor"] = [1.0, 1.0, 1.0, 1.0]
+
     json_blob = _pad4(json.dumps(gltf, separators=(",", ":")).encode("utf-8"), b" ")
     total_length = 12 + 8 + len(json_blob) + 8 + len(bin_blob)
     header = struct.pack("<4sII", b"glTF", 2, total_length)
