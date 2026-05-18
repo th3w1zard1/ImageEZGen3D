@@ -36,6 +36,14 @@ class ConfigTests(unittest.TestCase):
             self.assertEqual(config.app.output_dir, Path("out"))
             self.assertEqual(config.exports.formats, ("glb", "obj"))
 
+    def test_requirements_are_self_contained_for_space_builds(self) -> None:
+        requirements = Path("requirements.txt").read_text(encoding="utf-8").splitlines()
+        lines = [line.strip() for line in requirements if line.strip() and not line.startswith("#")]
+        self.assertIn("gradio>=4.44,<7", lines)
+        self.assertIn("Pillow>=10.0", lines)
+        self.assertIn("numpy>=1.26", lines)
+        self.assertNotIn("-e .[app]", lines)
+
 
 if __name__ == "__main__":
     unittest.main()

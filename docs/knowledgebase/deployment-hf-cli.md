@@ -55,7 +55,7 @@ If UI or runtime behavior changed, also run the app locally before pushing.
 ## Create Or Reuse A Gradio Space
 
 ```bash
-hf repos create ImageEZGen3D --repo-type space --space-sdk gradio --exist-ok
+hf repo create YOUR_USERNAME/ImageEZGen3D --repo-type space --space-sdk gradio --exist-ok
 ```
 
 The repo front matter and the Space creation command should agree that the SDK is `gradio`.
@@ -74,11 +74,12 @@ Use dry runs to inspect size, cache behavior, and access expectations before pre
 ## Upload App
 
 ```bash
-hf upload YOUR_USERNAME/ImageEZGen3D . . --repo-type=space --exclude='/outputs/*' --exclude='/.env*' --commit-message='Deploy ImageEZGen3D'
+hf upload YOUR_USERNAME/ImageEZGen3D . . --repo-type=space --exclude='.git/**' --exclude='.venv/**' --exclude='**/__pycache__/**' --exclude='**/*.pyc' --exclude='.pytest_cache/**' --exclude='.ruff_cache/**' --exclude='build/**' --exclude='dist/**' --exclude='tmp/**' --exclude='outputs/**' --exclude='.env*' --exclude='src/imageezgen3d.egg-info/**' --commit-message='Deploy ImageEZGen3D'
 ```
 
 Important details:
 
+- keep local virtualenvs, caches, build outputs, and egg-info metadata out of Space uploads;
 - keep `outputs/` out of deployments;
 - keep `.env` and any secret-bearing files out of deployments;
 - do not vendor model caches, generated outputs, or local artifacts into the Space repo;
@@ -86,12 +87,12 @@ Important details:
 
 ## Package Contract
 
-`requirements.txt` intentionally delegates to `-e .[app]` so Spaces installs app dependencies from `pyproject.toml`.
+`requirements.txt` intentionally lists the runtime dependencies directly because Spaces installs it before the full repo source is copied into the build context.
 
 That means deployment hygiene depends on keeping these aligned:
 
 - `pyproject.toml` optional dependency set for `app`;
-- `requirements.txt` delegation;
+- `requirements.txt` runtime dependency list;
 - `README.md` setup instructions;
 - runtime assumptions documented in the knowledgebase.
 

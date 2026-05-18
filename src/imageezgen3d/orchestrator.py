@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import shutil
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -10,8 +12,18 @@ from .adapters.base import GenerationRequest, ModelAdapter
 from .config import AppConfig
 from .mesh_checks import inspect_artifacts
 from .preprocess import save_input_bundle
-from .runtime import runtime_status, zero_gpu_runtime_available
+from .runtime import RuntimeStatus, runtime_status, zero_gpu_runtime_available
 from .storage import RunStore
+
+
+@dataclass(frozen=True)
+class AdapterResolution:
+    requested: str
+    selected: str | None
+    runtime: RuntimeStatus
+    zerogpu_runnable: bool
+    message: str
+    fallback_reason: str | None = None
 
 
 class ImageEZOrchestrator:
@@ -33,41 +45,116 @@ class ImageEZOrchestrator:
         ]
         return ["auto", *sorted(configured)]
 
-    def select_adapter(
-        self, adapter_name: str | None
-    ) -> tuple[str, ModelAdapter, str | None]:
+    def resolve_adapter(self, adapter_name: str | None) -> AdapterResolution:
         requested = adapter_name or self.config.app.adapter
+        status = runtime_status(self.config)
+        zerogpu_adapter = self.adapters.get(self.config.app.zerogpu_adapter)
+        zerogpu_runnable = bool(
+            status.zerogpu_runtime_available
+            and zerogpu_adapter is not None
+            and zerogpu_adapter.capabilities.configured
+        )
+
         if requested != "auto":
             adapter = self.adapters.get(requested)
             if adapter is None:
-                raise ValueError(
-                    f"Unknown adapter '{requested}'. Available: {', '.join(self.adapter_choices())}"
+                return AdapterResolution(
+                    requested=requested,
+                    selected=None,
+                    runtime=status,
+                    zerogpu_runnable=zerogpu_runnable,
+                    message=(
+                        f"Unknown adapter '{requested}'. Available: {', '.join(self.adapter_choices())}"
+                    ),
                 )
             if not adapter.capabilities.configured:
-                raise ValueError(
-                    f"Adapter '{requested}' is not enabled yet. Choose one of: {', '.join(self.adapter_choices())}"
+                return AdapterResolution(
+                    requested=requested,
+                    selected=None,
+                    runtime=status,
+                    zerogpu_runnable=zerogpu_runnable,
+                    message=(
+                        f"Adapter '{requested}' is not enabled yet. Choose one of: {', '.join(self.adapter_choices())}"
+                    ),
                 )
-            return requested, adapter, None
-
-        status = runtime_status(self.config)
-        if self.config.runtime.mode == "cpu" or self.config.runtime.force_cpu:
-            fallback_reason = status.reason
-        elif self.config.runtime.prefer_zerogpu and zero_gpu_runtime_available(
-            self.config
-        ):
-            zerogpu_adapter = self.adapters.get(self.config.app.zerogpu_adapter)
-            if zerogpu_adapter and zerogpu_adapter.capabilities.configured:
-                return self.config.app.zerogpu_adapter, zerogpu_adapter, None
-            fallback_reason = "ZeroGPU runtime is present, but the configured ZeroGPU model adapter is not enabled yet."
-        else:
-            fallback_reason = status.reason
-
-        if not self.config.runtime.fallback_to_cpu:
-            raise RuntimeError(
-                f"ZeroGPU could not be used and CPU fallback is disabled: {fallback_reason}"
+            return AdapterResolution(
+                requested=requested,
+                selected=requested,
+                runtime=status,
+                zerogpu_runnable=zerogpu_runnable,
+                message=f"Using requested backend '{requested}'.",
             )
-        cpu_adapter = self.adapters[self.config.app.cpu_adapter]
-        return self.config.app.cpu_adapter, cpu_adapter, fallback_reason
+
+        if self.config.runtime.mode == "cpu" or self.config.runtime.force_cpu:
+            return AdapterResolution(
+                requested=requested,
+                selected=self.config.app.cpu_adapter,
+                runtime=status,
+                zerogpu_runnable=zerogpu_runnable,
+                message=status.reason,
+                fallback_reason=status.reason,
+            )
+
+        if self.config.runtime.prefer_zerogpu and status.zerogpu_runtime_available:
+            if zerogpu_runnable:
+                return AdapterResolution(
+                    requested=requested,
+                    selected=self.config.app.zerogpu_adapter,
+                    runtime=status,
+                    zerogpu_runnable=True,
+                    message=status.reason,
+                )
+            fallback_reason = "ZeroGPU runtime is present, but the configured ZeroGPU model adapter is not enabled yet."
+            if self.config.runtime.fallback_to_cpu:
+                return AdapterResolution(
+                    requested=requested,
+                    selected=self.config.app.cpu_adapter,
+                    runtime=status,
+                    zerogpu_runnable=False,
+                    message=fallback_reason,
+                    fallback_reason=fallback_reason,
+                )
+            return AdapterResolution(
+                requested=requested,
+                selected=None,
+                runtime=status,
+                zerogpu_runnable=False,
+                message=(
+                    f"ZeroGPU could not be used and CPU fallback is disabled: {fallback_reason}"
+                ),
+            )
+
+        if self.config.runtime.fallback_to_cpu:
+            return AdapterResolution(
+                requested=requested,
+                selected=self.config.app.cpu_adapter,
+                runtime=status,
+                zerogpu_runnable=zerogpu_runnable,
+                message=status.reason,
+                fallback_reason=status.reason,
+            )
+
+        return AdapterResolution(
+            requested=requested,
+            selected=None,
+            runtime=status,
+            zerogpu_runnable=zerogpu_runnable,
+            message=(
+                f"ZeroGPU could not be used and CPU fallback is disabled: {status.reason}"
+            ),
+        )
+
+    def select_adapter(
+        self, adapter_name: str | None
+    ) -> tuple[str, ModelAdapter, str | None]:
+        resolution = self.resolve_adapter(adapter_name)
+        if resolution.selected is None:
+            if resolution.requested != "auto":
+                raise ValueError(resolution.message)
+            raise RuntimeError(resolution.message)
+
+        adapter = self.adapters[resolution.selected]
+        return resolution.selected, adapter, resolution.fallback_reason
 
     def generate(
         self,
@@ -76,6 +163,10 @@ class ImageEZOrchestrator:
         adapter_name: str | None = None,
         quality: str | None = None,
         seed: int | None = None,
+        project_brief: str | None = None,
+        starter_flow: str | None = None,
+        starter_flow_label: str | None = None,
+        reference_brief: str | Path | None = None,
     ) -> dict[str, Any]:
         if primary_image is None:
             raise ValueError("Upload a primary image before generating a 3D draft.")
@@ -91,6 +182,13 @@ class ImageEZOrchestrator:
             "seed": seed or self.config.generation.seed,
             "runtime": runtime_status(self.config).__dict__,
         }
+        if project_brief and project_brief.strip():
+            manifest.parameters["project_brief"] = project_brief.strip()
+        if starter_flow:
+            manifest.parameters["starter_flow"] = starter_flow
+            manifest.parameters["starter_flow_label"] = (
+                starter_flow_label or starter_flow
+            )
         if fallback_reason:
             manifest.parameters["fallback_reason"] = fallback_reason
         self.store.save_manifest(run_dir, manifest)
@@ -129,6 +227,17 @@ class ImageEZOrchestrator:
                 image.save(view_path)
                 saved_views[label] = view_path
                 self.store.record_artifact(manifest, f"view_{label}", view_path)
+
+            if reference_brief:
+                source_brief = Path(reference_brief)
+                if source_brief.exists() and source_brief.is_file():
+                    suffix = source_brief.suffix or ".txt"
+                    brief_path = self.store.artifact_path(
+                        run_dir, "inputs", f"reference_brief{suffix}"
+                    )
+                    shutil.copyfile(source_brief, brief_path)
+                    self.store.record_artifact(manifest, "reference_brief", brief_path)
+                    manifest.parameters["reference_brief_name"] = source_brief.name
 
             manifest.stage = "generating"
             self.store.save_manifest(run_dir, manifest)

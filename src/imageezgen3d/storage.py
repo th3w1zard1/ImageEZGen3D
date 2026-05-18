@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import uuid
+import zipfile
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -61,8 +62,19 @@ class RunStore:
         self.retention_runs = retention_runs
         self.root.mkdir(parents=True, exist_ok=True)
 
+    def _run_dirs(self) -> list[Path]:
+        return sorted(
+            (item for item in self.root.iterdir() if item.is_dir()),
+            key=lambda path: path.stat().st_mtime,
+            reverse=True,
+        )
+
     def create_run(self) -> tuple[Path, RunManifest]:
-        run_id = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S") + "-" + uuid.uuid4().hex[:8]
+        run_id = (
+            datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+            + "-"
+            + uuid.uuid4().hex[:8]
+        )
         run_dir = self.root / run_id
         for child in ("inputs", "processed", "meshes", "exports", "reports"):
             (run_dir / child).mkdir(parents=True, exist_ok=False)
@@ -90,9 +102,91 @@ class RunStore:
     def record_artifact(self, manifest: RunManifest, key: str, path: Path) -> None:
         manifest.artifacts[key] = str(path)
 
+    def read_manifest(self, run_id: str) -> dict[str, Any]:
+        manifest_path = self.root / Path(run_id).name / "manifest.json"
+        if not manifest_path.exists():
+            raise FileNotFoundError(f"Run manifest not found for {run_id}")
+        return json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    def list_runs(self, limit: int = 20) -> list[dict[str, Any]]:
+        if limit <= 0:
+            return []
+
+        records: list[dict[str, Any]] = []
+        for run_dir in self._run_dirs():
+            if len(records) >= limit:
+                break
+
+            manifest_path = run_dir / "manifest.json"
+            if not manifest_path.exists():
+                continue
+
+            try:
+                payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                continue
+
+            parameters = payload.get("parameters", {})
+            if not isinstance(parameters, dict):
+                parameters = {}
+
+            artifacts = payload.get("artifacts", {})
+            if not isinstance(artifacts, dict):
+                artifacts = {}
+
+            validation = payload.get("validation", {})
+            if not isinstance(validation, dict):
+                validation = {}
+
+            records.append(
+                {
+                    "run_id": str(payload.get("run_id", run_dir.name)),
+                    "created_at": str(payload.get("created_at", "")),
+                    "updated_at": str(payload.get("updated_at", "")),
+                    "stage": str(payload.get("stage", "unknown")),
+                    "adapter": str(
+                        payload.get(
+                            "adapter",
+                            parameters.get("selected_adapter")
+                            or parameters.get("requested_adapter")
+                            or "unknown",
+                        )
+                    ),
+                    "quality": str(parameters.get("quality", "")),
+                    "score": validation.get("score"),
+                    "starter_flow": parameters.get("starter_flow_label")
+                    or parameters.get("starter_flow"),
+                    "project_brief": parameters.get("project_brief"),
+                    "fallback_reason": parameters.get("fallback_reason"),
+                    "manifest": artifacts.get("manifest") or str(manifest_path),
+                    "glb": artifacts.get("glb"),
+                    "obj": artifacts.get("obj"),
+                }
+            )
+
+        return records
+
+    def archive_run(self, run_id: str) -> Path:
+        run_dir = self.root / Path(run_id).name
+        if not run_dir.exists() or not run_dir.is_dir():
+            raise FileNotFoundError(f"Run directory not found for {run_id}")
+
+        archive_path = self.root / f"{run_dir.name}.zip"
+        with zipfile.ZipFile(
+            archive_path, "w", compression=zipfile.ZIP_DEFLATED
+        ) as bundle:
+            for file_path in sorted(
+                path for path in run_dir.rglob("*") if path.is_file()
+            ):
+                bundle.write(file_path, arcname=str(file_path.relative_to(run_dir)))
+        return archive_path
+
     def cleanup_old_runs(self) -> None:
         if self.retention_runs <= 0:
             return
-        runs = sorted((item for item in self.root.iterdir() if item.is_dir()), key=lambda p: p.stat().st_mtime, reverse=True)
+        runs = self._run_dirs()
         for stale in runs[self.retention_runs :]:
             shutil.rmtree(stale, ignore_errors=True)
+            archive_path = self.root / f"{stale.name}.zip"
+            if archive_path.exists():
+                archive_path.unlink(missing_ok=True)

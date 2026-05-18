@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 from imageezgen3d.storage import RunStore, atomic_write_text
@@ -27,6 +28,65 @@ class StorageTests(unittest.TestCase):
             run_dir, _ = store.create_run()
             path = store.artifact_path(run_dir, "inputs", "../bad.png")
             self.assertTrue(str(path).endswith("bad.png"))
+
+    def test_list_runs_returns_recent_manifest_summaries(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = RunStore(directory)
+            run_dir, manifest = store.create_run()
+            manifest.stage = "done"
+            manifest.validation = {"score": 93}
+            manifest.parameters = {
+                "selected_adapter": "cpu-demo",
+                "quality": "balanced",
+                "starter_flow": "multi-view-quality",
+                "starter_flow_label": "Multi-View Quality",
+                "project_brief": "Keep the handle silhouette intact.",
+            }
+            manifest.artifacts = {
+                "manifest": str(run_dir / "manifest.json"),
+                "glb": str(run_dir / "exports" / "draft.glb"),
+                "obj": str(run_dir / "exports" / "draft.obj"),
+            }
+            store.save_manifest(run_dir, manifest)
+
+            runs = store.list_runs()
+
+            self.assertEqual(len(runs), 1)
+            self.assertEqual(runs[0]["run_id"], manifest.run_id)
+            self.assertEqual(runs[0]["adapter"], "cpu-demo")
+            self.assertEqual(runs[0]["quality"], "balanced")
+            self.assertEqual(runs[0]["score"], 93)
+            self.assertEqual(runs[0]["starter_flow"], "Multi-View Quality")
+            self.assertEqual(
+                runs[0]["project_brief"], "Keep the handle silhouette intact."
+            )
+
+    def test_read_manifest_loads_saved_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = RunStore(directory)
+            run_dir, manifest = store.create_run()
+            manifest.stage = "done"
+            store.save_manifest(run_dir, manifest)
+
+            payload = store.read_manifest(manifest.run_id)
+
+            self.assertEqual(payload["run_id"], manifest.run_id)
+            self.assertEqual(payload["stage"], "done")
+
+    def test_archive_run_writes_zip_with_run_files(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = RunStore(directory)
+            run_dir, manifest = store.create_run()
+            atomic_write_text(run_dir / "exports" / "mesh.obj", "mesh\n")
+            store.save_manifest(run_dir, manifest)
+
+            archive_path = store.archive_run(manifest.run_id)
+
+            self.assertTrue(archive_path.exists())
+            with zipfile.ZipFile(archive_path) as bundle:
+                names = sorted(bundle.namelist())
+            self.assertIn("manifest.json", names)
+            self.assertIn("exports/mesh.obj", names)
 
 
 if __name__ == "__main__":
