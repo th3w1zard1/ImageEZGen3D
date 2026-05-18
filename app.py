@@ -995,6 +995,7 @@ def build_demo():
                                 label="Normalized preview",
                                 type="pil",
                                 interactive=False,
+                                elem_classes="capture-preview-img",
                             )
                             validation_status = gr.Markdown(
                                 "Upload a primary image to preview the normalized input and the capture score before generating.",
@@ -2222,10 +2223,10 @@ button {
 }
 
 .artifact-file {
-    min-height: 112px;
+    min-height: 70px;
     overflow: hidden !important;
     border: 1px solid rgba(16, 42, 46, 0.08) !important;
-    border-radius: 20px !important;
+    border-radius: 16px !important;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 242, 233, 0.94)) !important;
     box-shadow: none !important;
 }
@@ -2237,14 +2238,23 @@ button {
 }
 
 .artifact-file .empty.large {
-    min-height: 74px !important;
-    height: 74px !important;
+    min-height: 42px !important;
+    height: 42px !important;
     margin-top: 0 !important;
+    padding: 0 !important;
+}
+
+/* hide upload prose in empty artifact slots — icon alone is enough */
+.artifact-file .empty.large .wrap > span,
+.artifact-file .empty.large .wrap > p,
+.artifact-file .empty.large .wrap > div:not(.icon-wrap) {
+    display: none !important;
 }
 
 .artifact-file .icon {
-    opacity: 0.55;
-    transform: scale(0.82);
+    opacity: 0.45;
+    transform: scale(0.7);
+    margin: 0 auto;
 }
 
 .artifact-file table {
@@ -2253,6 +2263,29 @@ button {
 
 .artifact-file table tr {
     background: transparent !important;
+}
+
+/* Compact normalized preview before any image exists */
+.capture-preview-img > div[data-testid="empty"] ,
+.capture-preview-img .empty {
+    min-height: 120px !important;
+    height: 120px !important;
+}
+
+.capture-preview-img .empty .wrap span,
+.capture-preview-img .empty .wrap p {
+    display: none !important;
+}
+
+/* Compact 3D model viewer when empty */
+.model-panel canvas,
+.model-panel model-viewer {
+    min-height: 180px;
+}
+.model-panel > .wrap > .empty,
+.model-panel > div > .empty {
+    min-height: 120px !important;
+    height: 120px !important;
 }
 
 @media (max-width: 1100px) {
