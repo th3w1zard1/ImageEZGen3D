@@ -1700,7 +1700,8 @@ _CSS = """
     position: relative;
     z-index: 1;
     display: grid;
-    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
     align-content: start;
 }
 
