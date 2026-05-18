@@ -1,14 +1,19 @@
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
 import app
+from imageezgen3d.storage import RunStore
 
 
 class RepoLocalWorkspaceTests(unittest.TestCase):
     def test_backend_display_label_normalizes_runtime_ids(self) -> None:
         self.assertEqual(app._backend_display_label("cpu-demo"), "Local CPU Preview")
-        self.assertEqual(app._backend_display_label("hunyuan-zerogpu"), "Hosted ZeroGPU")
+        self.assertEqual(
+            app._backend_display_label("hunyuan-zerogpu"), "Hosted ZeroGPU"
+        )
 
     def test_repo_sample_packs_group_generated_examples(self) -> None:
         packs = app._repo_sample_packs()
@@ -83,6 +88,27 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
                 app._STARTER_FLOW_BY_KEY[starter_key]["quality"],
             )
             self.assertTrue(str(template["brief"]).strip())
+
+    def test_verified_artifact_state_filters_missing_files(self) -> None:
+        store = RunStore(Path.cwd() / "outputs")
+        with patch.object(store, "artifact_value", side_effect=["/tmp/mesh.glb", None]):
+            verified, missing = app._verified_artifact_state(
+                store,
+                {"glb": "/tmp/mesh.glb", "obj": "/tmp/missing.obj"},
+            )
+
+        self.assertEqual(verified, {"glb": "/tmp/mesh.glb"})
+        self.assertEqual(missing, ["obj"])
+
+    def test_generation_pending_report_mentions_verified_outputs(self) -> None:
+        self.assertIn("verified output files", app._generation_pending_report())
+
+    def test_stale_artifact_report_lists_missing_keys(self) -> None:
+        report = app._stale_artifact_report("run-123", ["glb", "obj"])
+
+        self.assertIn("run-123", report)
+        self.assertIn("`glb`", report)
+        self.assertIn("`obj`", report)
 
 
 if __name__ == "__main__":

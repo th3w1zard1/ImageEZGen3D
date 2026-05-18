@@ -58,7 +58,7 @@ class RunManifest:
 
 class RunStore:
     def __init__(self, root: str | Path, retention_runs: int = 100) -> None:
-        self.root = Path(root)
+        self.root = Path(root).resolve()
         self.retention_runs = retention_runs
         self.root.mkdir(parents=True, exist_ok=True)
 
@@ -100,7 +100,22 @@ class RunStore:
         return path
 
     def record_artifact(self, manifest: RunManifest, key: str, path: Path) -> None:
-        manifest.artifacts[key] = str(path)
+        resolved_path = path.resolve()
+        if not resolved_path.exists() or not resolved_path.is_file():
+            raise FileNotFoundError(f"Artifact file not found for '{key}': {path}")
+        manifest.artifacts[key] = str(resolved_path)
+
+    def artifact_value(self, path: str | Path | None) -> str | None:
+        if not path:
+            return None
+        candidate = Path(path).expanduser()
+        if not candidate.is_absolute():
+            candidate = (Path.cwd() / candidate).resolve()
+        else:
+            candidate = candidate.resolve()
+        if not candidate.exists() or not candidate.is_file():
+            return None
+        return str(candidate)
 
     def read_manifest(self, run_id: str) -> dict[str, Any]:
         manifest_path = self.root / Path(run_id).name / "manifest.json"
@@ -158,9 +173,10 @@ class RunStore:
                     or parameters.get("starter_flow"),
                     "project_brief": parameters.get("project_brief"),
                     "fallback_reason": parameters.get("fallback_reason"),
-                    "manifest": artifacts.get("manifest") or str(manifest_path),
-                    "glb": artifacts.get("glb"),
-                    "obj": artifacts.get("obj"),
+                    "manifest": self.artifact_value(artifacts.get("manifest"))
+                    or self.artifact_value(manifest_path),
+                    "glb": self.artifact_value(artifacts.get("glb")),
+                    "obj": self.artifact_value(artifacts.get("obj")),
                 }
             )
 

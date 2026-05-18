@@ -262,6 +262,11 @@ class ImageEZOrchestrator:
             self.store.save_manifest(run_dir, manifest)
             payload = manifest.to_dict()
             payload["adapter"] = result.adapter
+            payload["artifacts"] = {
+                key: self.store.artifact_value(path)
+                for key, path in payload["artifacts"].items()
+                if self.store.artifact_value(path) is not None
+            }
             return payload
         except Exception as exc:
             manifest.stage = "failed"

@@ -33,6 +33,8 @@ class StorageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             store = RunStore(directory)
             run_dir, manifest = store.create_run()
+            atomic_write_text(run_dir / "exports" / "draft.glb", "glb")
+            atomic_write_text(run_dir / "exports" / "draft.obj", "obj")
             manifest.stage = "done"
             manifest.validation = {"score": 93}
             manifest.parameters = {
@@ -60,6 +62,25 @@ class StorageTests(unittest.TestCase):
             self.assertEqual(
                 runs[0]["project_brief"], "Keep the handle silhouette intact."
             )
+            self.assertEqual(
+                runs[0]["glb"], str((run_dir / "exports" / "draft.glb").resolve())
+            )
+
+    def test_record_artifact_requires_existing_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = RunStore(directory)
+            run_dir, manifest = store.create_run()
+
+            with self.assertRaises(FileNotFoundError):
+                store.record_artifact(
+                    manifest, "glb", run_dir / "exports" / "missing.glb"
+                )
+
+    def test_artifact_value_returns_none_for_missing_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = RunStore(directory)
+
+            self.assertIsNone(store.artifact_value(Path(directory) / "missing.glb"))
 
     def test_read_manifest_loads_saved_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
