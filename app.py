@@ -668,10 +668,11 @@ def _workspace_guide() -> str:
         "### Workspace Patterns Merged Into This App",
         "",
         "- **Starter flows** reduce first-run decision load by pairing outcome-oriented templates with sensible default quality settings.",
+        "- **Template chips** borrow the best prompt-lab behavior from modern image tools by letting you preload a strong default in one click.",
         "- **Project briefs** keep text intent, capture notes, and optional reference docs next to the image evidence so the prompt context stays attached to each run.",
-        "- **Projects & history** keep prior runs visible inside the same app shell instead of treating each export as a dead end.",
+        "- **Projects & history** keep prior runs visible in a compact rail and a dedicated reopen tab instead of treating each export as a dead end.",
         "- **Repo-local sample packs** keep starter captures inside this repository so the workspace behaves the same on local runs and hosted deployments.",
-        "- **Prompt ideas** preload a starter flow, quality mode, and project brief together so the primary image and text intent stay aligned.",
+        "- **Visual starter galleries** borrow the strongest parts of browse-heavy creative suites without sacrificing truthful run status or file output state.",
         "- **Route-preserving tabs** separate creation, inspection, and guidance without sending the user to a different product surface.",
         "",
         "### Starter Flows",
@@ -694,6 +695,45 @@ def _workspace_guide() -> str:
     return "\n".join(lines)
 
 
+def _build_theme() -> Any:
+    if gr is None:  # pragma: no cover
+        return None
+
+    return gr.themes.Base(
+        primary_hue="emerald",
+        secondary_hue="cyan",
+        neutral_hue="stone",
+        spacing_size="md",
+        radius_size="lg",
+        text_size="lg",
+        font=[gr.themes.GoogleFont("Space Grotesk"), "ui-sans-serif", "sans-serif"],
+        font_mono=[
+            gr.themes.GoogleFont("IBM Plex Mono"),
+            "ui-monospace",
+            "monospace",
+        ],
+    ).set(
+        body_background_fill="#f5f0e6",
+        background_fill_primary="#fffdf8",
+        background_fill_secondary="#efe8db",
+        block_background_fill="#fffdf8",
+        block_border_width="1px",
+        block_border_color="rgba(16, 42, 46, 0.10)",
+        block_shadow="0 24px 64px rgba(15, 23, 42, 0.08)",
+        button_primary_background_fill="linear-gradient(135deg, #0f766e, #155eef)",
+        button_primary_background_fill_hover="linear-gradient(135deg, #115e59, #1d4ed8)",
+        button_primary_text_color="white",
+        button_secondary_background_fill="#f0e8da",
+        button_secondary_background_fill_hover="#e6dcc9",
+        button_secondary_text_color="#102a2e",
+        input_background_fill="#fffdf8",
+        input_border_color="rgba(16, 42, 46, 0.12)",
+        input_border_color_focus="#0f766e",
+        loader_color="#0f766e",
+        block_title_text_weight="600",
+    )
+
+
 def build_demo():
     if gr is None:  # pragma: no cover
         raise RuntimeError(f"Gradio is not installed: {GRADIO_IMPORT_ERROR}")
@@ -708,162 +748,333 @@ def build_demo():
     history_runs = orchestrator.store.list_runs(limit=_HISTORY_LIMIT)
     history_choices = [_history_choice_label(item) for item in history_runs]
     history_default = history_choices[0] if history_choices else None
-    sample_examples = _ensure_examples()
+    sample_packs = _repo_sample_packs()
 
     with gr.Blocks(title=config.app.title) as demo:
         session_state = gr.State({})
 
-        with gr.Tabs():
+        with gr.Tabs(elem_classes="workspace-tabs"):
             with gr.Tab("Create"):
-                gr.Markdown(
-                    "\n".join(
-                        [
-                            f"# {config.app.title}",
-                            "",
-                            f"Default backend: **{_backend_display_label(resolution.selected or backend_value)}**",
-                            resolution.message,
-                        ]
-                    )
-                )
-                with gr.Row(equal_height=False):
-                    with gr.Column(scale=1, min_width=320):
-                        starter = gr.Dropdown(
-                            label="Starter flow",
-                            choices=[item["key"] for item in _STARTER_FLOWS],
-                            value=_DEFAULT_STARTER,
-                        )
-                        quality = gr.Radio(
-                            label="Quality mode",
-                            choices=["draft", "balanced", "high"],
-                            value=config.generation.quality,
-                        )
-                        adapter = gr.Dropdown(
-                            label="Backend",
-                            choices=backend_choices,
-                            value=backend_value,
-                            info="auto prefers ZeroGPU and falls back to CPU when ZeroGPU is not usable.",
-                        )
-                        seed = gr.Number(
-                            label="Seed",
-                            value=config.generation.seed,
-                            precision=0,
-                        )
-                        project_brief = gr.Textbox(
-                            label="Project brief",
-                            lines=6,
-                            value=_starter_spec(_DEFAULT_STARTER)["brief"],
-                            placeholder="Describe the object, must-keep details, and intended export.",
-                        )
-                        reference_brief = gr.File(
-                            label="Optional reference brief",
-                            type="filepath",
-                        )
-                        starter_help = gr.Markdown(_starter_markdown(_DEFAULT_STARTER))
-                        quality_help = gr.Markdown(
-                            _quality_markdown(config.generation.quality)
-                        )
-                    with gr.Column(scale=1, min_width=320):
-                        primary = gr.Image(
-                            label="Primary image",
-                            type="pil",
-                            sources=["upload", "clipboard"],
-                        )
-                        with gr.Accordion("Optional labeled views", open=False):
-                            with gr.Row(equal_height=False):
-                                front = gr.Image(
-                                    label="Front",
-                                    type="pil",
-                                    sources=["upload", "clipboard"],
+                gr.HTML(_hero_shell_html(config.app.title, resolution))
+                with gr.Row(equal_height=False, elem_classes="workspace-layout"):
+                    with gr.Column(scale=7, min_width=720, elem_classes="main-column"):
+                        with gr.Group(elem_classes="workspace-panel strategy-panel"):
+                            gr.HTML(
+                                _surface_header_html(
+                                    "Agent Brief",
+                                    "Compose the run like a modern creative suite",
+                                    "Blend a clear starter, a quality lane, and a real project brief before touching generation.",
                                 )
-                                back = gr.Image(
-                                    label="Back",
-                                    type="pil",
-                                    sources=["upload", "clipboard"],
-                                )
-                                left = gr.Image(
-                                    label="Left",
-                                    type="pil",
-                                    sources=["upload", "clipboard"],
-                                )
-                                right = gr.Image(
-                                    label="Right",
-                                    type="pil",
-                                    sources=["upload", "clipboard"],
-                                )
-                        gr.Examples(
-                            examples=sample_examples,
-                            inputs=[primary],
-                            label="Built-in samples",
-                            examples_per_page=6,
-                            example_labels=[
-                                str(spec["label"]) for spec in _EXAMPLE_SPECS
-                            ],
-                        )
-                        gr.Markdown(
-                            "Built-in samples are repo-local so local and hosted runs use the same starter images."
-                        )
+                            )
+                            with gr.Row(equal_height=False, elem_classes="strategy-grid"):
+                                with gr.Column(scale=4, min_width=240):
+                                    starter = gr.Dropdown(
+                                        label="Starter flow",
+                                        choices=[item["key"] for item in _STARTER_FLOWS],
+                                        value=_DEFAULT_STARTER,
+                                    )
+                                    quality = gr.Radio(
+                                        label="Quality mode",
+                                        choices=["draft", "balanced", "high"],
+                                        value=config.generation.quality,
+                                        elem_classes="quality-pills",
+                                    )
+                                    adapter = gr.Dropdown(
+                                        label="Backend",
+                                        choices=backend_choices,
+                                        value=backend_value,
+                                        info="auto prefers ZeroGPU and falls back to CPU when ZeroGPU is not usable.",
+                                    )
+                                    seed = gr.Number(
+                                        label="Seed",
+                                        value=config.generation.seed,
+                                        precision=0,
+                                    )
+                                with gr.Column(scale=6, min_width=320):
+                                    project_brief = gr.Textbox(
+                                        label="Project brief",
+                                        lines=6,
+                                        value=_starter_spec(_DEFAULT_STARTER)["brief"],
+                                        placeholder="Describe the object, must-keep details, and intended export.",
+                                        elem_classes="brief-field",
+                                    )
+                                    reference_brief = gr.File(
+                                        label="Optional reference brief",
+                                        type="filepath",
+                                    )
+                            with gr.Row(equal_height=False, elem_classes="support-grid"):
+                                with gr.Column(scale=1, min_width=250):
+                                    starter_help = gr.Markdown(
+                                        _starter_markdown(_DEFAULT_STARTER),
+                                        elem_classes="note-panel",
+                                    )
+                                with gr.Column(scale=1, min_width=250):
+                                    quality_help = gr.Markdown(
+                                        _quality_markdown(config.generation.quality),
+                                        elem_classes="note-panel",
+                                    )
 
-                generate = gr.Button("Generate Mesh", variant="primary")
-                with gr.Row(equal_height=False):
-                    with gr.Column(scale=1, min_width=320):
-                        model = gr.Model3D(
-                            label="Generated model",
-                            value=None,
-                            clear_color=_MODEL_CLEAR_COLOR,
-                        )
-                        status = gr.Markdown(
-                            "No generated output yet. Generate a run to populate the preview and downloads."
-                        )
-                    with gr.Column(scale=1, min_width=320):
-                        validation_preview = gr.Image(
-                            label="Normalized preview",
-                            type="pil",
-                            interactive=False,
-                        )
-                        validation_status = gr.Markdown(
-                            "Upload a primary image to preview the normalized input and the capture score before generating."
-                        )
+                        with gr.Group(elem_classes="workspace-panel template-panel"):
+                            gr.HTML(
+                                _surface_header_html(
+                                    "Prompt Lab",
+                                    "Apply one-click launch kits",
+                                    "Borrow the best part of the five reference apps: visible quick starts that actually configure the workspace instead of acting like dead marketing cards.",
+                                )
+                            )
+                            template_buttons: list[tuple[Any, str]] = []
+                            for row_start in range(0, len(_PROMPT_TEMPLATES), 3):
+                                with gr.Row(
+                                    equal_height=True,
+                                    elem_classes="template-grid-row",
+                                ):
+                                    for template in _PROMPT_TEMPLATES[
+                                        row_start : row_start + 3
+                                    ]:
+                                        with gr.Column(scale=1, min_width=220):
+                                            with gr.Group(elem_classes="template-card"):
+                                                gr.HTML(
+                                                    _prompt_template_card_html(template)
+                                                )
+                                                template_button = gr.Button(
+                                                    f"Use {template['title']}",
+                                                    variant="secondary",
+                                                    elem_classes="template-apply",
+                                                )
+                                                template_buttons.append(
+                                                    (
+                                                        template_button,
+                                                        str(template["key"]),
+                                                    )
+                                                )
 
-                with gr.Row(equal_height=False):
-                    manifest_file = gr.File(label="Manifest")
-                    glb_file = gr.File(label="GLB")
-                    obj_file = gr.File(label="OBJ")
-                with gr.Row(equal_height=False):
-                    ply_file = gr.File(label="PLY")
-                    stl_file = gr.File(label="STL")
-                    bundle_file = gr.File(label="All artifacts (ZIP)")
+                        with gr.Group(elem_classes="workspace-panel capture-panel"):
+                            gr.HTML(
+                                _surface_header_html(
+                                    "Capture",
+                                    "Load hero shots and visual starters",
+                                    "Blend Gemini-style style picks and Midjourney-style browsing into a repo-local gallery that never breaks hosted parity.",
+                                )
+                            )
+                            primary = gr.Image(
+                                label="Primary image",
+                                type="pil",
+                                sources=["upload", "clipboard"],
+                                elem_classes="primary-input",
+                            )
+                            with gr.Accordion(
+                                "Optional labeled views",
+                                open=False,
+                                elem_classes="views-accordion",
+                            ):
+                                with gr.Row(equal_height=False):
+                                    front = gr.Image(
+                                        label="Front",
+                                        type="pil",
+                                        sources=["upload", "clipboard"],
+                                    )
+                                    back = gr.Image(
+                                        label="Back",
+                                        type="pil",
+                                        sources=["upload", "clipboard"],
+                                    )
+                                    left = gr.Image(
+                                        label="Left",
+                                        type="pil",
+                                        sources=["upload", "clipboard"],
+                                    )
+                                    right = gr.Image(
+                                        label="Right",
+                                        type="pil",
+                                        sources=["upload", "clipboard"],
+                                    )
+                            gr.Markdown(
+                                _sample_packs_note(sample_packs),
+                                elem_classes="subtle-note",
+                            )
+                            with gr.Row(equal_height=False, elem_classes="sample-pack-row"):
+                                for pack in sample_packs:
+                                    with gr.Column(scale=1, min_width=210):
+                                        with gr.Group(elem_classes="sample-pack-surface"):
+                                            gr.HTML(_sample_pack_header_html(pack))
+                                            gr.Examples(
+                                                examples=pack["examples"],
+                                                inputs=[primary],
+                                                label="Examples",
+                                                examples_per_page=pack["count"],
+                                                example_labels=pack["example_labels"],
+                                            )
+
+                        with gr.Row(equal_height=False, elem_classes="action-row"):
+                            generate = gr.Button(
+                                "Generate Mesh",
+                                variant="primary",
+                                elem_classes="generate-button",
+                            )
+                            gr.Markdown(
+                                "Outputs stay empty until verified files exist, then preview and downloads light up together.",
+                                elem_classes="subtle-note action-note",
+                            )
+
+                    with gr.Column(scale=5, min_width=360, elem_classes="rail-column"):
+                        with gr.Group(elem_classes="workspace-panel rail-panel"):
+                            gr.HTML(
+                                _surface_header_html(
+                                    "Project Rail",
+                                    "Keep runtime and history in view",
+                                    "Borrow the Grok-style project rail without burying the primary creation flow under a permanent sidebar.",
+                                )
+                            )
+                            create_history_summary = gr.HTML(
+                                _history_overview_html(history_runs),
+                                elem_classes="history-overview-shell",
+                            )
+                            gr.Markdown(
+                                _runtime_banner(resolution),
+                                elem_classes="status-panel runtime-panel",
+                            )
+
+                        with gr.Group(elem_classes="workspace-panel preview-panel"):
+                            gr.HTML(
+                                _surface_header_html(
+                                    "Preview",
+                                    "Generated geometry",
+                                    "The 3D pane stays empty until the same verified mesh files shown below are actually available.",
+                                )
+                            )
+                            model = gr.Model3D(
+                                label="Generated model",
+                                value=None,
+                                clear_color=_MODEL_CLEAR_COLOR,
+                                elem_classes="model-panel",
+                            )
+                            status = gr.Markdown(
+                                "No generated output yet. Generate a run to populate the preview and downloads.",
+                                elem_classes="status-panel",
+                            )
+
+                        with gr.Group(elem_classes="workspace-panel validation-panel"):
+                            gr.HTML(
+                                _surface_header_html(
+                                    "Capture Check",
+                                    "Inspect the normalized input before spending a run",
+                                    "Keep the best part of agent UIs: immediate feedback before the expensive action fires.",
+                                )
+                            )
+                            validation_preview = gr.Image(
+                                label="Normalized preview",
+                                type="pil",
+                                interactive=False,
+                            )
+                            validation_status = gr.Markdown(
+                                "Upload a primary image to preview the normalized input and the capture score before generating.",
+                                elem_classes="status-panel",
+                            )
+
+                        with gr.Group(elem_classes="workspace-panel output-panel"):
+                            gr.HTML(
+                                _surface_header_html(
+                                    "Outputs",
+                                    "Collect verified exports",
+                                    "Manifest, meshes, and ZIP stay tied to the run, with nothing shown early and nothing faked.",
+                                )
+                            )
+                            with gr.Row(equal_height=False, elem_classes="artifact-row"):
+                                manifest_file = gr.File(label="Manifest", elem_classes="artifact-file")
+                                glb_file = gr.File(label="GLB", elem_classes="artifact-file")
+                                obj_file = gr.File(label="OBJ", elem_classes="artifact-file")
+                            with gr.Row(equal_height=False, elem_classes="artifact-row"):
+                                ply_file = gr.File(label="PLY", elem_classes="artifact-file")
+                                stl_file = gr.File(label="STL", elem_classes="artifact-file")
+                                bundle_file = gr.File(
+                                    label="All artifacts (ZIP)",
+                                    elem_classes="artifact-file",
+                                )
 
             with gr.Tab("History"):
-                history_notice = gr.Markdown(_history_notice_text(history_runs))
-                history_summary = gr.Markdown(_history_notice_text(history_runs))
-                history_run = gr.Radio(
-                    label="Recent runs",
-                    choices=history_choices,
-                    value=history_default,
+                history_summary = gr.HTML(
+                    _history_overview_html(history_runs),
+                    elem_classes="history-overview-shell",
                 )
-                with gr.Row(equal_height=False):
-                    history_refresh = gr.Button("Refresh")
-                    history_open = gr.Button("Open Run", variant="primary")
-                with gr.Row(equal_height=False):
-                    with gr.Column(scale=1, min_width=320):
-                        history_model = gr.Model3D(
-                            label="Run preview",
-                            value=None,
-                            clear_color=_MODEL_CLEAR_COLOR,
-                        )
-                        history_status = gr.Markdown(
-                            "Select a run and open it to inspect the manifest and exports."
-                        )
-                    with gr.Column(scale=1, min_width=320):
-                        history_manifest = gr.File(label="Manifest")
-                        history_glb = gr.File(label="GLB")
-                        history_obj = gr.File(label="OBJ")
-                        history_ply = gr.File(label="PLY")
-                        history_stl = gr.File(label="STL")
-                        history_bundle = gr.File(label="All artifacts (ZIP)")
+                with gr.Row(equal_height=False, elem_classes="history-layout"):
+                    with gr.Column(scale=3, min_width=280):
+                        with gr.Group(elem_classes="workspace-panel history-sidebar"):
+                            gr.HTML(
+                                _surface_header_html(
+                                    "Projects",
+                                    "Reopen recent runs",
+                                    "Keep the strongest Grok-style behavior: recent work stays visible and recoverable while you compare outputs.",
+                                )
+                            )
+                            history_notice = gr.Markdown(
+                                _history_notice_text(history_runs),
+                                elem_classes="status-panel",
+                            )
+                            history_run = gr.Radio(
+                                label="Recent runs",
+                                choices=history_choices,
+                                value=history_default,
+                                elem_classes="history-run-list",
+                            )
+                            with gr.Row(equal_height=False, elem_classes="history-action-row"):
+                                history_refresh = gr.Button(
+                                    "Refresh",
+                                    variant="secondary",
+                                    elem_classes="history-action",
+                                )
+                                history_open = gr.Button(
+                                    "Open Run",
+                                    variant="primary",
+                                    elem_classes="history-action",
+                                )
+                    with gr.Column(scale=5, min_width=340):
+                        with gr.Group(elem_classes="workspace-panel history-preview"):
+                            gr.HTML(
+                                _surface_header_html(
+                                    "Inspect",
+                                    "Run preview",
+                                    "The reopen path uses the same verified mesh contract as a fresh generation, not a placeholder substitute.",
+                                )
+                            )
+                            history_model = gr.Model3D(
+                                label="Run preview",
+                                value=None,
+                                clear_color=_MODEL_CLEAR_COLOR,
+                                elem_classes="model-panel",
+                            )
+                            history_status = gr.Markdown(
+                                "Select a run and open it to inspect the manifest and exports.",
+                                elem_classes="status-panel",
+                            )
+                    with gr.Column(scale=4, min_width=320):
+                        with gr.Group(elem_classes="workspace-panel history-artifacts"):
+                            gr.HTML(
+                                _surface_header_html(
+                                    "Artifacts",
+                                    "Recover exported files",
+                                    "Everything stays attached to the selected run so comparison and rollback remain explicit.",
+                                )
+                            )
+                            history_manifest = gr.File(label="Manifest", elem_classes="artifact-file")
+                            history_glb = gr.File(label="GLB", elem_classes="artifact-file")
+                            history_obj = gr.File(label="OBJ", elem_classes="artifact-file")
+                            history_ply = gr.File(label="PLY", elem_classes="artifact-file")
+                            history_stl = gr.File(label="STL", elem_classes="artifact-file")
+                            history_bundle = gr.File(
+                                label="All artifacts (ZIP)",
+                                elem_classes="artifact-file",
+                            )
 
             with gr.Tab("Guide"):
-                gr.Markdown(_workspace_guide())
+                with gr.Group(elem_classes="workspace-panel guide-panel"):
+                    gr.HTML(
+                        _surface_header_html(
+                            "Guide",
+                            "Why this shell now looks different",
+                            "This pass keeps the trustworthy output contract from the recovery fix, then reintroduces higher-fidelity patterns from the five reference tools without bringing back fake-friendly UI behavior.",
+                        )
+                    )
+                    gr.Markdown(_workspace_guide())
 
         def history_updates():
             runs = orchestrator.store.list_runs(limit=_HISTORY_LIMIT)
@@ -872,7 +1083,8 @@ def build_demo():
             return (
                 cast(Any, gr).Radio(choices=labels, value=value),
                 _history_notice_text(runs),
-                _history_notice_text(runs),
+                _history_overview_html(runs),
+                _history_overview_html(runs),
             )
 
         def preview_primary(primary_image, starter_key, quality_name):
@@ -1032,7 +1244,12 @@ def build_demo():
                     reference_brief=reference_brief_file,
                 )
             except ValueError as exc:
-                history_dropdown, history_message, history_overview = history_updates()
+                (
+                    history_dropdown,
+                    history_message,
+                    history_overview,
+                    create_overview,
+                ) = history_updates()
                 return (
                     fallback_model,
                     _error_report(str(exc)),
@@ -1046,6 +1263,7 @@ def build_demo():
                     history_dropdown,
                     history_message,
                     history_overview,
+                    create_overview,
                 )
             state["last_run_id"] = result["run_id"]
             artifacts, missing_keys = _verified_artifact_state(
@@ -1053,7 +1271,12 @@ def build_demo():
                 result.get("artifacts"),
             )
             if missing_keys:
-                history_dropdown, history_message, history_overview = history_updates()
+                (
+                    history_dropdown,
+                    history_message,
+                    history_overview,
+                    create_overview,
+                ) = history_updates()
                 return (
                     None,
                     _stale_artifact_report(result["run_id"], missing_keys),
@@ -1067,6 +1290,7 @@ def build_demo():
                     history_dropdown,
                     history_message,
                     history_overview,
+                    create_overview,
                 )
             state["model"] = artifacts.get("glb") or artifacts.get("obj")
             state["manifest"] = artifacts.get("manifest")
@@ -1075,7 +1299,12 @@ def build_demo():
             state["ply"] = artifacts.get("ply")
             state["stl"] = artifacts.get("stl")
             state["bundle"] = str(orchestrator.store.archive_run(result["run_id"]))
-            history_dropdown, history_message, history_overview = history_updates()
+            (
+                history_dropdown,
+                history_message,
+                history_overview,
+                create_overview,
+            ) = history_updates()
             return (
                 state["model"],
                 _format_report(result),
@@ -1089,6 +1318,7 @@ def build_demo():
                 history_dropdown,
                 history_message,
                 history_overview,
+                create_overview,
             )
 
         primary.change(
@@ -1113,6 +1343,23 @@ def build_demo():
             inputs=[quality, primary, starter],
             outputs=[quality_help, validation_preview, validation_status],
         )
+        for template_button, template_key in template_buttons:
+            template_button.click(
+                lambda primary_image, template_key=template_key: apply_prompt_template(
+                    template_key,
+                    primary_image,
+                ),
+                inputs=[primary],
+                outputs=[
+                    starter,
+                    project_brief,
+                    starter_help,
+                    quality,
+                    quality_help,
+                    validation_preview,
+                    validation_status,
+                ],
+            )
 
         generate.click(
             run_generate,
@@ -1143,12 +1390,18 @@ def build_demo():
                 history_run,
                 history_notice,
                 history_summary,
+                create_history_summary,
             ],
             api_name="generate",
         )
         history_refresh.click(
             history_updates,
-            outputs=[history_run, history_notice, history_summary],
+            outputs=[
+                history_run,
+                history_notice,
+                history_summary,
+                create_history_summary,
+            ],
         )
         history_open.click(
             open_history_run,
@@ -1169,23 +1422,309 @@ def build_demo():
 
 
 _CSS = """
+:root {
+    --iez-ink: #102a2e;
+    --iez-muted: #5a6f72;
+    --iez-line: rgba(16, 42, 46, 0.12);
+    --iez-panel: rgba(255, 253, 248, 0.92);
+    --iez-soft: #f0e8da;
+    --iez-accent: #0f766e;
+    --iez-accent-strong: #155eef;
+    --iez-sun: #c67a24;
+    --iez-shadow: 0 24px 64px rgba(15, 23, 42, 0.08);
+}
+
 .gradio-container {
-    max-width: 1120px !important;
-    padding: 20px !important;
+    max-width: 1420px !important;
+    padding: 28px !important;
+    background:
+        radial-gradient(circle at top left, rgba(21, 94, 239, 0.10), transparent 28%),
+        radial-gradient(circle at top right, rgba(15, 118, 110, 0.14), transparent 26%),
+        linear-gradient(180deg, #f7f2e8 0%, #f0e6d7 100%);
 }
 
-button[role="tab"] {
-    border-radius: 8px !important;
+.workspace-tabs {
+    gap: 18px;
 }
 
-textarea {
-    min-height: 180px !important;
+.workspace-tabs button[role="tab"] {
+    min-height: 48px;
+    border-radius: 999px !important;
+    border: 1px solid rgba(16, 42, 46, 0.08) !important;
+    background: rgba(255, 253, 248, 0.78) !important;
+    color: var(--iez-ink) !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
 }
 
-.block,
-.form,
-.panel {
-    box-shadow: none !important;
+.workspace-tabs button[role="tab"][aria-selected="true"] {
+    background: linear-gradient(135deg, #0f766e, #155eef) !important;
+    border-color: transparent !important;
+    color: white !important;
+    box-shadow: 0 18px 32px rgba(21, 94, 239, 0.18);
+}
+
+.hero-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.9fr);
+    gap: 24px;
+    padding: 30px;
+    border-radius: 32px;
+    margin-bottom: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    background:
+        linear-gradient(135deg, rgba(16, 42, 46, 0.94), rgba(21, 94, 239, 0.86)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent);
+    box-shadow: 0 32px 70px rgba(15, 23, 42, 0.18);
+    color: white;
+}
+
+.hero-copy h1 {
+    margin: 10px 0 14px;
+    font-size: clamp(2.6rem, 5vw, 4.6rem);
+    line-height: 0.92;
+    letter-spacing: -0.05em;
+    color: white;
+    text-shadow: 0 8px 28px rgba(15, 23, 42, 0.28);
+}
+
+.hero-copy-text {
+    max-width: 40rem;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.hero-runtime-note {
+    margin: 16px 0 0;
+    color: rgba(255, 249, 238, 0.88);
+    font-size: 0.95rem;
+}
+
+.hero-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.hero-chip {
+    min-width: 140px;
+    padding: 14px 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(12px);
+}
+
+.hero-chip-label,
+.hero-ideas-header,
+.surface-eyebrow,
+.sample-pack-count,
+.template-card-badge,
+.template-card-quality,
+.history-stat-label {
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.74rem;
+}
+
+.hero-chip-value {
+    display: block;
+    margin-top: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+}
+
+.hero-ideas {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+}
+
+.hero-ideas-header {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.hero-chip-label {
+    color: rgba(255, 255, 255, 0.68);
+}
+
+.hero-idea-card {
+    padding: 18px;
+    border-radius: 24px;
+    background: rgba(255, 250, 244, 0.92);
+    color: var(--iez-ink);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.hero-idea-card h3,
+.template-card h3,
+.sample-pack-head h3,
+.surface-header-copy h2,
+.history-overview-copy h2 {
+    margin: 10px 0 8px;
+    font-size: 1.28rem;
+    line-height: 1.1;
+    color: var(--iez-ink);
+}
+
+.hero-idea-card p,
+.surface-copy,
+.sample-pack-head p,
+.template-card-summary,
+.template-card-meta span,
+.history-overview-copy p,
+.subtle-note {
+    color: var(--iez-muted);
+    line-height: 1.6;
+}
+
+.hero-idea-meta {
+    display: inline-flex;
+    margin-top: 12px;
+    font-size: 0.88rem;
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
+.workspace-layout,
+.history-layout,
+.strategy-grid,
+.support-grid,
+.template-grid-row,
+.sample-pack-row,
+.artifact-row,
+.history-action-row,
+.action-row {
+    gap: 18px;
+}
+
+.workspace-panel {
+    border-radius: 28px;
+    border: 1px solid var(--iez-line);
+    background: var(--iez-panel);
+    box-shadow: var(--iez-shadow);
+    padding: 22px;
+}
+
+.surface-eyebrow,
+.sample-pack-count,
+.template-card-badge,
+.template-card-quality,
+.history-stat-label {
+    color: var(--iez-accent);
+}
+
+.surface-header-copy h2,
+.surface-copy,
+.template-card-copy,
+.sample-pack-head,
+.history-overview-copy,
+.status-panel {
+    margin: 0;
+}
+
+.surface-header-copy {
+    margin-bottom: 16px;
+}
+
+.strategy-panel textarea,
+.guide-panel textarea {
+    min-height: 220px !important;
+}
+
+.note-panel,
+.status-panel {
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: #f7f3ea;
+    border: 1px solid rgba(16, 42, 46, 0.08);
+}
+
+.template-card,
+.sample-pack-surface {
+    height: 100%;
+    border-radius: 24px;
+    border: 1px solid rgba(16, 42, 46, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(241, 236, 225, 0.94));
+}
+
+.template-card-top,
+.template-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.template-card-meta {
+    margin-top: 14px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.template-card-quality {
+    color: var(--iez-accent-strong);
+}
+
+.sample-pack-count {
+    color: var(--iez-sun);
+}
+
+.rail-panel {
+    position: sticky;
+    top: 18px;
+}
+
+.history-overview {
+    display: grid;
+    gap: 14px;
+}
+
+.history-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.history-stat-card {
+    padding: 14px 16px;
+    border-radius: 20px;
+    background: rgba(16, 42, 46, 0.04);
+    border: 1px solid rgba(16, 42, 46, 0.08);
+}
+
+.history-stat-card strong,
+.history-overview-latest {
+    display: block;
+    margin-top: 8px;
+    color: var(--iez-ink);
+    font-weight: 700;
+}
+
+.history-overview-latest {
+    margin-top: 0;
+}
+
+.history-run-list {
+    margin-top: 8px;
+}
+
+.artifact-file {
+    min-width: 0;
+}
+
+.generate-button {
+    flex: 0 0 240px;
+}
+
+.action-note {
+    display: flex;
+    align-items: center;
+    margin: 0;
 }
 
 .gradio-model3d,
@@ -1199,7 +1738,39 @@ textarea {
 }
 
 button {
-    min-height: 40px;
+    min-height: 42px;
+}
+
+@media (max-width: 1100px) {
+    .hero-shell,
+    .workspace-layout,
+    .history-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .rail-panel {
+        position: static;
+    }
+}
+
+@media (max-width: 720px) {
+    .gradio-container {
+        padding: 16px !important;
+    }
+
+    .hero-shell,
+    .workspace-panel {
+        padding: 18px;
+        border-radius: 24px;
+    }
+
+    .hero-copy h1 {
+        font-size: 2.2rem;
+    }
+
+    .history-stat-grid {
+        grid-template-columns: 1fr;
+    }
 }
 """
 
@@ -1213,5 +1784,6 @@ if __name__ == "__main__":
         server_name=launch_config.host,
         server_port=launch_config.port,
         share=launch_config.share,
+        theme=_build_theme(),
         css=_CSS,
     )
