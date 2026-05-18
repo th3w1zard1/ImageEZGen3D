@@ -783,6 +783,19 @@ def build_demo():
                                         placeholder="Subject, must-keep details, and target export quality.",
                                         elem_classes="brief-field composer-brief",
                                     )
+                                    with gr.Row(
+                                        equal_height=False,
+                                        elem_classes="action-row composer-footer",
+                                    ):
+                                        generate = gr.Button(
+                                            "Generate Mesh",
+                                            variant="primary",
+                                            elem_classes="generate-button composer-cta",
+                                        )
+                                        gr.Markdown(
+                                            "Generate early, then refine with presets or advanced controls.",
+                                            elem_classes="subtle-note action-note",
+                                        )
                                     primary = gr.Image(
                                         label="Primary image",
                                         type="pil",
@@ -815,19 +828,6 @@ def build_demo():
                                                 type="pil",
                                                 sources=["upload", "clipboard"],
                                             )
-                                    with gr.Row(
-                                        equal_height=False,
-                                        elem_classes="action-row composer-footer",
-                                    ):
-                                        generate = gr.Button(
-                                            "Generate Mesh",
-                                            variant="primary",
-                                            elem_classes="generate-button composer-cta",
-                                        )
-                                        gr.Markdown(
-                                            "Primary action first: generate a draft, then refine settings or presets.",
-                                            elem_classes="subtle-note action-note",
-                                        )
                                 with gr.Column(
                                     scale=4,
                                     min_width=300,
