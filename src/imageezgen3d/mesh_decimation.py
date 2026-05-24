@@ -57,26 +57,18 @@ def subdivide_mesh(mesh: SimpleMesh, levels: int = 1) -> SimpleMesh:
     )
 
 
-def decimate_mesh(
+def _decimate_mesh_largest_face_mvp(
     mesh: SimpleMesh,
     target_faces: int,
+    *,
+    faces_before: int,
 ) -> tuple[SimpleMesh, dict[str, Any]]:
-    """Reduce face count to at most target_faces (smallest-area removal MVP)."""
-    faces_before = len(mesh.faces)
-    if faces_before <= target_faces or target_faces < 1:
-        return mesh, {
-            "decimation_applied": False,
-            "faces_before": faces_before,
-            "faces_after": faces_before,
-        }
-
     ranked = sorted(
         mesh.faces,
         key=lambda face: _face_area(mesh, face),
         reverse=True,
     )
     kept = tuple(ranked[:target_faces])
-
     return (
         SimpleMesh(
             vertices=mesh.vertices,
@@ -86,7 +78,70 @@ def decimate_mesh(
         ),
         {
             "decimation_applied": True,
+            "decimation_method": "largest_face_mvp",
             "faces_before": faces_before,
             "faces_after": len(kept),
         },
     )
+
+
+def _decimate_mesh_quadric(
+    mesh: SimpleMesh,
+    target_faces: int,
+    *,
+    faces_before: int,
+) -> tuple[SimpleMesh, dict[str, Any]]:
+    import numpy as np
+    import trimesh
+
+    source = trimesh.Trimesh(
+        vertices=np.asarray(mesh.vertices, dtype=np.float64),
+        faces=np.asarray(mesh.faces, dtype=np.int64),
+        process=False,
+    )
+    simplified = source.simplify_quadric_decimation(face_count=target_faces)
+    vertices = tuple(tuple(float(value) for value in row) for row in simplified.vertices)
+    faces = tuple(tuple(int(index) for index in face) for face in simplified.faces)
+    return (
+        SimpleMesh(
+            vertices=vertices,
+            faces=faces,
+            color=mesh.color,
+            b64_image=mesh.b64_image,
+        ),
+        {
+            "decimation_applied": True,
+            "decimation_method": "quadric",
+            "faces_before": faces_before,
+            "faces_after": len(faces),
+        },
+    )
+
+
+def decimate_mesh(
+    mesh: SimpleMesh,
+    target_faces: int,
+) -> tuple[SimpleMesh, dict[str, Any]]:
+    """Reduce face count to at most target_faces (quadric when available, else MVP)."""
+    faces_before = len(mesh.faces)
+    if faces_before <= target_faces or target_faces < 1:
+        return mesh, {
+            "decimation_applied": False,
+            "faces_before": faces_before,
+            "faces_after": faces_before,
+        }
+
+    try:
+        import trimesh  # noqa: F401
+
+        return _decimate_mesh_quadric(
+            mesh,
+            target_faces,
+            faces_before=faces_before,
+        )
+    except Exception:
+        return _decimate_mesh_largest_face_mvp(
+            mesh,
+            target_faces,
+            faces_before=faces_before,
+        )

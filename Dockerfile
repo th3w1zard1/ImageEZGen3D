@@ -13,7 +13,7 @@ COPY src ./src
 COPY assets ./assets
 
 RUN python -m pip install --upgrade pip \
-    && python -m pip install -e .[app]
+    && python -m pip install -e ".[app,mesh]"
 
 EXPOSE 7865
 

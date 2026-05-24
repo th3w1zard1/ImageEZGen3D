@@ -53,7 +53,7 @@ jobs:
         if: ${{ success() || failure() }}
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[app,dev]"
+          python -m pip install -e ".[app,dev,mesh]"
 
       - name: Run unit tests
         if: ${{ success() || failure() }}
@@ -84,7 +84,7 @@ jobs:
         if: ${{ success() || failure() }}
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[app,dev]"
+          python -m pip install -e ".[app,dev,mesh]"
 
       - name: Run release preflight tests
         if: ${{ success() || failure() }}
@@ -123,7 +123,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[app,dev]"
+          python -m pip install -e ".[app,dev,mesh]"
 
       - name: Run golden sample attestation
         run: |

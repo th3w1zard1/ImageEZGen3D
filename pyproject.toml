@@ -15,6 +15,7 @@ dependencies = [
 
 [project.optional-dependencies]
 app = ["gradio>=4.44,<7"]
+mesh = ["trimesh>=4.4", "fast-simplification>=0.1"]
 dev = []
 
 [tool.setuptools.packages.find]
