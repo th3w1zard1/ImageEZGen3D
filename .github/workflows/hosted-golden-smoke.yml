@@ -44,10 +44,20 @@ jobs:
             --space-url "$IMAGEEZ_HF_SPACE_URL" \
             --json --record hosted-golden-smoke.json
 
+      - name: Run hosted export tier smoke
+        env:
+          IMAGEEZ_HF_SPACE_URL: ${{ github.event.inputs.space_url || 'https://th3w1zard1-imageezgen3d.hf.space/' }}
+        run: |
+          PYTHONPATH=src python scripts/hosted_export_tier_smoke.py \
+            --space-url "$IMAGEEZ_HF_SPACE_URL" \
+            --record hosted-export-tier-smoke.json
+
       - name: Upload hosted golden smoke record
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: hosted-golden-smoke
-          path: hosted-golden-smoke.json
+          path: |
+            hosted-golden-smoke.json
+            hosted-export-tier-smoke.json
           if-no-files-found: warn

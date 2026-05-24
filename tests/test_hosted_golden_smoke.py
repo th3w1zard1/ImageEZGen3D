@@ -51,6 +51,7 @@ class HostedGoldenSmokeTests(unittest.TestCase):
             run_id="20260524-000000-00000000",
             space_url="https://example.hf.space/",
             adapter_hint="cpu-demo",
+            quality="draft",
             issues=(),
         )
         with tempfile.TemporaryDirectory() as directory:
