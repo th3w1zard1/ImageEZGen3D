@@ -1,7 +1,7 @@
 ---
 title: "feat: Ship PR #14 history compare to main"
 type: feat
-status: active
+status: completed
 date: 2026-05-24
 origin: docs/plans/2026-05-24-025-feat-ship-history-compare-hosted-e2e-plan.md
 ---
