@@ -11,10 +11,15 @@ mode: repo-grounded
 
 Trust slice (Plans 012–022) is landed on `main`: fallback honesty, Phase 1 UX, Hunyuan admission docs, manifest UI, golden-sample CI (P12), History `/data` parity (PR #12). Hosted CPU fallback is validated; ZeroGPU adapter remains gated.
 
+## Guardrail track (complete)
+
+Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and Hunyuan admission audit (CLI + CI + scheduled workflow) are landed on `main` through PR #28 (Plan 045 docs closure). No further guardrail slices are queued unless product adds a new runtime or UX driver.
+
 ## Recommended next slices (ranked)
 
 1. **Hunyuan gate closure** — only when product intentionally enables adapter; walk G1–G9 in `docs/knowledgebase/hunyuan-admission-gates.md`. **Top priority** when enabling neural path.
-2. **Mesh polish (optional)** — quadric decimation (trimesh), neural adapter hookup for decimation at export.
+2. **Neural decimation hookup (optional)** — wire real adapter decimation at export when a neural path ships; quadric MVP is done.
+
 ## Completed since this ideation doc
 
 - **Phase 3 history compare** — MVP compare UI (PR #14), manifest JSON/MD export (PR #15), hosted smoke + KB evidence.
@@ -27,6 +32,7 @@ Trust slice (Plans 012–022) is landed on `main`: fallback honesty, Phase 1 UX,
 - **Hunyuan admission audit CLI** — PR #24 merged; `scripts/hunyuan_admission_audit.py` (Plan 041/042).
 - **Hunyuan CI admission gate** — PR #25 merged; `hunyuan-admission-audit` CI job on `main` (Plan 043).
 - **Hosted admission audit workflow** — PR #27 merged; scheduled smoke runs audit + artifact (Plan 044/045).
+- **Plan 045 docs closure** — PR #28 merged; KB + ideation sync for PR #27 ship (Plan 046).
 
 ## Explicitly defer
 
