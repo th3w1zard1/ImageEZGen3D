@@ -1,0 +1,53 @@
+name: Hosted Golden Smoke
+
+on:
+  schedule:
+  - cron: "0 14 * * *"
+  workflow_dispatch:
+    inputs:
+      space_url:
+        description: Override HF Space URL for smoke test
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hosted-golden-smoke
+  cancel-in-progress: false
+
+jobs:
+  hosted-golden-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[app,dev]"
+
+      - name: Run hosted golden smoke
+        env:
+          IMAGEEZ_HF_SPACE_URL: ${{ github.event.inputs.space_url || 'https://th3w1zard1-imageezgen3d.hf.space/' }}
+        run: |
+          PYTHONPATH=src python scripts/hosted_golden_smoke.py \
+            --space-url "$IMAGEEZ_HF_SPACE_URL" \
+            --json --record hosted-golden-smoke.json
+
+      - name: Upload hosted golden smoke record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hosted-golden-smoke
+          path: hosted-golden-smoke.json
+          if-no-files-found: warn
