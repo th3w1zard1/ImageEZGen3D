@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json, base64
 
 def patch_exporters():

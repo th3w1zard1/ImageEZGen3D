@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math, sys
 from pathlib import Path
 content = Path('src/imageezgen3d/exporters.py').read_text()

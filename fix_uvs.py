@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 def patch_exporters_uvs():
     with open('src/imageezgen3d/exporters.py', 'r') as f:
         src = f.read()

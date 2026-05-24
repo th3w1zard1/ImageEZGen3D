@@ -12,7 +12,7 @@ from .adapters.base import GenerationRequest, ModelAdapter
 from .config import AppConfig
 from .mesh_checks import inspect_artifacts
 from .preprocess import save_input_bundle
-from .runtime import RuntimeStatus, runtime_status, zero_gpu_runtime_available
+from .runtime import RuntimeStatus, runtime_status
 from .storage import RunStore
 
 
