@@ -26,6 +26,7 @@ Trust slice (Plans 012–022) is landed on `main`: fallback honesty, Phase 1 UX,
 - **Trimesh quadric decimation** — PR #22 merged; quadric simplification + hosted sidecar validation (Plan 039/040).
 - **Hunyuan admission audit CLI** — PR #24 merged; `scripts/hunyuan_admission_audit.py` (Plan 041/042).
 - **Hunyuan CI admission gate** — PR #25 merged; `hunyuan-admission-audit` CI job on `main` (Plan 043).
+- **Hosted admission audit workflow** — PR #27 merged; scheduled smoke runs audit + artifact (Plan 044/045).
 
 ## Explicitly defer
 

@@ -26,6 +26,16 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 045 validation (PR #27 merge to main)
+
+After squash-merge PR #27 (`b2eebd2` on `main`, 2026-05-24):
+
+- **Merge:** Hunyuan admission audit step in scheduled `hosted-golden-smoke.yml`; `--record` on audit script; `AGENTS.md` gate note
+- **GitHub Actions:** `workflow_dispatch` run `26372769605` — golden smoke, export tier smoke, and **Run Hunyuan admission gate audit** all succeeded
+- **Artifacts:** `hunyuan-admission-audit.json` uploaded with hosted smoke bundle
+- **Post-merge local:** `hosted_export_tier_smoke.py` exit 0; `hunyuan_admission_audit.py` exit 0 (`adapter_configured=False`)
+- **Mode:** hosted CPU fallback; Hunyuan **not** enabled
+
 ## Plan 043 validation (PR #25 merge to main)
 
 After squash-merge PR #25 (`a8fdd1e` on `main`, 2026-05-24):
