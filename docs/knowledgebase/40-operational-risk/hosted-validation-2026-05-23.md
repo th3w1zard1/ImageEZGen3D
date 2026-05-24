@@ -15,6 +15,15 @@ Evidence for Plan 005 hosted E2E (parity register P10). Follows the template in 
 - **Build/load:** no error ☑ (Space stage `RUNNING` after deploy commit `3ad22d80`)
 - **Evidence link:** Gradio API `/generate` call via `gradio_client`; manifest 2339 bytes; GLB 12144 bytes; OBJ 369 bytes
 
+## Post-merge validation (main)
+
+After PR #2 merge (`95d452d` on `main`):
+
+- **Deploy commit:** `119be82d` on Hub
+- **Run id:** `20260524-091303-98869780`
+- **Mode:** hosted CPU fallback (`Local CPU Preview`)
+- **Artifacts:** GLB + OBJ returned via `/generate`
+
 ## Deploy context
 
 | Step | Result |
