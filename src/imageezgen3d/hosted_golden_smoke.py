@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .export_tiers import resolve_decimation_target
+
 DEFAULT_SPACE_URL = "https://th3w1zard1-imageezgen3d.hf.space/"
 DEFAULT_SAMPLE_PATH = Path("assets/examples/teal_block.png")
 DEFAULT_BRIEF = (
@@ -14,7 +16,11 @@ DEFAULT_BRIEF = (
     "Keep the silhouette faithful and prioritize a fast draft mesh."
 )
 _RUN_ID_RE = re.compile(r"`(\d{8}-\d{6}-[0-9a-f]{8})`")
-DRAFT_DECIMATION_DISPLAY = ("25,000", "25000")
+_DECIMATION_DISPLAY: dict[str, tuple[str, ...]] = {
+    "draft": ("25,000", "25000"),
+    "balanced": ("150,000", "150000"),
+    "high": ("500,000", "500000"),
+}
 
 
 @dataclass(frozen=True)
@@ -23,6 +29,7 @@ class HostedGoldenSmokeResult:
     run_id: str | None
     space_url: str
     adapter_hint: str | None
+    quality: str
     issues: tuple[str, ...]
 
     def to_dict(self) -> dict[str, Any]:
@@ -31,6 +38,7 @@ class HostedGoldenSmokeResult:
             "run_id": self.run_id,
             "space_url": self.space_url,
             "adapter_hint": self.adapter_hint,
+            "quality": self.quality,
             "issues": list(self.issues),
         }
 
@@ -40,7 +48,11 @@ def parse_run_id(status_markdown: str) -> str | None:
     return match.group(1) if match else None
 
 
-def validate_hosted_generate_status(status_markdown: str) -> tuple[bool, list[str], str | None]:
+def validate_hosted_generate_status(
+    status_markdown: str,
+    *,
+    quality: str = "draft",
+) -> tuple[bool, list[str], str | None]:
     """Validate post-generate status markdown from live Space (no network)."""
     issues: list[str] = []
     run_id = parse_run_id(status_markdown)
@@ -48,8 +60,12 @@ def validate_hosted_generate_status(status_markdown: str) -> tuple[bool, list[st
         issues.append("Missing run id in generation status markdown")
     if "Export budget" not in status_markdown:
         issues.append("Status markdown missing Export budget line")
-    if not any(token in status_markdown for token in DRAFT_DECIMATION_DISPLAY):
-        issues.append("Status markdown missing draft decimation target (25,000 faces)")
+    display_tokens = _DECIMATION_DISPLAY.get(quality, _DECIMATION_DISPLAY["draft"])
+    if not any(token in status_markdown for token in display_tokens):
+        issues.append(
+            f"Status markdown missing decimation target for {quality} quality "
+            f"({', '.join(display_tokens)})"
+        )
     if (
         "cpu-demo" not in status_markdown.lower()
         and "Local CPU Preview" not in status_markdown
@@ -62,6 +78,55 @@ def validate_hosted_generate_status(status_markdown: str) -> tuple[bool, list[st
     return (not issues, issues, run_id)
 
 
+def validate_run_manifest(
+    manifest_path: Path,
+    *,
+    quality: str = "draft",
+    expect_raw: bool = False,
+) -> list[str]:
+    """Validate downloaded manifest JSON for export tier contracts."""
+    issues: list[str] = []
+    if not manifest_path.is_file():
+        return [f"Manifest file missing: {manifest_path}"]
+
+    try:
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return [f"Manifest is not valid JSON: {exc}"]
+
+    artifacts = payload.get("artifacts")
+    if not isinstance(artifacts, dict):
+        issues.append("Manifest missing artifacts object")
+        artifacts = {}
+
+    if "export_sidecar" not in artifacts:
+        issues.append("Manifest artifacts missing export_sidecar key")
+
+    parameters = payload.get("parameters")
+    if not isinstance(parameters, dict):
+        issues.append("Manifest missing parameters object")
+        parameters = {}
+
+    target = resolve_decimation_target(quality)
+    actual_target = parameters.get("decimation_target")
+    if actual_target != target:
+        issues.append(
+            f"Expected decimation_target {target} for {quality}, got {actual_target!r}"
+        )
+
+    if expect_raw:
+        if "raw_glb" not in artifacts:
+            issues.append("Manifest artifacts missing raw_glb key")
+        if not parameters.get("raw_exported"):
+            issues.append("Manifest parameters missing raw_exported=true")
+        if not parameters.get("decimation_applied"):
+            issues.append("Manifest parameters missing decimation_applied=true")
+    elif parameters.get("raw_exported"):
+        issues.append("Draft manifest should not set raw_exported")
+
+    return issues
+
+
 def run_hosted_golden_smoke(
     *,
     space_url: str = DEFAULT_SPACE_URL,
@@ -69,6 +134,8 @@ def run_hosted_golden_smoke(
     seed: int = 42,
     quality: str = "draft",
     adapter: str = "auto",
+    validate_manifest: bool = False,
+    expect_raw: bool = False,
 ) -> HostedGoldenSmokeResult:
     from gradio_client import Client, handle_file
 
@@ -79,6 +146,7 @@ def run_hosted_golden_smoke(
             run_id=None,
             space_url=space_url,
             adapter_hint=None,
+            quality=quality,
             issues=(f"Golden sample image not found: {sample}",),
         )
 
@@ -105,7 +173,22 @@ def run_hosted_golden_smoke(
         Path(brief_handle.name).unlink(missing_ok=True)
 
     status = str(result[1] if isinstance(result, (list, tuple)) else result)
-    ok, issues, run_id = validate_hosted_generate_status(status)
+    ok, issues, run_id = validate_hosted_generate_status(status, quality=quality)
+
+    if validate_manifest and isinstance(result, (list, tuple)) and len(result) > 2:
+        manifest_value = result[2]
+        if manifest_value:
+            manifest_path = Path(str(manifest_value))
+            issues.extend(
+                validate_run_manifest(
+                    manifest_path,
+                    quality=quality,
+                    expect_raw=expect_raw,
+                )
+            )
+        else:
+            issues.append("Generate response missing manifest file path")
+
     adapter_hint: str | None = None
     if "cpu-demo" in status.lower():
         adapter_hint = "cpu-demo"
@@ -113,10 +196,11 @@ def run_hosted_golden_smoke(
         adapter_hint = "Local CPU Preview"
 
     return HostedGoldenSmokeResult(
-        ok=ok,
+        ok=not issues,
         run_id=run_id,
         space_url=space_url,
         adapter_hint=adapter_hint,
+        quality=quality,
         issues=tuple(issues),
     )
 
@@ -127,6 +211,7 @@ def format_hosted_golden_report(result: HostedGoldenSmokeResult) -> str:
         f"run_id={result.run_id or ''}",
         f"space_url={result.space_url}",
         f"adapter_hint={result.adapter_hint or ''}",
+        f"quality={result.quality}",
     ]
     for issue in result.issues:
         lines.append(f"issue={issue}")
