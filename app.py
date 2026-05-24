@@ -748,6 +748,9 @@ def build_demo():
     history_runs = orchestrator.store.list_runs(limit=_HISTORY_LIMIT)
     history_choices = [_history_choice_label(item) for item in history_runs]
     history_default = history_choices[0] if history_choices else None
+    history_compare_default = (
+        history_choices[1] if len(history_choices) > 1 else history_default
+    )
     sample_packs = _repo_sample_packs()
 
     with gr.Blocks(title=config.app.title) as demo:
@@ -1056,6 +1059,21 @@ def build_demo():
                                     variant="primary",
                                     elem_classes="history-action",
                                 )
+                            history_compare_run = gr.Radio(
+                                label="Compare with",
+                                choices=history_choices,
+                                value=history_compare_default,
+                                elem_classes="history-run-list",
+                            )
+                            history_compare_btn = gr.Button(
+                                "Compare Runs",
+                                variant="secondary",
+                                elem_classes="history-action",
+                            )
+                            history_compare = gr.Markdown(
+                                "Pick two runs and compare manifest-backed fields.",
+                                elem_classes="history-compare-panel status-panel",
+                            )
                     with gr.Column(scale=5, min_width=340):
                         with gr.Group(elem_classes="workspace-panel history-preview"):
                             gr.HTML(
@@ -1122,8 +1140,10 @@ def build_demo():
             runs = orchestrator.store.list_runs(limit=_HISTORY_LIMIT)
             labels = [_history_choice_label(item) for item in runs]
             value = labels[0] if labels else None
+            compare_value = labels[1] if len(labels) > 1 else value
             return (
                 cast(Any, gr).Radio(choices=labels, value=value),
+                cast(Any, gr).Radio(choices=labels, value=compare_value),
                 _history_notice_text(runs),
                 _history_overview_html(runs),
                 _history_overview_html(runs),
@@ -1198,6 +1218,23 @@ def build_demo():
                 status_text,
                 _quality_intake_html(quality_name),
             )
+
+        def compare_history_runs(primary_choice, compare_choice):
+            run_a = _selected_run_id(primary_choice)
+            run_b = _selected_run_id(compare_choice)
+            if not run_a or not run_b:
+                return (
+                    "Select two runs from **Recent runs** and **Compare with**, "
+                    "then click **Compare Runs**."
+                )
+            if run_a == run_b:
+                return "Choose two different runs to compare."
+            try:
+                left = orchestrator.store.read_manifest(run_a)
+                right = orchestrator.store.read_manifest(run_b)
+            except FileNotFoundError as exc:
+                return _error_report(str(exc))
+            return _manifest_ui.compare_runs_markdown(left, right)
 
         def open_history_run(history_choice):
             run_id = _selected_run_id(history_choice)
@@ -1297,6 +1334,7 @@ def build_demo():
             except ValueError as exc:
                 (
                     history_dropdown,
+                    history_compare_dropdown,
                     history_message,
                     history_overview,
                     create_overview,
@@ -1312,6 +1350,7 @@ def build_demo():
                     state.get("bundle"),
                     state,
                     history_dropdown,
+                    history_compare_dropdown,
                     history_message,
                     history_overview,
                     create_overview,
@@ -1324,6 +1363,7 @@ def build_demo():
             if missing_keys:
                 (
                     history_dropdown,
+                    history_compare_dropdown,
                     history_message,
                     history_overview,
                     create_overview,
@@ -1339,6 +1379,7 @@ def build_demo():
                     None,
                     state,
                     history_dropdown,
+                    history_compare_dropdown,
                     history_message,
                     history_overview,
                     create_overview,
@@ -1352,6 +1393,7 @@ def build_demo():
             state["bundle"] = str(orchestrator.store.archive_run(result["run_id"]))
             (
                 history_dropdown,
+                history_compare_dropdown,
                 history_message,
                 history_overview,
                 create_overview,
@@ -1367,6 +1409,7 @@ def build_demo():
                 state["bundle"],
                 state,
                 history_dropdown,
+                history_compare_dropdown,
                 history_message,
                 history_overview,
                 create_overview,
@@ -1444,6 +1487,7 @@ def build_demo():
                 bundle_file,
                 session_state,
                 history_run,
+                history_compare_run,
                 history_notice,
                 history_summary,
                 create_history_summary,
@@ -1454,10 +1498,18 @@ def build_demo():
             history_updates,
             outputs=[
                 history_run,
+                history_compare_run,
                 history_notice,
                 history_summary,
                 create_history_summary,
             ],
+            api_name="history_updates",
+        )
+        history_compare_btn.click(
+            compare_history_runs,
+            inputs=[history_run, history_compare_run],
+            outputs=[history_compare],
+            api_name="compare_history_runs",
         )
         history_open.click(
             open_history_run,
@@ -1479,6 +1531,7 @@ def build_demo():
             history_updates,
             outputs=[
                 history_run,
+                history_compare_run,
                 history_notice,
                 history_summary,
                 create_history_summary,
