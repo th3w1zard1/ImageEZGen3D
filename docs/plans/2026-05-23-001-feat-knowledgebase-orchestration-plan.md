@@ -1,7 +1,7 @@
 ---
 title: "feat: Knowledgebase orchestration pass"
 type: feat
-status: active
+status: completed
 date: 2026-05-23
 origin: ce-ideate + kb-orchestrator + kb-repo-archaeologist synthesis
 ---
