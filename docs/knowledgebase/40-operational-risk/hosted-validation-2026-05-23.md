@@ -26,6 +26,16 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 040 validation (PR #22 merge to main)
+
+After squash-merge PR #22 (`5df22cb` on `main`, 2026-05-24):
+
+- **Merge:** Trimesh quadric decimation with MVP fallback; `decimation_method` in export sidecar
+- **Hub deploy:** `hf_space_sync --execute` commit `b4844dbf` (includes `trimesh` + `fast-simplification` in Space requirements)
+- **Post-merge smoke:** `hosted_golden_smoke.py` exit 0 — run `20260524-202920-a3f83314`
+- **Export tier smoke:** `hosted_export_tier_smoke.py` exit 0 — draft `20260524-202924-512575a4`, balanced `20260524-202927-f5f15efa` with sidecar `decimation_method: quadric` check
+- **Mode:** hosted CPU fallback (`cpu-demo`)
+
 ## Plan 038 validation (PR #20 merge to main)
 
 After squash-merge PR #20 (`a33146a` on `main`, 2026-05-24):

@@ -78,11 +78,41 @@ def validate_hosted_generate_status(
     return (not issues, issues, run_id)
 
 
+_GENERATE_MANIFEST_INDEX = 2
+_GENERATE_EXPORT_SIDECAR_INDEX = 7
+
+
+def _validate_export_sidecar_decimation(
+    sidecar_path: Path,
+    *,
+    expect_quadric: bool,
+) -> list[str]:
+    issues: list[str] = []
+    if not sidecar_path.is_file():
+        return [f"Export sidecar file missing: {sidecar_path}"]
+    try:
+        payload = json.loads(sidecar_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return [f"Export sidecar is not valid JSON: {exc}"]
+
+    decimation = payload.get("decimation")
+    if not isinstance(decimation, dict):
+        issues.append("Export sidecar missing decimation object")
+        return issues
+
+    if expect_quadric:
+        method = decimation.get("decimation_method")
+        if method != "quadric":
+            issues.append(f"Expected decimation_method quadric, got {method!r}")
+    return issues
+
+
 def validate_run_manifest(
     manifest_path: Path,
     *,
     quality: str = "draft",
     expect_raw: bool = False,
+    sidecar_path: Path | None = None,
 ) -> list[str]:
     """Validate downloaded manifest JSON for export tier contracts."""
     issues: list[str] = []
@@ -123,6 +153,14 @@ def validate_run_manifest(
             issues.append("Manifest parameters missing decimation_applied=true")
     elif parameters.get("raw_exported"):
         issues.append("Draft manifest should not set raw_exported")
+
+    if expect_raw and sidecar_path is not None:
+        issues.extend(
+            _validate_export_sidecar_decimation(
+                sidecar_path,
+                expect_quadric=True,
+            )
+        )
 
     return issues
 
@@ -175,15 +213,24 @@ def run_hosted_golden_smoke(
     status = str(result[1] if isinstance(result, (list, tuple)) else result)
     ok, issues, run_id = validate_hosted_generate_status(status, quality=quality)
 
-    if validate_manifest and isinstance(result, (list, tuple)) and len(result) > 2:
-        manifest_value = result[2]
+    if validate_manifest and isinstance(result, (list, tuple)) and len(result) > _GENERATE_MANIFEST_INDEX:
+        manifest_value = result[_GENERATE_MANIFEST_INDEX]
+        sidecar_value = (
+            result[_GENERATE_EXPORT_SIDECAR_INDEX]
+            if len(result) > _GENERATE_EXPORT_SIDECAR_INDEX
+            else None
+        )
         if manifest_value:
             manifest_path = Path(str(manifest_value))
+            sidecar_path = (
+                Path(str(sidecar_value)) if sidecar_value not in (None, "") else None
+            )
             issues.extend(
                 validate_run_manifest(
                     manifest_path,
                     quality=quality,
                     expect_raw=expect_raw,
+                    sidecar_path=sidecar_path,
                 )
             )
         else:

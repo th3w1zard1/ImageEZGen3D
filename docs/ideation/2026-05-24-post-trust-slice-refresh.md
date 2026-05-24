@@ -23,6 +23,7 @@ Trust slice (Plans 012–022) is landed on `main`: fallback honesty, Phase 1 UX,
 - **Mesh decimation + RAW export** — PR #18 merged; largest-face decimation MVP + `raw.glb` tier (Plan 033/034).
 - **Hosted export tier smoke** — PR #19 merged; manifest validation for draft/balanced (Plan 035/036).
 - **Gradio export tier downloads** — PR #20 merged; Export sidecar + RAW GLB on Create/History (Plan 037/038).
+- **Trimesh quadric decimation** — PR #22 merged; quadric simplification + hosted sidecar validation (Plan 039/040).
 
 ## Explicitly defer
 

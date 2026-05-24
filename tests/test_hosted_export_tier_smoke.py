@@ -80,6 +80,77 @@ class HostedExportTierSmokeTests(unittest.TestCase):
             issues = validate_run_manifest(path, quality="balanced", expect_raw=True)
             self.assertEqual(issues, [])
 
+    def test_validate_run_manifest_balanced_requires_quadric_sidecar(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            manifest_path = Path(directory) / "manifest.json"
+            sidecar_path = Path(directory) / "mesh.export.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "artifacts": {
+                            "export_sidecar": str(sidecar_path),
+                            "raw_glb": "/tmp/mesh.raw.glb",
+                            "glb": "/tmp/mesh.glb",
+                        },
+                        "parameters": {
+                            "decimation_target": 150_000,
+                            "raw_exported": True,
+                            "decimation_applied": True,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            sidecar_path.write_text(
+                json.dumps(
+                    {
+                        "decimation": {
+                            "decimation_method": "quadric",
+                            "decimation_applied": True,
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            issues = validate_run_manifest(
+                manifest_path,
+                quality="balanced",
+                expect_raw=True,
+                sidecar_path=sidecar_path,
+            )
+            self.assertEqual(issues, [])
+
+    def test_validate_run_manifest_rejects_non_quadric_sidecar(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            manifest_path = Path(directory) / "manifest.json"
+            sidecar_path = Path(directory) / "mesh.export.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "artifacts": {"export_sidecar": str(sidecar_path)},
+                        "parameters": {
+                            "decimation_target": 150_000,
+                            "raw_exported": True,
+                            "decimation_applied": True,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            sidecar_path.write_text(
+                json.dumps(
+                    {"decimation": {"decimation_method": "largest_face_mvp"}}
+                ),
+                encoding="utf-8",
+            )
+            issues = validate_run_manifest(
+                manifest_path,
+                quality="balanced",
+                expect_raw=True,
+                sidecar_path=sidecar_path,
+            )
+            self.assertTrue(any("quadric" in issue for issue in issues))
+
 
 if __name__ == "__main__":
     unittest.main()
