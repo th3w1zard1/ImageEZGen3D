@@ -26,6 +26,16 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 036 validation (PR #19 merge to main)
+
+After squash-merge PR #19 (`39e9e47` on `main`, 2026-05-24):
+
+- **Merge:** Hosted export tier smoke via manifest validation (draft + balanced)
+- **Post-merge smoke:** `hosted_export_tier_smoke.py` exit 0
+- **Run ids:** draft `20260524-193238-5b2e4dc9`, balanced `20260524-193241-e53c7089` (manifest confirms `export_sidecar`, balanced `raw_glb` + decimation flags)
+- **GitHub Actions:** workflow_dispatch `26370717326` (hosted golden + export tier steps)
+- **Mode:** hosted CPU fallback
+
 ## Plan 034 validation (PR #18 merge to main)
 
 After squash-merge PR #18 (`bac08f5` on `main`, 2026-05-24):
