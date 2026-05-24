@@ -33,6 +33,7 @@ Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and H
 - **Hunyuan CI admission gate** — PR #25 merged; `hunyuan-admission-audit` CI job on `main` (Plan 043).
 - **Hosted admission audit workflow** — PR #27 merged; scheduled smoke runs audit + artifact (Plan 044/045).
 - **Plan 045 docs closure** — PR #28 merged; KB + ideation sync for PR #27 ship (Plan 046).
+- **Plan 046 guardrail closure** — PR #29 merged; guardrail track complete on `main` (Plan 047).
 
 ## Explicitly defer
 
