@@ -18,18 +18,18 @@ run_id: a8f3d4dd
 
 **External context (Tier 1):** Post-scaffold priorities in comparable HF Spaces/SaaS converge on hosted E2E validation loop, artifact trust bundles, adapter/fallback visibility, and mesh cleanup tiers — not more scaffold plumbing.
 
-**Past learnings:** See `docs/solutions/` (5 learning docs as of 2026-05-24) and KB parity register.
+**Past learnings:** See `docs/solutions/` (6 learning docs as of 2026-05-24) and KB parity register.
 
 ## Recommended Focus Sequence
 
 For the **next implementation pass**, execute in this order:
 
-1. **Unblock deploy parity (P4/P5)** — small fix, gates honest deploy claims
-2. **Land in-flight vertical slice** — commit UI/export/port changes with KB parity update (P8)
-3. **Hosted E2E validation** — HF CLI deploy → Block/Vase → evidence template → close P10
-4. **Trust-first Phase 1 UX** — draft/quality framing, visible adapter/fallback status
-5. **STRATEGY.md** — durable anchor for ce-plan/ce-ideate (currently absent)
-6. **Hunyuan admission audit prep** — document gates; do not enable adapter yet
+1. **Trust-first Phase 1 UX** — draft/quality framing, visible adapter/fallback status, comprehension exit
+2. **Hosted fallback honesty labeling** — surface cpu-demo fallback reason in UI/manifest copy
+3. **Hunyuan admission audit prep** — document gates; do not enable adapter yet
+4. **Manifest-driven UI components** — RunStatusCard, FallbackBanner for history reuse
+
+**Completed (2026-05-24):** deploy parity P4/P5, vertical slice UI/export/port, hosted Block E2E (P10), HF release-tag CI deploy, KB/solutions bootstrap, `STRATEGY.md` anchor, PR #2 merged to `main`.
 
 ---
 
