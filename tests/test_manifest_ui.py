@@ -65,6 +65,49 @@ class ManifestUiTests(unittest.TestCase):
         self.assertIn("## What happened", report)
         self.assertIn("Output tier: **Balanced**", report)
 
+    def test_compare_runs_rejects_same_run_identity(self) -> None:
+        payload = {
+            "run_id": "run-a",
+            "stage": "done",
+            "adapter": "cpu-demo",
+            "quality": "draft",
+            "validation": {"score": 80},
+            "artifacts": {"glb": "/tmp/a.glb"},
+        }
+        report = mu.compare_runs_markdown(payload, payload)
+
+        self.assertIn("## Run comparison", report)
+        self.assertIn("All compared fields match", report)
+
+    def test_compare_runs_highlights_adapter_and_artifact_diffs(self) -> None:
+        left = {
+            "run_id": "run-left",
+            "stage": "done",
+            "adapter": "cpu-demo",
+            "quality": "draft",
+            "validation": {"score": 70},
+            "parameters": {"quality": "draft", "selected_adapter": "cpu-demo"},
+            "artifacts": {"glb": "/tmp/left.glb", "obj": "/tmp/left.obj"},
+        }
+        right = {
+            "run_id": "run-right",
+            "stage": "done",
+            "adapter": "hunyuan-zerogpu",
+            "quality": "balanced",
+            "validation": {"score": 88},
+            "parameters": {
+                "quality": "balanced",
+                "selected_adapter": "hunyuan-zerogpu",
+            },
+            "artifacts": {"glb": "/tmp/right.glb"},
+        }
+        report = mu.compare_runs_markdown(left, right)
+
+        self.assertIn("### Changed", report)
+        self.assertIn("**Backend**", report)
+        self.assertIn("**Quality tier**", report)
+        self.assertIn("Only on left: obj", report)
+
 
 if __name__ == "__main__":
     unittest.main()

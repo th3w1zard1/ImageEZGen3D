@@ -293,3 +293,122 @@ def format_run_report_markdown(result: Mapping[str, Any]) -> str:
         "conversion never overwrites prior outputs."
     )
     return "\n".join(lines)
+
+
+def _run_compare_snapshot(run: Mapping[str, Any]) -> dict[str, Any]:
+    parameters = run.get("parameters", {})
+    if not isinstance(parameters, dict):
+        parameters = {}
+    validation = run.get("validation", {})
+    if not isinstance(validation, dict):
+        validation = {}
+    mesh = run.get("mesh_report", {})
+    if not isinstance(mesh, dict):
+        mesh = {}
+    adapter = (
+        run.get("adapter")
+        or parameters.get("selected_adapter")
+        or parameters.get("requested_adapter")
+        or "unknown"
+    )
+    quality_key = str(run.get("quality") or parameters.get("quality") or "draft")
+    score = run.get("score")
+    if score is None:
+        score = validation.get("score")
+    artifacts = run.get("artifacts", {})
+    if not isinstance(artifacts, dict):
+        artifacts = {}
+    artifact_keys = sorted(
+        key for key, value in artifacts.items() if value not in (None, "")
+    )
+    return {
+        "run_id": str(run.get("run_id", "unknown")),
+        "adapter": backend_display_label(str(adapter)),
+        "quality": quality_tier_label(quality_key),
+        "stage": str(run.get("stage", "unknown")),
+        "score": score,
+        "starter": str(
+            run.get("starter_flow")
+            or parameters.get("starter_flow_label")
+            or parameters.get("starter_flow")
+            or "—"
+        ),
+        "fallback": str(
+            parameters.get("fallback_reason") or run.get("fallback_reason") or ""
+        ),
+        "mesh_status": str(mesh.get("status", "n/a")),
+        "artifact_keys": artifact_keys,
+    }
+
+
+def _compare_cell(value: Any) -> str:
+    if value is None:
+        return "n/a"
+    if isinstance(value, list):
+        return ", ".join(str(item) for item in value) or "none"
+    return str(value)
+
+
+def compare_runs_markdown(
+    left: Mapping[str, Any],
+    right: Mapping[str, Any],
+) -> str:
+    """Manifest-backed diff for two runs (Phase 3 history compare MVP)."""
+    left_snapshot = _run_compare_snapshot(left)
+    right_snapshot = _run_compare_snapshot(right)
+    rows = [
+        ("Run ID", left_snapshot["run_id"], right_snapshot["run_id"]),
+        ("Stage", left_snapshot["stage"], right_snapshot["stage"]),
+        ("Backend", left_snapshot["adapter"], right_snapshot["adapter"]),
+        ("Quality tier", left_snapshot["quality"], right_snapshot["quality"]),
+        ("Input score", left_snapshot["score"], right_snapshot["score"]),
+        ("Starter flow", left_snapshot["starter"], right_snapshot["starter"]),
+        ("Mesh status", left_snapshot["mesh_status"], right_snapshot["mesh_status"]),
+        (
+            "Fallback",
+            left_snapshot["fallback"] or "—",
+            right_snapshot["fallback"] or "—",
+        ),
+        (
+            "Artifacts",
+            ", ".join(left_snapshot["artifact_keys"]) or "none",
+            ", ".join(right_snapshot["artifact_keys"]) or "none",
+        ),
+    ]
+    lines = [
+        "## Run comparison",
+        f"**Left:** `{left_snapshot['run_id']}` · **Right:** `{right_snapshot['run_id']}`",
+        "",
+        "| Field | Left | Right |",
+        "| --- | --- | --- |",
+    ]
+    changed: list[str] = []
+    for label, left_value, right_value in rows:
+        left_text = _compare_cell(left_value)
+        right_text = _compare_cell(right_value)
+        if left_text != right_text and label != "Run ID":
+            changed.append(label)
+        lines.append(f"| {label} | {left_text} | {right_text} |")
+    if changed:
+        lines.extend(
+            [
+                "",
+                "### Changed",
+                *[f"- **{name}** differs between runs." for name in changed],
+            ]
+        )
+    else:
+        lines.extend(["", "All compared fields match aside from run identity."])
+    only_left = set(left_snapshot["artifact_keys"]) - set(
+        right_snapshot["artifact_keys"]
+    )
+    only_right = set(right_snapshot["artifact_keys"]) - set(
+        left_snapshot["artifact_keys"]
+    )
+    if only_left or only_right:
+        lines.append("\n### Artifact-only differences")
+        if only_left:
+            lines.append(f"- Only on left: {', '.join(sorted(only_left))}")
+        if only_right:
+            lines.append(f"- Only on right: {', '.join(sorted(only_right))}")
+    return "\n".join(lines)
