@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
-"""Hosted Space E2E: seed two runs and validate History compare via Gradio API."""
-
 from __future__ import annotations
+
+"""Hosted Space E2E: seed two runs and validate History compare via Gradio API."""
 
 import argparse
 import re
