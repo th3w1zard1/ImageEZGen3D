@@ -130,6 +130,31 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         starter_idx = create_section.index('elem_classes="starter-card-row"')
         self.assertLess(composer_idx, starter_idx)
 
+    def test_create_and_history_tabs_expose_export_tier_downloads(self) -> None:
+        source = Path(app.__file__).read_text(encoding="utf-8")
+        create_section = source.split('with gr.Tab("Create"):')[1].split(
+            'with gr.Tab("History")'
+        )[0]
+        history_section = source.split('with gr.Tab("History"):')[1].split(
+            'with gr.Tab("Guide")'
+        )[0]
+
+        for section in (create_section, history_section):
+            self.assertIn('label="Export sidecar"', section)
+            self.assertIn('label="RAW GLB"', section)
+
+        generate_outputs = source.split("api_name=\"generate\"")[0].split(
+            "generate.click("
+        )[-1]
+        stl_idx = generate_outputs.index("stl_file")
+        bundle_idx = generate_outputs.index("bundle_file")
+        self.assertLess(stl_idx, generate_outputs.index("export_sidecar_file"))
+        self.assertLess(
+            generate_outputs.index("export_sidecar_file"),
+            generate_outputs.index("raw_glb_file"),
+        )
+        self.assertLess(generate_outputs.index("raw_glb_file"), bundle_idx)
+
     def test_verified_artifact_state_filters_missing_files(self) -> None:
         store = RunStore(Path.cwd() / "outputs")
         with patch.object(store, "artifact_value", side_effect=["/tmp/mesh.glb", None]):
