@@ -26,6 +26,18 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 017 validation (manifest-driven UI)
+
+After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b5780929360d96e2ab6f5c197a20a3fe` (2026-05-24):
+
+- **Run id:** `20260524-173153-8baf7797`
+- **Mode:** hosted CPU fallback (`Local CPU Preview` / `cpu-demo`)
+- **Comprehension exit:** status includes `## What happened` with output tier, mesh type, fallback, and suggested next steps (manifest_ui report path)
+- **Quality intake:** live Create tab shows “Choose your output tier before generating” and fallback notice in Project Rail (browser smoke)
+- **Artifacts verified:** manifest ☑ (2536 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
+- **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`), starter flow `single-photo-draft`
+- **History inspect:** `[REPO]` `tests/test_app.py::test_history_inspect_html_composes_status_card_and_artifact_strip` covers `run-status-card` + `artifact-strip` composition; `[UI]` History tab loads on live Space but lists runs only after in-session generation (API `/generate` alone did not populate browser History on 2026-05-24)
+
 ## Plan 014 validation (trust-first Phase 1 UX)
 
 After PR #6 merge (`8dd87f1` on `main`) and deploy commit `dfd4990adc93bbaba18ff05541a0ae186307caba`:

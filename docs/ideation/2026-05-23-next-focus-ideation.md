@@ -12,7 +12,7 @@ run_id: a8f3d4dd
 
 **Codebase context:** ZeroGPU-first Gradio image-to-3D scaffold with CPU demo workflow proof, gated Hunyuan adapter, and broad KB (27 docs + new index/parity register from PR #1). Roadmap states the frontier shifted from documentation to **trustworthy generation without breaking legal/runtime/local-dev contract**.
 
-**Active blockers:** Parity P8 closed 2026-05-24 (export-guide audit). P10 closed via hosted Block E2E (Plan 005). Remaining frontier: ZeroGPU adapter enablement, trust-first UX polish.
+**Active blockers:** Parity P8 closed 2026-05-24. P10 closed via hosted Block E2E (Plans 005–018). Trust-first ideation sequence (items 1–4) shipped 2026-05-24. Remaining frontier: ZeroGPU adapter enablement (gates G1–G9), hosted History session parity, golden-sample CI attestation.
 
 **Recent landings:** HF Space auto-deploy (plan 006), KB refresh (007), docs/solutions bootstrap (008), Space port/demo fix + hosted E2E (005/009).
 
@@ -22,14 +22,16 @@ run_id: a8f3d4dd
 
 ## Recommended Focus Sequence
 
-For the **next implementation pass**, execute in this order:
+For the **next implementation pass**, pick from the ranked ideas below (sequence 1–4 is **done**):
 
-1. **Trust-first Phase 1 UX** — draft/quality framing, visible adapter/fallback status, comprehension exit
-2. **Hosted fallback honesty labeling** — surface cpu-demo fallback reason in UI/manifest copy
-3. **Hunyuan admission audit prep** — document gates; do not enable adapter yet
-4. **Manifest-driven UI components** — RunStatusCard, FallbackBanner for history reuse
+1. ~~Trust-first Phase 1 UX~~ — shipped (Plans 014–015, PR #6–#7)
+2. ~~Hosted fallback honesty labeling~~ — shipped (Plans 012–013, PR #4–#5)
+3. ~~Hunyuan admission audit prep~~ — shipped (Plan 016, PR #8)
+4. ~~Manifest-driven UI components~~ — shipped (Plan 017–018, PR #9–#10)
 
-**Completed (2026-05-24):** deploy parity P4/P5, vertical slice UI/export/port, hosted Block E2E (P10), HF release-tag CI deploy, KB/solutions bootstrap, `STRATEGY.md` anchor, PR #2 merged to `main`.
+**Suggested next slice:** golden-sample CI attestation (ideation #15) or Hunyuan gate closure only when intentionally enabling the adapter.
+
+**Completed (2026-05-24):** deploy parity P4/P5, vertical slice UI/export/port, hosted Block E2E (P10), HF release-tag CI deploy, KB/solutions bootstrap, `STRATEGY.md` anchor, trust slice PRs #4–#10.
 
 ---
 

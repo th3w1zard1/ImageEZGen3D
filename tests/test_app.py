@@ -80,6 +80,29 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         self.assertIn("Hosted ZeroGPU", label)
         self.assertNotIn("hunyuan-zerogpu", label)
 
+    def test_history_inspect_html_composes_status_card_and_artifact_strip(self) -> None:
+        html = app._history_inspect_html(
+            {
+                "run_id": "run-123",
+                "stage": "done",
+                "adapter": "cpu-demo",
+                "quality": "draft",
+                "score": 91,
+                "starter_flow": "Single Photo Draft",
+                "fallback_reason": "adapter disabled",
+                "parameters": {
+                    "selected_adapter": "cpu-demo",
+                    "fallback_reason": "adapter disabled",
+                },
+                "artifacts": {"glb": "/tmp/mesh.glb", "obj": "/tmp/mesh.obj"},
+            },
+            missing_keys=[],
+        )
+
+        self.assertIn("run-status-card", html)
+        self.assertIn("artifact-strip", html)
+        self.assertIn("run-123", html)
+
     def test_prompt_templates_target_known_starters(self) -> None:
         self.assertEqual(len(app._PROMPT_TEMPLATES), 5)
         for template in app._PROMPT_TEMPLATES:
