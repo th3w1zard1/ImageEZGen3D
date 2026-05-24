@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -141,6 +142,31 @@ class CpuDemoTests(unittest.TestCase):
                 image, adapter_name="cpu-demo", quality="high", seed=2
             )
             self.assertEqual(result["parameters"]["decimation_target"], 500_000)
+
+    def test_generate_balanced_exports_raw_and_decimates(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            config = AppConfig(
+                app=AppSettings(output_dir=Path(directory)),
+                storage=StorageSettings(retention_runs=10),
+            )
+            orchestrator = ImageEZOrchestrator(config)
+            image = Image.new("RGBA", (640, 640), (40, 120, 180, 255))
+            result = orchestrator.generate(
+                image, adapter_name="cpu-demo", quality="balanced", seed=3
+            )
+            artifacts = result["artifacts"]
+            self.assertTrue(Path(artifacts["raw_glb"]).exists())
+            self.assertTrue(result["parameters"].get("decimation_applied"))
+            self.assertTrue(result["parameters"].get("raw_exported"))
+            sidecar = json.loads(
+                Path(artifacts["export_sidecar"]).read_text(encoding="utf-8")
+            )
+            self.assertTrue(sidecar["raw_exported"])
+            self.assertTrue(sidecar["decimation"]["decimation_applied"])
+            self.assertLessEqual(
+                sidecar["mesh_topology"]["face_count"],
+                result["parameters"]["decimation_target"],
+            )
 
     def test_mesh_check_validates_glb_header(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

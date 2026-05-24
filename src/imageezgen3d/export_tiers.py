@@ -21,8 +21,10 @@ def build_export_sidecar(
     vertex_count: int,
     face_count: int,
     adapter: str,
+    decimation: Mapping[str, Any] | None = None,
+    raw_exported: bool = False,
 ) -> dict[str, Any]:
-    return {
+    payload: dict[str, Any] = {
         "export_tier": quality,
         "decimation_target_faces": decimation_target,
         "mesh_topology": {
@@ -30,12 +32,16 @@ def build_export_sidecar(
             "face_count": face_count,
         },
         "within_decimation_budget": face_count <= decimation_target,
+        "raw_exported": raw_exported,
         "adapter": adapter,
         "notes": (
             "Sidecar records export intent and measured topology. "
-            "Neural backends should apply decimation_target at export time."
+            "Tier exports may be decimated; RAW GLB preserves pre-decimation mesh when present."
         ),
     }
+    if decimation:
+        payload["decimation"] = dict(decimation)
+    return payload
 
 
 def decimation_target_from_parameters(parameters: Mapping[str, Any]) -> int | None:
