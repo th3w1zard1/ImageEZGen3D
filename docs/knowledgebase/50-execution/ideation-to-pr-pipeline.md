@@ -13,6 +13,7 @@ Maps Compound Engineering workflow stages to ImageEZGen3D knowledgebase entry po
 | Stage | Skill / agent | Entry artifact | Exit criteria | KB pointers (≤3) |
 |-------|---------------|----------------|---------------|------------------|
 | **Ideate** | `ce-ideate` | Focus hint or "surprise me" | Ranked survivors in `docs/ideation/` or synthesis for planning | [project-intent.md](../project-intent.md), [roadmap.md](../roadmap.md), [README.md](../README.md) |
+| **Learnings** | `ce-learnings-researcher` | Feature area or task description | Applicable `docs/solutions/` hits or explicit empty-store note | [docs/solutions/README.md](../../solutions/README.md), [verification.md](../verification.md) |
 | **Brainstorm** | `ce-brainstorm` | Selected ideation survivor | `docs/brainstorms/*-requirements.md` with scope boundaries | [frontend-ux-blueprint.md](../frontend-ux-blueprint.md), [creator-product-patterns.md](../creator-product-patterns.md) |
 | **Plan** | `ce-plan` | Requirements doc or feature description | `docs/plans/*-plan.md` with implementation units | [architecture.md](../architecture.md), [configuration.md](../configuration.md), [verification.md](../verification.md) |
 | **Work** | `ce-work` | Plan file path | Files changed per units; tests pass for touched code | [vscode-workflow.md](../vscode-workflow.md), [verification.md](../verification.md) |
@@ -24,6 +25,7 @@ Maps Compound Engineering workflow stages to ImageEZGen3D knowledgebase entry po
 
 `[SYNTH]` Autopilot ordering:
 
+0. Optional: `ce-learnings-researcher` — search `docs/solutions/` before plan (recommended for deploy/runtime/CI work)
 1. `ce-plan` — plan file required in `docs/plans/` before work
 2. `ce-work` — implement plan units
 3. `ce-code-review mode:autofix` — autofix and residual summary

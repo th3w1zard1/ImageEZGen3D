@@ -82,6 +82,7 @@ Navigation map for all knowledgebase documents. Use this index to find authority
 |-----|------|---------|
 | [knowledgebase-authoring-playbook.md](knowledgebase-authoring-playbook.md) | Canonical | Evidence rules and taxonomy |
 | [knowledgebase-builder-agent-spec.md](knowledgebase-builder-agent-spec.md) | Canonical | KB builder agent contract |
+| [docs/solutions/README.md](../../solutions/README.md) | Canonical | Searchable institutional learnings (compound docs) |
 
 ## Quick Entry Points
 
@@ -94,6 +95,7 @@ Navigation map for all knowledgebase documents. Use this index to find authority
 | Drift between source and hosted | [source-runtime-parity-register.md](40-operational-risk/source-runtime-parity-register.md) |
 | CE pipeline stages | [ideation-to-pr-pipeline.md](50-execution/ideation-to-pr-pipeline.md) |
 | Writing new KB docs | [knowledgebase-authoring-playbook.md](knowledgebase-authoring-playbook.md) |
+| Past solved problems / compound learnings | [docs/solutions/README.md](../../solutions/README.md) |
 
 ## Taxonomy Migration Status
 
