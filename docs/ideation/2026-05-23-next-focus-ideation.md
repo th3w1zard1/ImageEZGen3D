@@ -12,7 +12,7 @@ run_id: a8f3d4dd
 
 **Codebase context:** ZeroGPU-first Gradio image-to-3D scaffold with CPU demo workflow proof, gated Hunyuan adapter, and broad KB (27 docs + new index/parity register from PR #1). Roadmap states the frontier shifted from documentation to **trustworthy generation without breaking legal/runtime/local-dev contract**.
 
-**Active blockers:** Parity P8 closed 2026-05-24. P10 closed via hosted Block E2E (Plans 005–018). Trust-first ideation sequence (items 1–4) shipped 2026-05-24. Remaining frontier: ZeroGPU adapter enablement (gates G1–G9), hosted History session parity, golden-sample CI attestation.
+**Active blockers:** Parity P8 closed 2026-05-24. P10 closed via hosted Block E2E (Plans 005–018). Trust-first sequence + golden CI (020) + History parity (021) shipped 2026-05-24. Remaining frontier: ZeroGPU adapter enablement (gates G1–G9) when intentionally enabling Hunyuan.
 
 **Recent landings:** HF Space auto-deploy (plan 006), KB refresh (007), docs/solutions bootstrap (008), Space port/demo fix + hosted E2E (005/009).
 

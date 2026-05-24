@@ -26,6 +26,15 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 021 validation (History session parity)
+
+After deploy with `/data/outputs` + `demo.load` (branch `feat/hosted-history-session-parity`, 2026-05-24):
+
+- **Run id:** `20260524-174702-003962b1` (API `/generate` seed)
+- **History:** browser History tab lists run after page reload; **Open Run** shows manifest inspect + `## What happened` + GLB/OBJ downloads
+- **Mode:** hosted CPU fallback
+- **Evidence:** live Space browser smoke + Gradio API
+
 ## Plan 017 validation (manifest-driven UI)
 
 After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b5780929360d96e2ab6f5c197a20a3fe` (2026-05-24):
