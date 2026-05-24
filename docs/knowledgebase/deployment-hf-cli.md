@@ -73,8 +73,23 @@ Use dry runs to inspect size, cache behavior, and access expectations before pre
 
 ## Upload App
 
+**Prefer staged minimal payload** — full-repo uploads can timeout or include workspace junk. `[REPO]` `stage_space_payload()` in `src/imageezgen3d/hf_cli.py` copies only Space-required paths (~30 files).
+
 ```bash
-hf upload YOUR_USERNAME/ImageEZGen3D . . --repo-type=space --exclude='.git/**' --exclude='.venv/**' --exclude='**/__pycache__/**' --exclude='**/*.pyc' --exclude='.pytest_cache/**' --exclude='.ruff_cache/**' --exclude='build/**' --exclude='dist/**' --exclude='tmp/**' --exclude='outputs/**' --exclude='.env*' --exclude='src/imageezgen3d.egg-info/**' --commit-message='Deploy ImageEZGen3D'
+PYTHONPATH=src python -c "
+from pathlib import Path
+from imageezgen3d.hf_cli import stage_space_payload
+stage_space_payload(Path('/tmp/imageezgen3d-space-payload'))
+"
+hf upload YOUR_USERNAME/ImageEZGen3D /tmp/imageezgen3d-space-payload . \
+  --repo-type=space \
+  --commit-message='Deploy ImageEZGen3D'
+```
+
+Full-repo upload (discouraged for large workspaces):
+
+```bash
+hf upload YOUR_USERNAME/ImageEZGen3D . . --repo-type=space --exclude='.git/**' --exclude='.venv/**' --exclude='**/__pycache__/**' --exclude='**/*.pyc' --exclude='.pytest_cache/**' --exclude='.ruff_cache/**' --exclude='build/**' --exclude='dist/**' --exclude='tmp/**' --exclude='outputs/**' --exclude='.env*' --exclude='src/imageezgen3d.egg-info/**' --exclude='deploy/**' --exclude='docs/plans/**' --commit-message='Deploy ImageEZGen3D'
 ```
 
 Important details:
@@ -83,7 +98,15 @@ Important details:
 - keep `outputs/` out of deployments;
 - keep `.env` and any secret-bearing files out of deployments;
 - do not vendor model caches, generated outputs, or local artifacts into the Space repo;
-- use a commit message that makes the deployment intent clear.
+- use a commit message that makes the deployment intent clear;
+- `[REPO]` CI uploads via `.github/workflows/hf-space.yml` on default-branch pushes and `v*` release tags when `HF_TOKEN` is configured; tag builds use `Deploy ImageEZGen3D <tag>` commit messages;
+- `[OFFICIAL]` Spaces install `requirements.txt` before copying full source — keep it self-contained (no editable `-e .[app]`).
+
+## Port And Launch
+
+- `[REPO]` Local default port is **7865** in `pyproject.toml`.
+- `[OFFICIAL]` Hugging Face Gradio Spaces inject `GRADIO_SERVER_PORT` (commonly `7860`). The config loader honors `GRADIO_SERVER_PORT` over `IMAGEEZ_PORT` and pyproject defaults.
+- If a Space stays in `APP_STARTING`, verify the app binds to `GRADIO_SERVER_PORT`, not a hardcoded local port.
 
 ## Package Contract
 

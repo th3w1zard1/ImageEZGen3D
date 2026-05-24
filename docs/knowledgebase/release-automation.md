@@ -6,7 +6,8 @@ This repo now has dedicated release workflows for forge mirroring, Hugging Face 
 
 - `ci.yml` stays read-only and validates the release planning logic with no side effects.
 - `forge-mirrors.yml` handles GitLab and Codeberg repository creation or reuse plus branch and tag sync.
-- `hf-space.yml` handles Hugging Face Space create-or-upload behavior.
+- `hf-space.yml` handles Hugging Face Space create-or-upload behavior on default-branch pushes, `v*` release tags, and manual dispatch.
+- `sync-hf-space.yml` is a manual full-repo mirror escape hatch only; it does not run automatically on push.
 - `runtime-artifacts.yml` handles OCI image publication plus Helm, Kubernetes, Nomad, Podman, and GitHub release assets.
 
 That split is intentional: each workflow owns one deliverable family instead of mixing unrelated external targets into one file.
@@ -16,7 +17,7 @@ That split is intentional: each workflow owns one deliverable family instead of 
 The release surfaces follow the same anti-magic rule as the runtime path.
 
 - pull requests are summary-only and do not create or push external state;
-- `push` to `main` or `master` and `workflow_dispatch` may create missing targets and publish when credentials exist;
+- `push` to `main` or `master`, `push` of `v*` release tags, and `workflow_dispatch` may create missing targets and publish when credentials exist;
 - default-branch image publication resolves to `latest` plus an immutable `sha-*` tag;
 - pull requests resolve to `pr-*` tags for summaries and dry runs;
 - if a target is enabled but credentials are absent, the workflow reports a skip reason instead of failing silently.

@@ -228,7 +228,14 @@ def load_config(path: str | Path | None = None) -> AppConfig:
                 "IMAGEEZ_HOST", _str_value(launch_raw, "host", LaunchSettings.host)
             ),
             port=_env_int(
-                "IMAGEEZ_PORT", _int_value(launch_raw, "port", LaunchSettings.port)
+                "PORT",
+                _env_int(
+                    "GRADIO_SERVER_PORT",
+                    _env_int(
+                        "IMAGEEZ_PORT",
+                        _int_value(launch_raw, "port", LaunchSettings.port),
+                    ),
+                ),
             ),
             share=_env_bool(
                 "IMAGEEZ_SHARE", _bool_value(launch_raw, "share", LaunchSettings.share)

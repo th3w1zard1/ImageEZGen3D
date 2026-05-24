@@ -51,6 +51,40 @@ class ReleasePlanTests(unittest.TestCase):
         self.assertEqual(plan.image.primary_tag, "latest")
         self.assertTrue(plan.image.publish_latest)
 
+    def test_build_release_plan_pushes_huggingface_on_release_tag(self) -> None:
+        settings = load_release_settings()
+        plan = build_release_plan(
+            settings=settings,
+            env={
+                "GITHUB_REPOSITORY": "th3w1zard1/ImageEZGen3D",
+                "GITHUB_EVENT_NAME": "push",
+                "GITHUB_REF": "refs/tags/v0.1.0",
+                "GITHUB_REF_NAME": "v0.1.0",
+                "GITHUB_SHA": "abcdef0123456789",
+                "HF_TOKEN": "hf-token",
+            },
+        )
+        actions = {target.name: target.action for target in plan.targets}
+        self.assertEqual(actions["huggingface"], "push")
+        self.assertEqual(plan.branch, "v0.1.0")
+
+    def test_build_release_plan_skips_huggingface_on_release_tag_without_token(
+        self,
+    ) -> None:
+        settings = load_release_settings()
+        plan = build_release_plan(
+            settings=settings,
+            env={
+                "GITHUB_REPOSITORY": "th3w1zard1/ImageEZGen3D",
+                "GITHUB_EVENT_NAME": "push",
+                "GITHUB_REF": "refs/tags/v0.1.0",
+                "GITHUB_REF_NAME": "v0.1.0",
+                "GITHUB_SHA": "abcdef0123456789",
+            },
+        )
+        actions = {target.name: target.action for target in plan.targets}
+        self.assertEqual(actions["huggingface"], "skip")
+
     def test_format_release_plan_contains_target_summary(self) -> None:
         settings = load_release_settings()
         plan = build_release_plan(

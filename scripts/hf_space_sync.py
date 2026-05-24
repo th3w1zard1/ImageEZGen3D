@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from imageezgen3d.hf_cli import hf_cli_status, stage_space_payload
+from imageezgen3d.hf_cli import deploy_commit_message, hf_cli_status, stage_space_payload
 from imageezgen3d.release_config import load_release_settings, resolve_target_repo_slug
 
 
@@ -35,7 +35,11 @@ _SPACE_DELETE_PATTERNS = (
 
 
 def _commands_for_sync(
-    space_id: str, *, space_sdk: str, payload_dir: Path | None = None
+    space_id: str,
+    *,
+    space_sdk: str,
+    payload_dir: Path | None = None,
+    commit_message: str = "Deploy ImageEZGen3D",
 ) -> tuple[str, ...]:
     status = hf_cli_status(space_id, space_sdk=space_sdk)
     command = status.executable or "hf"
@@ -46,7 +50,8 @@ def _commands_for_sync(
         )
         upload_command = (
             f"{command} upload {space_id} {shlex.quote(str(payload_dir))} . "
-            f"--repo-type=space {delete_args} --commit-message='Deploy ImageEZGen3D'"
+            f"--repo-type=space {delete_args} "
+            f"--commit-message={shlex.quote(commit_message)}"
         )
     return (
         status.recommended_commands[0],
@@ -69,9 +74,12 @@ def main() -> None:
         owner=settings.forge.huggingface.owner,
         repo=settings.forge.huggingface.repo,
     )
+    commit_message = deploy_commit_message()
     if not args.execute:
         commands = _commands_for_sync(
-            target, space_sdk=settings.forge.huggingface.space_sdk
+            target,
+            space_sdk=settings.forge.huggingface.space_sdk,
+            commit_message=commit_message,
         )
         print(f"space id: {target}")
         print(f"space sdk: {settings.forge.huggingface.space_sdk}")
@@ -88,6 +96,7 @@ def main() -> None:
             target,
             space_sdk=settings.forge.huggingface.space_sdk,
             payload_dir=payload_dir,
+            commit_message=commit_message,
         )
         print(f"space id: {target}")
         print(f"space sdk: {settings.forge.huggingface.space_sdk}")

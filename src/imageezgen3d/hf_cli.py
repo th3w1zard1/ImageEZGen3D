@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 import sys
 from dataclasses import dataclass
@@ -26,6 +27,14 @@ _SPACE_PAYLOAD_PATHS = (
 
 def _workspace_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+def deploy_commit_message(env: dict[str, str] | None = None) -> str:
+    current = env or dict(os.environ)
+    ref = current.get("GITHUB_REF", "")
+    if ref.startswith("refs/tags/"):
+        return f"Deploy ImageEZGen3D {ref[len('refs/tags/'):]}"
+    return "Deploy ImageEZGen3D"
 
 
 def stage_space_payload(destination: Path, *, workspace_root: Path | None = None) -> Path:
