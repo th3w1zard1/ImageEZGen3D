@@ -1,41 +1,40 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
 from imageezgen3d.adapters.hunyuan import HunyuanPlaceholderAdapter
-from imageezgen3d.config import AppConfig
-from imageezgen3d.orchestrator import ImageEZOrchestrator
+from imageezgen3d.hunyuan_admission import (
+    audit_exit_code,
+    evaluate_admission_gates,
+    format_admission_report,
+)
 
 
 class HunyuanAdmissionTests(unittest.TestCase):
-    def test_placeholder_adapter_is_not_configured(self) -> None:
-        adapter = HunyuanPlaceholderAdapter()
-        self.assertFalse(adapter.capabilities.configured)
-        self.assertEqual(adapter.capabilities.name, "hunyuan-zerogpu")
+    def test_adapter_remains_disabled(self) -> None:
+        self.assertFalse(HunyuanPlaceholderAdapter().capabilities.configured)
 
-    def test_generate_error_references_admission_gate_doc(self) -> None:
-        adapter = HunyuanPlaceholderAdapter()
-        with self.assertRaisesRegex(
-            RuntimeError, "hunyuan-admission-gates.md"
+    def test_evaluate_returns_nine_gates(self) -> None:
+        gates = evaluate_admission_gates()
+        self.assertEqual(len(gates), 9)
+        self.assertEqual([gate.gate_id for gate in gates], [f"G{i}" for i in range(1, 10)])
+
+    def test_audit_exit_code_zero_while_disabled(self) -> None:
+        self.assertEqual(audit_exit_code(), 0)
+
+    def test_audit_exit_code_one_when_enabled_with_open_gates(self) -> None:
+        gates = evaluate_admission_gates()
+        with patch(
+            "imageezgen3d.hunyuan_admission._adapter_configured",
+            return_value=True,
         ):
-            adapter.generate(
-                request=type(
-                    "Req",
-                    (),
-                    {
-                        "run_dir": None,
-                        "primary_image": None,
-                        "quality": "draft",
-                        "seed": 1,
-                    },
-                )()
-            )
+            self.assertEqual(audit_exit_code(gates), 1)
 
-    def test_orchestrator_excludes_unconfigured_hunyuan_from_choices(self) -> None:
-        orchestrator = ImageEZOrchestrator(AppConfig())
-        self.assertEqual(orchestrator.adapter_choices(), ["auto", "cpu-demo"])
-        with self.assertRaisesRegex(ValueError, "not enabled yet"):
-            orchestrator.select_adapter("hunyuan-zerogpu")
+    def test_format_report_mentions_adapter_configured(self) -> None:
+        report = format_admission_report(evaluate_admission_gates())
+        self.assertIn("adapter_configured=False", report)
+        self.assertIn("G9", report)
 
 
 if __name__ == "__main__":

@@ -24,6 +24,7 @@ Trust slice (Plans 012–022) is landed on `main`: fallback honesty, Phase 1 UX,
 - **Hosted export tier smoke** — PR #19 merged; manifest validation for draft/balanced (Plan 035/036).
 - **Gradio export tier downloads** — PR #20 merged; Export sidecar + RAW GLB on Create/History (Plan 037/038).
 - **Trimesh quadric decimation** — PR #22 merged; quadric simplification + hosted sidecar validation (Plan 039/040).
+- **Hunyuan admission audit CLI** — Plan 041; `scripts/hunyuan_admission_audit.py` (audit-only, adapter stays disabled).
 
 ## Explicitly defer
 
