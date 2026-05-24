@@ -26,6 +26,17 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 038 validation (PR #20 merge to main)
+
+After squash-merge PR #20 (`a33146a` on `main`, 2026-05-24):
+
+- **Merge:** Gradio **Export sidecar** and **RAW GLB** download widgets on Create + History tabs
+- **Hub deploy:** `hf_space_sync --execute` commit `ad9117f3`
+- **Post-merge smoke:** `hosted_golden_smoke.py` exit 0 — run `20260524-195421-f1926aec`
+- **Export tier smoke:** `hosted_export_tier_smoke.py` exit 0 — draft `20260524-195431-bf8499b4`, balanced `20260524-195434-1143b336`
+- **Browser:** live Space Create tab shows **EXPORT SIDECAR** and **RAW GLB** labels (`{public}`)
+- **Mode:** hosted CPU fallback (`cpu-demo`)
+
 ## Plan 036 validation (PR #19 merge to main)
 
 After squash-merge PR #19 (`39e9e47` on `main`, 2026-05-24):
