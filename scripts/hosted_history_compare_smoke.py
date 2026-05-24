@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-"""Hosted Space E2E: seed two runs and validate History compare via Gradio API."""
-
 import argparse
 import re
 import sys
@@ -98,7 +96,11 @@ def _history_selection(client: Client) -> tuple[str, str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=(
+            "Hosted Space E2E: seed two runs and validate History compare via Gradio API."
+        )
+    )
     parser.add_argument("--space-url", default=DEFAULT_SPACE_URL)
     parser.add_argument("--sample", type=Path, default=DEFAULT_SAMPLE)
     parser.add_argument("--seed-a", type=int, default=42)
