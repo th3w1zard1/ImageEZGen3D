@@ -31,7 +31,7 @@ For the **next implementation pass**, pick from the ranked ideas below (sequence
 
 **Suggested next slice:** Hunyuan gate closure only when intentionally enabling the adapter, or golden-sample hosted smoke in CI (optional). History session parity shipped (Plan 021). Golden-sample CI attestation shipped (Plan 020).
 
-**Completed (2026-05-24):** deploy parity P4/P5, vertical slice UI/export/port, hosted Block E2E (P10), HF release-tag CI deploy, KB/solutions bootstrap, `STRATEGY.md` anchor, trust slice PRs #4–#10.
+**Completed (2026-05-24):** deploy parity P4/P5, vertical slice UI/export/port, hosted Block E2E (P10), HF release-tag CI deploy, KB/solutions bootstrap, `STRATEGY.md` anchor, trust slice PRs #4–#10, golden-sample CI (#11), History parity (#12).
 
 ---
 

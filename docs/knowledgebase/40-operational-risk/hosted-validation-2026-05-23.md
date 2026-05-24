@@ -28,7 +28,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 
 ## Plan 021 validation (History session parity)
 
-After deploy with `/data/outputs` + `demo.load` (branch `feat/hosted-history-session-parity`, 2026-05-24):
+After PR #12 merge (`03b82fc` on `main`) and deploy (2026-05-24):
+
+- **Run id:** `20260524-175359-95c7ebb7` (post-merge `/generate` on `main` after redeploy; browser `demo.load` shows latest run on Create tab)
+- **Also:** `20260524-175040-3313c6fb` (immediate post-merge generate before Space rebuild settled)
+- **Prior branch evidence:** `20260524-174702-003962b1` (API `/generate` seed on feature branch)
+
+Pre-merge branch deploy (`feat/hosted-history-session-parity`, 2026-05-24):
 
 - **Run id:** `20260524-174702-003962b1` (API `/generate` seed)
 - **History:** browser History tab lists run after page reload; **Open Run** shows manifest inspect + `## What happened` + GLB/OBJ downloads
