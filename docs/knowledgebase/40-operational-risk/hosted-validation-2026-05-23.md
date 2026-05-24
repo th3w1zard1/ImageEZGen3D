@@ -26,6 +26,16 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 042 validation (PR #24 merge to main)
+
+After squash-merge PR #24 (`c53f126` on `main`, 2026-05-24):
+
+- **Merge:** Hunyuan admission audit CLI (`scripts/hunyuan_admission_audit.py`); adapter remains `configured=False`
+- **CI:** `hunyuan-admission-audit` job in `.github/workflows/ci.yml`
+- **Post-merge audit:** `hunyuan_admission_audit.py` exit 0 — G9 pass (disabled), G1–G5/G7 open
+- **Post-merge smoke:** `hosted_golden_smoke.py` run `20260524-204536-dedc5b0e`; `hosted_export_tier_smoke.py` exit 0 (no Space redeploy; runtime unchanged)
+- **Mode:** hosted CPU fallback (`cpu-demo`); Hunyuan **not** enabled
+
 ## Plan 040 validation (PR #22 merge to main)
 
 After squash-merge PR #22 (`5df22cb` on `main`, 2026-05-24):
