@@ -228,6 +228,56 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         self.assertIn(custom, report)
         self.assertNotIn(PREVIEW_FALLBACK_DISCLAIMER, report)
 
+    def test_comprehension_exit_explains_preview_mesh_and_next_steps(self) -> None:
+        summary = app._comprehension_exit_markdown(
+            {
+                "adapter": "cpu-demo",
+                "parameters": {
+                    "quality": "draft",
+                    "selected_adapter": "cpu-demo",
+                    "fallback_reason": "ZeroGPU adapter is not enabled yet.",
+                },
+            }
+        )
+
+        self.assertIn("## What happened", summary)
+        self.assertIn("Output tier", summary)
+        self.assertIn("Preview geometry", summary)
+        self.assertIn("Suggested next steps", summary)
+
+    def test_quality_intake_html_lists_all_tiers(self) -> None:
+        html = app._quality_intake_html("draft")
+
+        self.assertIn("Choose your output tier", html)
+        self.assertIn("Draft (selected)", html)
+        self.assertIn("Balanced", html)
+        self.assertIn("High", html)
+
+    def test_hero_shell_includes_output_tier_chip(self) -> None:
+        html = app._hero_shell_html(
+            "ImageEZGen3D",
+            self._sample_resolution(),
+            quality_name="balanced",
+        )
+
+        self.assertIn("Output tier", html)
+        self.assertIn("Balanced", html)
+
+    def test_format_report_includes_comprehension_exit_and_output_tier(self) -> None:
+        report = app._format_report(
+            {
+                "stage": "done",
+                "run_id": "run-comp",
+                "adapter": "cpu-demo",
+                "validation": {"score": 88, "issues": []},
+                "mesh_report": {"status": "ok", "warnings": []},
+                "parameters": {"quality": "balanced", "selected_adapter": "cpu-demo"},
+            }
+        )
+
+        self.assertIn("## What happened", report)
+        self.assertIn("Output tier: **Balanced**", report)
+
 
 if __name__ == "__main__":
     unittest.main()

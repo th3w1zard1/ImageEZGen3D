@@ -361,7 +361,89 @@ def _fallback_notice_html(resolution: AdapterResolution) -> str:
     )
 
 
-def _hero_shell_html(title: str, resolution: AdapterResolution) -> str:
+def _quality_tier_label(quality_name: str | None) -> str:
+    if quality_name in _QUALITY_GUIDANCE:
+        return quality_name.title()
+    return "Draft"
+
+
+def _quality_intake_html(quality_name: str | None = None) -> str:
+    selected = quality_name if quality_name in _QUALITY_GUIDANCE else "draft"
+    tier_items = []
+    for tier in ("draft", "balanced", "high"):
+        label = tier.title()
+        if tier == selected:
+            label = f"<strong>{escape(label)} (selected)</strong>"
+        else:
+            label = escape(label)
+        tier_items.append(
+            f"<li>{label} — {escape(_QUALITY_GUIDANCE[tier])}</li>"
+        )
+    return "\n".join(
+        [
+            '<section class="quality-intake">',
+            "<p><strong>Choose your output tier before generating.</strong></p>",
+            "<ul>",
+            *tier_items,
+            "</ul>",
+            "</section>",
+        ]
+    )
+
+
+def _comprehension_exit_markdown(result: dict[str, Any]) -> str:
+    parameters = result.get("parameters", {})
+    if not isinstance(parameters, dict):
+        parameters = {}
+    quality = str(parameters.get("quality", "draft"))
+    quality_label = _quality_tier_label(quality)
+    guidance = _QUALITY_GUIDANCE.get(quality, _QUALITY_GUIDANCE["draft"])
+    adapter_key = str(
+        result.get("adapter")
+        or parameters.get("selected_adapter")
+        or parameters.get("requested_adapter")
+        or ""
+    ).lower()
+    adapter_label = _backend_display_label(adapter_key or "unknown")
+    is_preview = "cpu" in adapter_key or "demo" in adapter_key
+
+    lines = [
+        "## What happened",
+        f"- **Output tier:** {quality_label} — {guidance}",
+        f"- **Backend used:** {adapter_label}",
+    ]
+    if is_preview:
+        lines.append(
+            "- **Mesh type:** Preview geometry (CPU demo), not neural 3D reconstruction."
+        )
+    else:
+        lines.append("- **Mesh type:** Mesh from the selected backend path.")
+
+    if parameters.get("fallback_reason"):
+        lines.append(f"- **Fallback:** {parameters['fallback_reason']}")
+
+    lines.append("\n### Suggested next steps")
+    if is_preview:
+        lines.extend(
+            [
+                "- Review the capture score and normalized preview before another run.",
+                "- Download GLB, OBJ, and manifest when the preview looks acceptable.",
+                "- Switch to **balanced** or **high** after improving capture if you need more detail.",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "- Reopen this run from **History** without losing prior artifacts.",
+                "- Download exports when mesh validation reports **ok**.",
+            ]
+        )
+    return "\n".join(lines)
+
+
+def _hero_shell_html(
+    title: str, resolution: AdapterResolution, *, quality_name: str | None = None
+) -> str:
     runtime = resolution.runtime
     chips = [
         ("Runtime", runtime.requested_mode.title()),
@@ -377,6 +459,8 @@ def _hero_shell_html(title: str, resolution: AdapterResolution) -> str:
             else ("Armed" if resolution.selected else "Ready"),
         ),
     ]
+    if quality_name in _QUALITY_GUIDANCE:
+        chips.append(("Output tier", _quality_tier_label(quality_name)))
     chip_html = "".join(
         (
             '<div class="hero-chip">'
@@ -539,9 +623,16 @@ def _format_report(result: dict[str, Any]) -> str:
         or "unknown"
     )
     adapter_label = _backend_display_label(adapter_name)
+    quality_name = parameters.get("quality") if isinstance(parameters, dict) else None
+    quality_label = _quality_tier_label(str(quality_name) if quality_name else None)
     lines = [
+        _comprehension_exit_markdown(result),
+        "",
+        "---",
+        "",
         f"### {result.get('stage', 'done').title()}",
         f"Run ID: `{result.get('run_id', 'unknown')}`",
+        f"Output tier: **{quality_label}**",
         f"Adapter: `{adapter_label}`",
         f"Input score: **{validation.get('score', 'n/a')} / 100**",
         f"Mesh status: **{mesh.get('status', 'unchecked')}**",
@@ -781,7 +872,11 @@ def build_demo():
                 with gr.Row(equal_height=False, elem_classes="workspace-layout"):
                     with gr.Column(scale=8, min_width=760, elem_classes="main-column"):
                         with gr.Group(elem_classes="workspace-panel composer-panel"):
-                            gr.HTML(_hero_shell_html(config.app.title, resolution))
+                            gr.HTML(_hero_shell_html(
+                                config.app.title,
+                                resolution,
+                                quality_name=config.generation.quality,
+                            ))
                             template_buttons: list[tuple[Any, str]] = []
                             with gr.Row(
                                 equal_height=False, elem_classes="composer-grid"
@@ -881,6 +976,10 @@ def build_demo():
                                         ],
                                         value=_DEFAULT_STARTER,
                                         elem_classes="composer-control",
+                                    )
+                                    quality_intake_panel = gr.HTML(
+                                        _quality_intake_html(config.generation.quality),
+                                        elem_classes="quality-intake-shell",
                                     )
                                     quality = gr.Radio(
                                         label="Quality mode",
@@ -1178,6 +1277,7 @@ def build_demo():
                 _mode_summary_markdown(starter_spec["key"], quality_value),
                 preview,
                 status_text,
+                _quality_intake_html(quality_value),
             )
 
         def apply_prompt_template(template_key, primary_image):
@@ -1196,6 +1296,7 @@ def build_demo():
                 _mode_summary_markdown(starter_key, quality_value),
                 preview,
                 status_text,
+                _quality_intake_html(quality_value),
             )
 
         def update_quality_help(quality_name, primary_image, starter_key):
@@ -1206,6 +1307,7 @@ def build_demo():
                 _mode_summary_markdown(starter_key, quality_name),
                 preview,
                 status_text,
+                _quality_intake_html(quality_name),
             )
 
         def open_history_run(history_choice):
@@ -1391,12 +1493,18 @@ def build_demo():
                 mode_summary,
                 validation_preview,
                 validation_status,
+                quality_intake_panel,
             ],
         )
         quality.change(
             update_quality_help,
             inputs=[quality, primary, starter],
-            outputs=[mode_summary, validation_preview, validation_status],
+            outputs=[
+                mode_summary,
+                validation_preview,
+                validation_status,
+                quality_intake_panel,
+            ],
         )
         for template_button, template_key in template_buttons:
             template_button.click(
@@ -1412,6 +1520,7 @@ def build_demo():
                     mode_summary,
                     validation_preview,
                     validation_status,
+                    quality_intake_panel,
                 ],
             )
 
@@ -2384,6 +2493,27 @@ _CSS = """
 .history-action-row {
     gap: 10px;
     margin-top: 4px;
+}
+
+/* ─── Quality intake ────────────────────────────────────────────────────── */
+.quality-intake {
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin: 8px 0 10px;
+    background: linear-gradient(135deg, rgba(0, 112, 243, 0.05), rgba(124, 58, 237, 0.05)) !important;
+    border: 1px solid rgba(0, 112, 243, 0.14) !important;
+    box-shadow: none !important;
+}
+
+.quality-intake * {
+    color: var(--iez-ink) !important;
+    font-size: 0.86rem !important;
+    line-height: 1.55 !important;
+}
+
+.quality-intake ul {
+    margin: 8px 0 0 1.1rem !important;
+    padding: 0 !important;
 }
 
 /* ─── Fallback notice ───────────────────────────────────────────────────── */
