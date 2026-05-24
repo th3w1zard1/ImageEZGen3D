@@ -18,7 +18,7 @@ It is:
 | Backend Or Family | Primary Role | Best Current Value | Main Risk | Fit For This Repo Right Now | Current Status |
 | --- | --- | --- | --- | --- | --- |
 | CPU demo | Local and CI scaffold | No CUDA, no weights, deterministic export path, easy validation | Not real reconstruction quality | Excellent for workflow proof and regression coverage | Implemented |
-| Hunyuan3D-2.1 | Future hosted shape-plus-texture path | Strong modular pipeline ideas, multi-view direction, potential ZeroGPU-facing relevance | License restrictions, gated assets, VRAM pressure, texture-stage complexity | Promising but still blocked on audit and runtime readiness | Placeholder until audit |
+| Hunyuan3D-2.1 | Future hosted shape-plus-texture path | Strong modular pipeline ideas, multi-view direction, potential ZeroGPU-facing relevance | License restrictions, gated assets, VRAM pressure, texture-stage complexity | Promising but still blocked on audit and runtime readiness | Placeholder — see [hunyuan-admission-gates.md](hunyuan-admission-gates.md) |
 | TRELLIS.2 | High-end structured asset research | Strong ideas around richer asset outputs and PBR-oriented thinking | CUDA-only custom wheels, heavy setup, no current CPU-safe fallback | Good research signal, poor current scaffold fit | Research reference |
 | Pixal-style cascade stacks | Product and runtime architecture reference | Good inspiration for staged progress, health reporting, camera estimation, and pipeline orchestration | Large dependency surface, CUDA coupling, operational heaviness | Better as product-pattern reference than near-term default adapter | Research reference |
 | Gaussian splat and radiance-field families | Representation and preview research | Excellent view-synthesis fidelity, fast preview, strong hybrid-scene research | Weak as the primary editable canonical asset, viewer and portability constraints remain | Valuable complement, not primary export path | Research reference |
@@ -58,6 +58,8 @@ Hunyuan remains the most plausible future hosted direction in this scaffold, but
 - hosted runtime costs and fit still matter;
 - the configured adapter is still a placeholder rather than a completed integration;
 - the repo's trust model requires explicit fallback and operational honesty.
+
+Track gate status in [hunyuan-admission-gates.md](hunyuan-admission-gates.md); do not enable the adapter until every gate is closed with evidence.
 
 ## What Counts As Admission For The Next Adapter
 
