@@ -26,6 +26,18 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 030 validation (PR #16 merge to main)
+
+After squash-merge PR #16 (`04ba9bf` on `main`, 2026-05-24):
+
+- **Merge:** Quality-tier decimation presets + per-run `export_sidecar` JSON; golden attestation requires sidecar
+- **Post-merge local:** `golden_sample_attestation.py` exit 0 with `export_sidecar_bytes` present
+- **Hub deploy:** post-merge `hf_space_sync --execute` commit `25ee4bfe`
+- **Hosted run id:** `20260524-184255-f0ce0436` (Block, draft, seed 42)
+- **Mode:** hosted CPU fallback (`cpu-demo`)
+- **Status markdown:** includes **Export budget** up to 25,000 faces
+- **Artifacts verified:** manifest ☑ GLB ☑ OBJ ☑ (export sidecar on new runs via API path)
+
 ## Plan 028 validation (PR #15 merge to main)
 
 After squash-merge PR #15 (`3228f59` on `main`, 2026-05-24):

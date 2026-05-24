@@ -1,7 +1,7 @@
 ---
 title: "feat: Ship PR #16 export sidecar to main"
 type: feat
-status: active
+status: completed
 date: 2026-05-24
 origin: docs/plans/2026-05-24-029-feat-quality-tier-export-sidecar-plan.md
 ---

@@ -13,13 +13,14 @@ Trust slice (Plans 012–022) is landed on `main`: fallback honesty, Phase 1 UX,
 
 ## Recommended next slices (ranked)
 
-1. **Mesh cleanup / export tiers** — RAW + sidecar, decimation presets tied to quality tier (Track 4; ideation #12). **Now top priority** after Phase 3 compare shipped (PRs #14–#15).
-2. **Hosted golden smoke (optional)** — scheduled workflow against live Space URL; separate from local `golden-sample` CI job.
+1. **Hosted golden smoke (optional)** — scheduled workflow against live Space URL; separate from local `golden-sample` CI job. **Now top priority** after export sidecar shipped (PR #16).
+2. **Mesh cleanup (remaining)** — real decimation post-process + RAW mesh tier; sidecar + quality presets landed on `main` (Plan 029/030).
 3. **Hunyuan gate closure** — only when product intentionally enables adapter; walk G1–G9 in `docs/knowledgebase/hunyuan-admission-gates.md`.
 
 ## Completed since this ideation doc
 
 - **Phase 3 history compare** — MVP compare UI (PR #14), manifest JSON/MD export (PR #15), hosted smoke + KB evidence.
+- **Export sidecar + decimation presets** — PR #16 merged; golden attestation + hosted Block E2E (Plan 030).
 
 ## Explicitly defer
 
