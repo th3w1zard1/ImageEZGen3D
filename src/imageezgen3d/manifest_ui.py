@@ -4,6 +4,7 @@ import json
 from html import escape
 from typing import Any, Mapping
 
+from .export_tiers import decimation_target_from_parameters, resolve_decimation_target
 from .orchestrator import PREVIEW_FALLBACK_DISCLAIMER
 
 QUALITY_GUIDANCE: dict[str, str] = {
@@ -44,9 +45,7 @@ def quality_tier_label(quality_name: str | None) -> str:
 
 def is_preview_fallback(parameters: Mapping[str, Any]) -> bool:
     selected = str(
-        parameters.get("selected_adapter")
-        or parameters.get("adapter")
-        or ""
+        parameters.get("selected_adapter") or parameters.get("adapter") or ""
     ).lower()
     return bool(parameters.get("fallback_reason")) and (
         "cpu" in selected or "demo" in selected
@@ -66,9 +65,7 @@ def fallback_banner_html(parameters: Mapping[str, Any]) -> str:
     if not is_preview_fallback(parameters):
         return ""
     reason = str(
-        parameters.get("fallback_reason")
-        or parameters.get("runtime_message")
-        or ""
+        parameters.get("fallback_reason") or parameters.get("runtime_message") or ""
     )
     disclaimer = parameters.get("preview_disclaimer") or PREVIEW_FALLBACK_DISCLAIMER
     return "\n".join(
@@ -85,11 +82,7 @@ def fallback_banner_html(parameters: Mapping[str, Any]) -> str:
 def run_status_card_html(run: Mapping[str, Any]) -> str:
     run_id = str(run.get("run_id", "unknown"))
     adapter = backend_display_label(
-        str(
-            run.get("adapter")
-            or run.get("selected_adapter")
-            or "unknown"
-        )
+        str(run.get("adapter") or run.get("selected_adapter") or "unknown")
     )
     parameters = run.get("parameters", {})
     if not isinstance(parameters, dict):
@@ -178,9 +171,15 @@ def comprehension_exit_markdown(result: Mapping[str, Any]) -> str:
     adapter_label = backend_display_label(adapter_key or "unknown")
     is_preview = "cpu" in adapter_key or "demo" in adapter_key
 
+    decimation_target = decimation_target_from_parameters(parameters)
+    if decimation_target is None:
+        decimation_target = resolve_decimation_target(
+            str(parameters.get("quality", "draft"))
+        )
     lines = [
         "## What happened",
         f"- **Output tier:** {quality_label} — {guidance}",
+        f"- **Export budget:** up to {decimation_target:,} faces (quality-tier preset)",
         f"- **Backend used:** {adapter_label}",
     ]
     if is_preview:
@@ -313,6 +312,9 @@ def _run_compare_snapshot(run: Mapping[str, Any]) -> dict[str, Any]:
         or "unknown"
     )
     quality_key = str(run.get("quality") or parameters.get("quality") or "draft")
+    decimation_target = decimation_target_from_parameters(parameters)
+    if decimation_target is None:
+        decimation_target = resolve_decimation_target(quality_key)
     score = run.get("score")
     if score is None:
         score = validation.get("score")
@@ -326,6 +328,7 @@ def _run_compare_snapshot(run: Mapping[str, Any]) -> dict[str, Any]:
         "run_id": str(run.get("run_id", "unknown")),
         "adapter": backend_display_label(str(adapter)),
         "quality": quality_tier_label(quality_key),
+        "decimation_target": decimation_target,
         "stage": str(run.get("stage", "unknown")),
         "score": score,
         "starter": str(
@@ -362,6 +365,11 @@ def compare_runs_payload(
         ("Stage", left_snapshot["stage"], right_snapshot["stage"]),
         ("Backend", left_snapshot["adapter"], right_snapshot["adapter"]),
         ("Quality tier", left_snapshot["quality"], right_snapshot["quality"]),
+        (
+            "Decimation target",
+            left_snapshot["decimation_target"],
+            right_snapshot["decimation_target"],
+        ),
         ("Input score", left_snapshot["score"], right_snapshot["score"]),
         ("Starter flow", left_snapshot["starter"], right_snapshot["starter"]),
         ("Mesh status", left_snapshot["mesh_status"], right_snapshot["mesh_status"]),
@@ -378,7 +386,10 @@ def compare_runs_payload(
     ]
     changed: list[str] = []
     for label, left_value, right_value in rows:
-        if _compare_cell(left_value) != _compare_cell(right_value) and label != "Run ID":
+        if (
+            _compare_cell(left_value) != _compare_cell(right_value)
+            and label != "Run ID"
+        ):
             changed.append(label)
     only_left = sorted(
         set(left_snapshot["artifact_keys"]) - set(right_snapshot["artifact_keys"])
@@ -417,6 +428,11 @@ def compare_runs_markdown(
         ("Stage", left_snapshot["stage"], right_snapshot["stage"]),
         ("Backend", left_snapshot["adapter"], right_snapshot["adapter"]),
         ("Quality tier", left_snapshot["quality"], right_snapshot["quality"]),
+        (
+            "Decimation target",
+            left_snapshot["decimation_target"],
+            right_snapshot["decimation_target"],
+        ),
         ("Input score", left_snapshot["score"], right_snapshot["score"]),
         ("Starter flow", left_snapshot["starter"], right_snapshot["starter"]),
         ("Mesh status", left_snapshot["mesh_status"], right_snapshot["mesh_status"]),

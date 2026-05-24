@@ -63,7 +63,9 @@ class CpuDemoTests(unittest.TestCase):
             self.assertTrue(Path(artifacts["glb"]).exists())
             self.assertTrue(Path(artifacts["obj"]).exists())
             self.assertTrue(Path(artifacts["manifest"]).exists())
+            self.assertTrue(Path(artifacts["export_sidecar"]).exists())
             self.assertEqual(result["stage"], "done")
+            self.assertEqual(result["parameters"]["decimation_target"], 25_000)
 
     def test_generate_records_preview_disclaimer_on_cpu_fallback(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -126,6 +128,19 @@ class CpuDemoTests(unittest.TestCase):
             )
             self.assertEqual(result["parameters"]["reference_brief_name"], "brief.txt")
             self.assertTrue(Path(result["artifacts"]["reference_brief"]).exists())
+
+    def test_generate_high_quality_uses_higher_decimation_target(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            config = AppConfig(
+                app=AppSettings(output_dir=Path(directory)),
+                storage=StorageSettings(retention_runs=10),
+            )
+            orchestrator = ImageEZOrchestrator(config)
+            image = Image.new("RGBA", (640, 640), (40, 120, 180, 255))
+            result = orchestrator.generate(
+                image, adapter_name="cpu-demo", quality="high", seed=2
+            )
+            self.assertEqual(result["parameters"]["decimation_target"], 500_000)
 
     def test_mesh_check_validates_glb_header(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

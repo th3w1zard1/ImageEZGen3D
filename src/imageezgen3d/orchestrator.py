@@ -9,6 +9,7 @@ from PIL import Image
 
 from .adapters import CpuDemoAdapter, HunyuanPlaceholderAdapter
 from .adapters.base import GenerationRequest, ModelAdapter
+from .export_tiers import resolve_decimation_target
 from .config import AppConfig
 from .mesh_checks import inspect_artifacts
 from .preprocess import save_input_bundle
@@ -179,11 +180,17 @@ class ImageEZOrchestrator:
         run_dir, manifest = self.store.create_run()
         adapter_key, adapter, fallback_reason = self.select_adapter(adapter_name)
 
+        quality_value = quality or self.config.generation.quality
+        decimation_target = resolve_decimation_target(
+            quality_value,
+            default=self.config.generation.decimation_target,
+        )
         manifest.stage = "preprocessing"
         manifest.parameters = {
             "requested_adapter": adapter_name or self.config.app.adapter,
             "selected_adapter": adapter_key,
-            "quality": quality or self.config.generation.quality,
+            "quality": quality_value,
+            "decimation_target": decimation_target,
             "seed": seed or self.config.generation.seed,
             "runtime": runtime_status(self.config).__dict__,
         }
@@ -253,8 +260,9 @@ class ImageEZOrchestrator:
                     run_dir=run_dir,
                     processed_image=processed_path,
                     view_images=saved_views,
-                    quality=quality or self.config.generation.quality,
+                    quality=quality_value,
                     seed=seed or self.config.generation.seed,
+                    decimation_target=decimation_target,
                 )
             )
 
