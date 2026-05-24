@@ -7,11 +7,13 @@ from imageezgen3d.deploy_assets import render_deploy_assets
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Render deploy assets for a specific image reference.")
+    parser = argparse.ArgumentParser(
+        description="Render deploy assets for a specific image reference."
+    )
     parser.add_argument("--image", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--app-name", default="imageezgen3d")
-    parser.add_argument("--container-port", type=int, default=7860)
+    parser.add_argument("--container-port", type=int, default=7865)
     parser.add_argument("--service-port", type=int, default=80)
     args = parser.parse_args()
 

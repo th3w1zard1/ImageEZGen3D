@@ -1,0 +1,10 @@
+[Unit]
+Description=imageezgen3d container
+
+[Container]
+ContainerName=imageezgen3d
+Image=ghcr.io/th3w1zard1/imageezgen3d:latest
+PublishPort=80:7865
+
+[Install]
+WantedBy=default.target

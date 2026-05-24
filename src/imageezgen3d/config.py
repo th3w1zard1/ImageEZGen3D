@@ -100,7 +100,7 @@ class AppSettings:
 @dataclass(frozen=True)
 class LaunchSettings:
     host: str = "0.0.0.0"
-    port: int = 7860
+    port: int = 7865
     share: bool = False
     queue_max_size: int = 32
     default_concurrency_limit: int = 1

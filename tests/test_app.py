@@ -89,6 +89,13 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
             )
             self.assertTrue(str(template["brief"]).strip())
 
+    def test_mode_summary_markdown_combines_path_and_quality(self) -> None:
+        summary = app._mode_summary_markdown("single-photo-draft", "high")
+
+        self.assertIn("Single Photo Draft", summary)
+        self.assertIn("High mode", summary)
+        self.assertIn("Capture hint:", summary)
+
     def test_verified_artifact_state_filters_missing_files(self) -> None:
         store = RunStore(Path.cwd() / "outputs")
         with patch.object(store, "artifact_value", side_effect=["/tmp/mesh.glb", None]):

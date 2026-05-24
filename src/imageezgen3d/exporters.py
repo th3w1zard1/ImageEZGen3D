@@ -26,13 +26,28 @@ def make_box_mesh(
 ) -> SimpleMesh:
     w, d, h = width / 2, depth / 2, height / 2
     vertices = (
-        (-w, -d, -h), (w, -d, -h), (w, d, -h), (-w, d, -h),
-        (-w, -d, h), (w, -d, h), (w, d, h), (-w, d, h),
+        (-w, -d, -h),
+        (w, -d, -h),
+        (w, d, -h),
+        (-w, d, -h),
+        (-w, -d, h),
+        (w, -d, h),
+        (w, d, h),
+        (-w, d, h),
     )
     faces = (
-        (0, 1, 2), (0, 2, 3), (4, 6, 5), (4, 7, 6),
-        (0, 4, 5), (0, 5, 1), (1, 5, 6), (1, 6, 2),
-        (2, 6, 7), (2, 7, 3), (3, 7, 4), (3, 4, 0),
+        (0, 1, 2),
+        (0, 2, 3),
+        (4, 6, 5),
+        (4, 7, 6),
+        (0, 4, 5),
+        (0, 5, 1),
+        (1, 5, 6),
+        (1, 6, 2),
+        (2, 6, 7),
+        (2, 7, 3),
+        (3, 7, 4),
+        (3, 4, 0),
     )
     return SimpleMesh(vertices=vertices, faces=faces, color=color, b64_image=b64_image)
 
@@ -45,19 +60,35 @@ def write_obj(mesh: SimpleMesh, path: Path) -> None:
 
 
 def write_ply(mesh: SimpleMesh, path: Path) -> None:
-    red, green, blue = [int(max(0, min(1, channel)) * 255) for channel in mesh.color[:3]]
-    header = [
-        "ply", "format ascii 1.0", f"element vertex {len(mesh.vertices)}",
-        "property float x", "property float y", "property float z",
-        "property uchar red", "property uchar green", "property uchar blue",
-        f"element face {len(mesh.faces)}", "property list uchar int vertex_indices", "end_header",
+    red, green, blue = [
+        int(max(0, min(1, channel)) * 255) for channel in mesh.color[:3]
     ]
-    body = [f"{x:.6f} {y:.6f} {z:.6f} {red} {green} {blue}" for x, y, z in mesh.vertices]
+    header = [
+        "ply",
+        "format ascii 1.0",
+        f"element vertex {len(mesh.vertices)}",
+        "property float x",
+        "property float y",
+        "property float z",
+        "property uchar red",
+        "property uchar green",
+        "property uchar blue",
+        f"element face {len(mesh.faces)}",
+        "property list uchar int vertex_indices",
+        "end_header",
+    ]
+    body = [
+        f"{x:.6f} {y:.6f} {z:.6f} {red} {green} {blue}" for x, y, z in mesh.vertices
+    ]
     body.extend(f"3 {a} {b} {c}" for a, b, c in mesh.faces)
     atomic_write_text(path, "\n".join(header + body) + "\n")
 
 
-def _normal(v1: tuple[float, float, float], v2: tuple[float, float, float], v3: tuple[float, float, float]) -> tuple[float, float, float]:
+def _normal(
+    v1: tuple[float, float, float],
+    v2: tuple[float, float, float],
+    v3: tuple[float, float, float],
+) -> tuple[float, float, float]:
     ax, ay, az = (v2[i] - v1[i] for i in range(3))
     bx, by, bz = (v3[i] - v1[i] for i in range(3))
     nx, ny, nz = ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx
@@ -85,7 +116,9 @@ def _pad4(data: bytes, pad_byte: bytes) -> bytes:
 
 def write_glb(mesh: SimpleMesh, path: Path) -> None:
     positions = b"".join(struct.pack("<3f", *vertex) for vertex in mesh.vertices)
-    indices = b"".join(struct.pack("<H", index) for face in mesh.faces for index in face)
+    indices = b"".join(
+        struct.pack("<H", index) for face in mesh.faces for index in face
+    )
 
     mins = [min(vertex[i] for vertex in mesh.vertices) for i in range(3)]
     maxs = [max(vertex[i] for vertex in mesh.vertices) for i in range(3)]
@@ -97,7 +130,7 @@ def write_glb(mesh: SimpleMesh, path: Path) -> None:
     uvs = b"".join(
         struct.pack(
             "<2f",
-            (v[0] - mins[0]) / x_span,       # u: left to right
+            (v[0] - mins[0]) / x_span,  # u: left to right
             1.0 - (v[2] - mins[2]) / z_span,  # v: bottom to top (flip Z)
         )
         for v in mesh.vertices
@@ -125,23 +158,67 @@ def write_glb(mesh: SimpleMesh, path: Path) -> None:
         "scenes": [{"nodes": [0]}],
         "nodes": [{"mesh": 0, "name": "ImageEZGen3D Draft"}],
         "materials": [mat],
-        "meshes": [{"primitives": [{"attributes": {"POSITION": 0, "TEXCOORD_0": 2}, "indices": 1, "material": 0}]}],
+        "meshes": [
+            {
+                "primitives": [
+                    {
+                        "attributes": {"POSITION": 0, "TEXCOORD_0": 2},
+                        "indices": 1,
+                        "material": 0,
+                    }
+                ]
+            }
+        ],
         "buffers": [{"byteLength": len(bin_blob)}],
         "bufferViews": [
-            {"buffer": 0, "byteOffset": 0, "byteLength": len(positions), "target": 34962},
-            {"buffer": 0, "byteOffset": indices_offset, "byteLength": len(indices), "target": 34963},
-            {"buffer": 0, "byteOffset": uvs_offset, "byteLength": len(uvs), "target": 34962},
+            {
+                "buffer": 0,
+                "byteOffset": 0,
+                "byteLength": len(positions),
+                "target": 34962,
+            },
+            {
+                "buffer": 0,
+                "byteOffset": indices_offset,
+                "byteLength": len(indices),
+                "target": 34963,
+            },
+            {
+                "buffer": 0,
+                "byteOffset": uvs_offset,
+                "byteLength": len(uvs),
+                "target": 34962,
+            },
         ],
         "accessors": [
-            {"bufferView": 0, "componentType": 5126, "count": len(mesh.vertices), "type": "VEC3", "min": mins, "max": maxs},
-            {"bufferView": 1, "componentType": 5123, "count": len(mesh.faces) * 3, "type": "SCALAR"},
-            {"bufferView": 2, "componentType": 5126, "count": len(mesh.vertices), "type": "VEC2"},
+            {
+                "bufferView": 0,
+                "componentType": 5126,
+                "count": len(mesh.vertices),
+                "type": "VEC3",
+                "min": mins,
+                "max": maxs,
+            },
+            {
+                "bufferView": 1,
+                "componentType": 5123,
+                "count": len(mesh.faces) * 3,
+                "type": "SCALAR",
+            },
+            {
+                "bufferView": 2,
+                "componentType": 5126,
+                "count": len(mesh.vertices),
+                "type": "VEC2",
+            },
         ],
     }
 
     if mesh.b64_image:
         gltf["images"] = [{"uri": "data:image/jpeg;base64," + mesh.b64_image}]
-        gltf["samplers"] = [{"magFilter": 9729, "minFilter": 9987, "wrapS": 33071, "wrapT": 33071}]
+        gltf["samplers"] = [
+            {"magFilter": 9729, "minFilter": 9987, "wrapS": 33071, "wrapT": 33071}
+        ]
         gltf["textures"] = [{"sampler": 0, "source": 0}]
         mat["pbrMetallicRoughness"]["baseColorTexture"] = {"index": 0}
         mat["pbrMetallicRoughness"]["baseColorFactor"] = [1.0, 1.0, 1.0, 1.0]
@@ -154,7 +231,9 @@ def write_glb(mesh: SimpleMesh, path: Path) -> None:
     atomic_write_bytes(path, header + json_header + json_blob + bin_header + bin_blob)
 
 
-def export_all(mesh: SimpleMesh, directory: Path, stem: str = "draft_mesh") -> dict[str, Path]:
+def export_all(
+    mesh: SimpleMesh, directory: Path, stem: str = "draft_mesh"
+) -> dict[str, Path]:
     directory.mkdir(parents=True, exist_ok=True)
     paths = {
         "glb": directory / f"{stem}.glb",
