@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 from html import escape
 from pathlib import Path
 from typing import Any, cast
@@ -1074,6 +1075,14 @@ def build_demo():
                                 "Pick two runs and compare manifest-backed fields.",
                                 elem_classes="history-compare-panel status-panel",
                             )
+                            history_compare_json = gr.File(
+                                label="Compare diff (JSON)",
+                                elem_classes="artifact-file",
+                            )
+                            history_compare_report = gr.File(
+                                label="Compare report (MD)",
+                                elem_classes="artifact-file",
+                            )
                     with gr.Column(scale=5, min_width=340):
                         with gr.Group(elem_classes="workspace-panel history-preview"):
                             gr.HTML(
@@ -1220,21 +1229,36 @@ def build_demo():
             )
 
         def compare_history_runs(primary_choice, compare_choice):
+            empty_exports = (None, None)
+
+            def _fail(message: str) -> tuple[str, None, None]:
+                return message, *empty_exports
+
             run_a = _selected_run_id(primary_choice)
             run_b = _selected_run_id(compare_choice)
             if not run_a or not run_b:
-                return (
+                return _fail(
                     "Select two runs from **Recent runs** and **Compare with**, "
                     "then click **Compare Runs**."
                 )
             if run_a == run_b:
-                return "Choose two different runs to compare."
+                return _fail("Choose two different runs to compare.")
             try:
                 left = orchestrator.store.read_manifest(run_a)
                 right = orchestrator.store.read_manifest(run_b)
             except FileNotFoundError as exc:
-                return _error_report(str(exc))
-            return _manifest_ui.compare_runs_markdown(left, right)
+                return _fail(_error_report(str(exc)))
+            markdown = _manifest_ui.compare_runs_markdown(left, right)
+            compare_dir = Path(tempfile.gettempdir()) / "imageezgen3d-compare"
+            compare_dir.mkdir(parents=True, exist_ok=True)
+            json_path = compare_dir / f"compare_{run_a}_vs_{run_b}.json"
+            report_path = compare_dir / f"compare_{run_a}_vs_{run_b}.md"
+            json_path.write_text(
+                _manifest_ui.compare_runs_json(left, right),
+                encoding="utf-8",
+            )
+            report_path.write_text(markdown, encoding="utf-8")
+            return markdown, str(json_path), str(report_path)
 
         def open_history_run(history_choice):
             run_id = _selected_run_id(history_choice)
@@ -1508,7 +1532,11 @@ def build_demo():
         history_compare_btn.click(
             compare_history_runs,
             inputs=[history_run, history_compare_run],
-            outputs=[history_compare],
+            outputs=[
+                history_compare,
+                history_compare_json,
+                history_compare_report,
+            ],
             api_name="compare_history_runs",
         )
         history_open.click(
