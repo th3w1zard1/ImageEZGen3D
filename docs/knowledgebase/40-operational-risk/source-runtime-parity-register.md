@@ -26,7 +26,8 @@ Living log of surfaces where repository source, built assets, documentation, and
 | P9 | VS Code tasks vs CI | `.vscode/tasks.json` vs `.github/workflows/ci.yml` | 2026-05-23 | `[REPO]` verification.md asserts sync | Spot-check on workflow edits | OK |
 | P10 | Live HF Space behavior | Hosted app vs README frontmatter | 2026-05-24 | `[UI]` Block E2E on live Space; run `20260524-084947-19c70f8f`; cpu-demo fallback; manifest/GLB/OBJ verified | See [hosted-validation-2026-05-23.md](hosted-validation-2026-05-23.md); ZeroGPU adapter still disabled | OK |
 | P11 | HF Space CI deploy | `.github/workflows/hf-space.yml` + `scripts/hf_space_sync.py` | 2026-05-23 | `[REPO]` Auto sync on default branch + `v*` tags; staged minimal payload; legacy `sync-hf-space.yml` manual-only | CI upload ≠ E2E; verify after workflow edits | OK |
-| P12 | Golden sample CI attestation | `scripts/golden_sample_attestation.py` + `.github/workflows/ci.yml` job `golden-sample` | 2026-05-24 | `[REPO]` Block PNG → cpu-demo generate; manifest/GLB/OBJ size gates in CI | Does not replace hosted P10 E2E or ZeroGPU verification | OK |
+| P12 | Golden sample CI attestation | `scripts/golden_sample_attestation.py` + `.github/workflows/ci.yml` job `golden-sample` | 2026-05-24 | `[REPO]` Block PNG → cpu-demo generate; manifest/GLB/OBJ/size gates in CI | Does not replace hosted P10 E2E or ZeroGPU verification | OK |
+| P13 | Hosted golden smoke CI | `scripts/hosted_golden_smoke.py` + `.github/workflows/hosted-golden-smoke.yml` | 2026-05-24 | `[REPO]` Scheduled/dispatch Gradio `/generate` on live Space; export budget + run id checks | Complements P12; first green run records run id in KB | OK |
 
 ## How To Update
 

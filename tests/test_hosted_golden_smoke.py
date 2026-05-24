@@ -1,0 +1,84 @@
+from __future__ import annotations
+
+import json
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+
+from imageezgen3d.hosted_golden_smoke import (
+    HostedGoldenSmokeResult,
+    parse_run_id,
+    run_hosted_golden_smoke,
+    validate_hosted_generate_status,
+    write_hosted_golden_record,
+)
+
+
+def _valid_status(run_id: str = "20260524-184255-f0ce0436") -> str:
+    return "\n".join(
+        [
+            f"Run `{run_id}` complete.",
+            "- **Export budget:** up to 25,000 faces (quality-tier preset)",
+            "- **Backend used:** Local CPU Preview",
+            "Downloads: manifest, glb, obj",
+        ]
+    )
+
+
+class HostedGoldenSmokeTests(unittest.TestCase):
+    def test_parse_run_id(self) -> None:
+        self.assertEqual(
+            parse_run_id("Done. Run `20260524-184255-f0ce0436`."),
+            "20260524-184255-f0ce0436",
+        )
+        self.assertIsNone(parse_run_id("no run id here"))
+
+    def test_validate_hosted_generate_status_accepts_golden_markdown(self) -> None:
+        ok, issues, run_id = validate_hosted_generate_status(_valid_status())
+        self.assertTrue(ok, issues)
+        self.assertEqual(run_id, "20260524-184255-f0ce0436")
+
+    def test_validate_hosted_generate_status_rejects_missing_export_budget(self) -> None:
+        status = _valid_status().replace("Export budget", "Quality tier")
+        ok, issues, _ = validate_hosted_generate_status(status)
+        self.assertFalse(ok)
+        self.assertTrue(any("Export budget" in issue for issue in issues))
+
+    def test_write_hosted_golden_record_persists_json(self) -> None:
+        result = HostedGoldenSmokeResult(
+            ok=True,
+            run_id="20260524-000000-00000000",
+            space_url="https://example.hf.space/",
+            adapter_hint="cpu-demo",
+            issues=(),
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "hosted-golden.json"
+            write_hosted_golden_record(path, result)
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            self.assertTrue(payload["ok"])
+            self.assertEqual(payload["adapter_hint"], "cpu-demo")
+
+    @patch("gradio_client.Client")
+    def test_run_hosted_golden_smoke_validates_predict_output(
+        self, client_cls: object,
+    ) -> None:
+        client = client_cls.return_value
+        client.predict.return_value = (None, _valid_status())
+
+        with tempfile.TemporaryDirectory() as directory:
+            sample = Path(directory) / "block.png"
+            sample.write_bytes(b"png")
+            result = run_hosted_golden_smoke(
+                space_url="https://test.hf.space/",
+                sample_path=sample,
+            )
+
+        self.assertTrue(result.ok, result.issues)
+        self.assertEqual(result.run_id, "20260524-184255-f0ce0436")
+        self.assertEqual(result.adapter_hint, "Local CPU Preview")
+
+
+if __name__ == "__main__":
+    unittest.main()
