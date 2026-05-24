@@ -5,6 +5,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import app
+from imageezgen3d.orchestrator import PREVIEW_FALLBACK_DISCLAIMER, AdapterResolution
+from imageezgen3d.runtime import RuntimeStatus
 from imageezgen3d.storage import RunStore
 
 
@@ -125,6 +127,106 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         self.assertIn("run-123", report)
         self.assertIn("`glb`", report)
         self.assertIn("`obj`", report)
+
+    def _sample_resolution(
+        self,
+        *,
+        selected: str = "cpu-demo",
+        fallback_reason: str | None = None,
+    ) -> AdapterResolution:
+        return AdapterResolution(
+            requested="auto",
+            selected=selected,
+            runtime=RuntimeStatus(
+                requested_mode="auto",
+                prefer_zerogpu=True,
+                zerogpu_enabled=True,
+                zerogpu_runtime_available=True,
+                cpu_fallback_allowed=True,
+                reason="ZeroGPU runtime is available and preferred.",
+            ),
+            zerogpu_runnable=False,
+            message="Using CPU preview fallback.",
+            fallback_reason=fallback_reason,
+        )
+
+    def test_is_preview_fallback_requires_cpu_demo_and_reason(self) -> None:
+        self.assertTrue(
+            app._is_preview_fallback(
+                self._sample_resolution(fallback_reason="adapter disabled")
+            )
+        )
+        self.assertFalse(
+            app._is_preview_fallback(
+                self._sample_resolution(
+                    selected="hunyuan-zerogpu", fallback_reason="adapter disabled"
+                )
+            )
+        )
+        self.assertFalse(
+            app._is_preview_fallback(self._sample_resolution(fallback_reason=None))
+        )
+
+    def test_fallback_notice_html_surfaces_reason_and_disclaimer(self) -> None:
+        html = app._fallback_notice_html(
+            self._sample_resolution(
+                fallback_reason="ZeroGPU adapter is not enabled yet."
+            )
+        )
+
+        self.assertIn("CPU preview fallback is active", html)
+        self.assertIn("ZeroGPU adapter is not enabled yet.", html)
+        self.assertIn(PREVIEW_FALLBACK_DISCLAIMER, html)
+
+    def test_fallback_notice_html_empty_when_fallback_not_preview(self) -> None:
+        self.assertEqual(
+            app._fallback_notice_html(
+                self._sample_resolution(
+                    selected="hunyuan-zerogpu",
+                    fallback_reason="adapter disabled",
+                )
+            ),
+            "",
+        )
+
+    def test_format_report_includes_preview_disclaimer_for_cpu_fallback(self) -> None:
+        report = app._format_report(
+            {
+                "stage": "done",
+                "run_id": "run-456",
+                "adapter": "cpu-demo",
+                "validation": {"score": 88, "issues": []},
+                "mesh_report": {"status": "ok", "warnings": []},
+                "parameters": {
+                    "fallback_reason": "ZeroGPU adapter is not enabled yet.",
+                    "selected_adapter": "cpu-demo",
+                },
+            }
+        )
+
+        self.assertIn("**Preview Disclaimer**", report)
+        self.assertIn(PREVIEW_FALLBACK_DISCLAIMER, report)
+        self.assertIn("**Runtime Fallback**", report)
+
+    def test_format_report_uses_manifest_preview_disclaimer_when_present(self) -> None:
+        custom = "Custom disclaimer from manifest."
+        report = app._format_report(
+            {
+                "stage": "done",
+                "run_id": "run-789",
+                "adapter": "cpu-demo",
+                "validation": {"score": 90, "issues": []},
+                "mesh_report": {"status": "ok", "warnings": []},
+                "parameters": {
+                    "fallback_reason": "ZeroGPU adapter is not enabled yet.",
+                    "preview_disclaimer": custom,
+                    "selected_adapter": "cpu-demo",
+                },
+            }
+        )
+
+        self.assertIn(custom, report)
+        self.assertNotIn(PREVIEW_FALLBACK_DISCLAIMER, report)
 
 
 if __name__ == "__main__":
