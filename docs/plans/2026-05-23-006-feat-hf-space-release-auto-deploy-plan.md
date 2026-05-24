@@ -1,7 +1,7 @@
 ---
 title: "feat: HF Space auto-deploy on default branch and release tags"
 type: feat
-status: active
+status: completed
 date: 2026-05-23
 origin: conversation — user asked whether HF Space should upload on default-branch push and release
 ---

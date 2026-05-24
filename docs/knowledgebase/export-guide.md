@@ -47,6 +47,8 @@ Repository direction:
 
 Each run has a unique folder. Original input, normalized input, validation report, mesh files, and manifest are written separately. Conversion outputs are never overwritten in place.
 
+`[REPO]` Hosted validation (2026-05-24) confirmed manifest + GLB + OBJ downloads for cpu-demo Block sample on live Space — see [hosted-validation-2026-05-23.md](40-operational-risk/hosted-validation-2026-05-23.md).
+
 This rule also applies to future heavy adapters: export stages should be additive and traceable, not destructive.
 
 ## Validation Expectations

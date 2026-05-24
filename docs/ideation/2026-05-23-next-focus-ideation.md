@@ -12,13 +12,13 @@ run_id: a8f3d4dd
 
 **Codebase context:** ZeroGPU-first Gradio image-to-3D scaffold with CPU demo workflow proof, gated Hunyuan adapter, and broad KB (27 docs + new index/parity register from PR #1). Roadmap states the frontier shifted from documentation to **trustworthy generation without breaking legal/runtime/local-dev contract**.
 
-**Active blockers:** Parity register P4/P5 — syntax corruption in `scripts/render_deploy_assets.py` and invalid type annotation in `src/imageezgen3d/deploy_assets.py`. P1/P3/P10 open — port 7865 unverified on live HF Space.
+**Active blockers:** Parity P8 closed 2026-05-24 (export-guide audit). P10 closed via hosted Block E2E (Plan 005). Remaining frontier: ZeroGPU adapter enablement, trust-first UX polish.
 
-**In-flight work:** Nine uncommitted files (`app.py`, exporters, deploy, config, Dockerfile, tests) from UI rewrite + port migration + textured CPU demo exports.
+**Recent landings:** HF Space auto-deploy (plan 006), KB refresh (007), docs/solutions bootstrap (008), Space port/demo fix + hosted E2E (005/009).
 
 **External context (Tier 1):** Post-scaffold priorities in comparable HF Spaces/SaaS converge on hosted E2E validation loop, artifact trust bundles, adapter/fallback visibility, and mesh cleanup tiers — not more scaffold plumbing.
 
-**Past learnings:** No `docs/solutions/` directory; institutional direction lives in KB + roadmap.
+**Past learnings:** See `docs/solutions/` (5 learning docs as of 2026-05-24) and KB parity register.
 
 ## Recommended Focus Sequence
 

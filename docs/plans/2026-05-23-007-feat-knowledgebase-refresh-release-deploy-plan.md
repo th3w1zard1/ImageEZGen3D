@@ -1,7 +1,7 @@
 ---
 title: "feat: Knowledgebase refresh after release deploy and port fixes"
 type: feat
-status: active
+status: completed
 date: 2026-05-23
 origin: /build-knowledgebase + plans 005/006 landed context
 ---
