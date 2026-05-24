@@ -129,3 +129,10 @@ def format_attestation_report(attestation: GoldenSampleAttestation) -> str:
 
 def attestation_json(attestation: GoldenSampleAttestation) -> str:
     return json.dumps(attestation.to_dict(), indent=2, sort_keys=True) + "\n"
+
+
+def write_attestation_record(path: Path, attestation: GoldenSampleAttestation) -> Path:
+    destination = path.resolve()
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(attestation_json(attestation), encoding="utf-8")
+    return destination

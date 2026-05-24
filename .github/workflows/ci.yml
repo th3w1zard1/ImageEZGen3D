@@ -126,7 +126,16 @@ jobs:
           python -m pip install -e ".[app,dev]"
 
       - name: Run golden sample attestation
-        run: PYTHONPATH=src python scripts/golden_sample_attestation.py --json
+        run: |
+          PYTHONPATH=src python scripts/golden_sample_attestation.py \
+            --json --record golden-attestation.json
+
+      - name: Upload golden attestation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-sample-attestation
+          path: golden-attestation.json
+          if-no-files-found: error
 
   build:
     runs-on: ubuntu-latest

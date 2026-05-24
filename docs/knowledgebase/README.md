@@ -105,6 +105,7 @@ Navigation map for all knowledgebase documents. Use this index to find authority
 
 ## Caveats
 
-- `[OPEN]` Hosted Space Block/Vase E2E (P10) not verified — CI upload success is not E2E validation.
-- `[REPO]` Port env chain (`PORT` / `GRADIO_SERVER_PORT` / `IMAGEEZ_PORT`) documented 2026-05-23; live Space binding still `[OPEN]`.
+- `[REPO]` Hosted Block/Vase E2E verified 2026-05-24 — see [hosted-validation-2026-05-23.md](40-operational-risk/hosted-validation-2026-05-23.md). CI golden-sample attestation is local CPU only and does not replace hosted E2E.
+- `[OPEN]` Hosted ZeroGPU path not verified — adapter remains disabled on Space.
+- `[REPO]` Port env chain documented; live Space uses platform `GRADIO_SERVER_PORT` (typically 7860) per [hf-space-demo-port-binding](../solutions/tooling-decisions/hf-space-demo-port-binding-2026-05-24.md).
 - Dated slices may lag in-flight UI changes; check git diff against `app.py` when implementing UX work.

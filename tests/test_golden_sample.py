@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -10,6 +11,7 @@ from PIL import Image
 from imageezgen3d.golden_sample import (
     DEFAULT_SAMPLE_PATH,
     run_golden_sample_attestation,
+    write_attestation_record,
 )
 
 
@@ -39,6 +41,19 @@ class GoldenSampleTests(unittest.TestCase):
 
         self.assertFalse(attestation.ok)
         self.assertTrue(any("not found" in issue for issue in attestation.issues))
+
+    def test_write_attestation_record_persists_json(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "golden-attestation.json"
+            attestation = run_golden_sample_attestation(
+                sample_path=Path(directory) / "missing.png",
+                output_dir=Path(directory) / "out",
+            )
+            write_attestation_record(path, attestation)
+
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            self.assertFalse(payload["ok"])
+            self.assertTrue(payload["issues"])
 
     def test_attestation_fails_when_artifacts_missing(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

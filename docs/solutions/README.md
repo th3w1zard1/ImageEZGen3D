@@ -44,6 +44,7 @@ When a solution and KB doc overlap, prefer KB for procedure and solutions for th
 | [best-practices/ci-upload-vs-hosted-e2e-2026-05-23.md](best-practices/ci-upload-vs-hosted-e2e-2026-05-23.md) | Knowledge | CI sync ≠ browser E2E |
 | [tooling-decisions/gradio-port-env-precedence-2026-05-23.md](tooling-decisions/gradio-port-env-precedence-2026-05-23.md) | Knowledge | PORT / GRADIO_SERVER_PORT chain |
 | [tooling-decisions/hf-space-demo-port-binding-2026-05-24.md](tooling-decisions/hf-space-demo-port-binding-2026-05-24.md) | Knowledge | Module-level demo + Space port 7860 |
+| [architecture-patterns/trust-slice-completion-2026-05-24.md](architecture-patterns/trust-slice-completion-2026-05-24.md) | Knowledge | Trust slice landed — golden CI vs hosted E2E |
 
 ## Related
 
