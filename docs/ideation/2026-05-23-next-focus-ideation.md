@@ -29,7 +29,7 @@ For the **next implementation pass**, pick from the ranked ideas below (sequence
 3. ~~Hunyuan admission audit prep~~ — shipped (Plan 016, PR #8)
 4. ~~Manifest-driven UI components~~ — shipped (Plan 017–018, PR #9–#10)
 
-**Suggested next slice:** golden-sample CI attestation (ideation #15) or Hunyuan gate closure only when intentionally enabling the adapter.
+**Suggested next slice:** hosted History session parity (API vs browser runs on Space) or Hunyuan gate closure only when intentionally enabling the adapter. Golden-sample CI attestation shipped (Plan 020).
 
 **Completed (2026-05-24):** deploy parity P4/P5, vertical slice UI/export/port, hosted Block E2E (P10), HF release-tag CI deploy, KB/solutions bootstrap, `STRATEGY.md` anchor, trust slice PRs #4–#10.
 
