@@ -1579,12 +1579,6 @@ _CSS = """
     line-height: 1.7;
 }
 
-.hero-runtime-note {
-    margin: 0 0 10px;
-    color: var(--iez-muted-lighter);
-    font-size: 0.88rem;
-}
-
 .hero-chip-row {
     display: flex;
     flex-wrap: wrap;
@@ -1615,76 +1609,6 @@ _CSS = """
     font-size: 0.92rem;
     font-weight: 800;
     color: var(--iez-ink);
-}
-
-/* Hero sidebar — launch kit cards */
-.hero-ideas {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-    align-content: start;
-}
-
-.hero-ideas-header {
-    display: block;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    font-size: 0.70rem;
-    font-weight: 700;
-    color: var(--iez-muted);
-    margin: 0 0 4px;
-}
-
-.hero-idea-card {
-    padding: 10px 12px;
-    border-radius: 16px;
-    background: var(--iez-surface-3);
-    border: 1px solid var(--iez-line);
-    cursor: default;
-    transition: background 0.18s, border-color 0.18s;
-}
-
-.hero-idea-card:hover {
-    background: var(--iez-surface-2);
-    border-color: var(--iez-line);
-}
-
-.hero-idea-badge {
-    display: inline-block;
-    margin: 0 0 6px;
-    padding: 2px 9px;
-    border-radius: 99px;
-    background: rgba(0, 112, 243, 0.10);
-    border: 1px solid rgba(0, 112, 243, 0.25);
-    color: var(--iez-accent);
-    font-size: 0.70rem;
-    font-weight: 700;
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
-}
-
-.hero-idea-card h3 {
-    margin: 0 0 3px;
-    font-size: 0.96rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: var(--iez-ink);
-}
-
-.hero-idea-card p {
-    margin: 0 0 10px;
-    color: var(--iez-muted);
-    font-size: 0.82rem;
-    line-height: 1.55;
-}
-
-.hero-idea-meta {
-    display: inline-flex;
-    font-size: 0.80rem;
-    font-weight: 700;
-    color: var(--iez-accent);
 }
 
 /* ─── Main layout ───────────────────────────────────────────────────────── */
@@ -1790,10 +1714,6 @@ _CSS = """
     z-index: 1;
     gap: 10px;
     margin: 0 0 8px;
-}
-
-.hero-ideas-summary {
-    grid-template-columns: minmax(0, 1fr);
 }
 
 .starter-card .template-card-copy {
@@ -2576,11 +2496,6 @@ button {
     .hero-shell {
         grid-template-columns: 1fr;
     }
-
-    .hero-ideas {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 10px;
-    }
 }
 
 @media (max-width: 900px) {
@@ -2590,10 +2505,6 @@ button {
 
     .hero-shell {
         padding: 20px 18px;
-    }
-
-    .hero-ideas {
-        grid-template-columns: 1fr;
     }
 
     .workspace-panel {

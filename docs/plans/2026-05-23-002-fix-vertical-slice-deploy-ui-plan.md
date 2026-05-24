@@ -159,3 +159,11 @@ Nine modified files sit uncommitted while `compileall` fails on deploy scripts. 
 - Parity register: `docs/knowledgebase/40-operational-risk/source-runtime-parity-register.md`
 - UI checklist: `docs/knowledgebase/50-execution/ui-fidelity-implementation-checklist-2026-05-18.md`
 - AGENTS.md hosted validation contract
+
+---
+
+### Delta Update (2026-05-23)
+
+- **Landed:** P4/P5 deploy fixes, port 7865 slice, UI fidelity CSS, STRATEGY.md, dead hero-idea CSS removed (~70 lines)
+- **Partial:** P10 hosted E2E `[OPEN]`; composer above-fold reorder deferred
+- **Next:** HF deploy + Block/Vase E2E; composer layout reorder; export-guide audit
