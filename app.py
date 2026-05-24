@@ -22,8 +22,8 @@ else:
 
 from imageezgen3d.config import load_config  # noqa: E402
 from imageezgen3d.exporters import make_box_mesh, write_glb  # noqa: E402
+from imageezgen3d import manifest_ui as _manifest_ui  # noqa: E402
 from imageezgen3d.orchestrator import (  # noqa: E402
-    PREVIEW_FALLBACK_DISCLAIMER,
     AdapterResolution,
     ImageEZOrchestrator,
 )
@@ -340,31 +340,26 @@ def _backend_display_label(value: object) -> str:
 
 
 def _is_preview_fallback(resolution: AdapterResolution) -> bool:
-    selected = str(resolution.selected or "").lower()
-    return bool(resolution.fallback_reason) and (
-        "cpu" in selected or "demo" in selected
+    return _manifest_ui.is_preview_fallback(
+        {
+            "selected_adapter": resolution.selected,
+            "fallback_reason": resolution.fallback_reason,
+        }
     )
 
 
 def _fallback_notice_html(resolution: AdapterResolution) -> str:
-    if not _is_preview_fallback(resolution):
-        return ""
-    reason = resolution.fallback_reason or resolution.message
-    return "\n".join(
-        [
-            '<section class="fallback-notice">',
-            "<p><strong>CPU preview fallback is active.</strong></p>",
-            f"<p>{escape(reason)}</p>",
-            f"<p>{escape(PREVIEW_FALLBACK_DISCLAIMER)}</p>",
-            "</section>",
-        ]
+    return _manifest_ui.fallback_banner_html(
+        {
+            "selected_adapter": resolution.selected,
+            "fallback_reason": resolution.fallback_reason,
+            "runtime_message": resolution.message,
+        }
     )
 
 
 def _quality_tier_label(quality_name: str | None) -> str:
-    if quality_name in _QUALITY_GUIDANCE:
-        return quality_name.title()
-    return "Draft"
+    return _manifest_ui.quality_tier_label(quality_name)
 
 
 def _quality_intake_html(quality_name: str | None = None) -> str:
@@ -392,53 +387,16 @@ def _quality_intake_html(quality_name: str | None = None) -> str:
 
 
 def _comprehension_exit_markdown(result: dict[str, Any]) -> str:
-    parameters = result.get("parameters", {})
-    if not isinstance(parameters, dict):
-        parameters = {}
-    quality = str(parameters.get("quality", "draft"))
-    quality_label = _quality_tier_label(quality)
-    guidance = _QUALITY_GUIDANCE.get(quality, _QUALITY_GUIDANCE["draft"])
-    adapter_key = str(
-        result.get("adapter")
-        or parameters.get("selected_adapter")
-        or parameters.get("requested_adapter")
-        or ""
-    ).lower()
-    adapter_label = _backend_display_label(adapter_key or "unknown")
-    is_preview = "cpu" in adapter_key or "demo" in adapter_key
+    return _manifest_ui.comprehension_exit_markdown(result)
 
-    lines = [
-        "## What happened",
-        f"- **Output tier:** {quality_label} — {guidance}",
-        f"- **Backend used:** {adapter_label}",
-    ]
-    if is_preview:
-        lines.append(
-            "- **Mesh type:** Preview geometry (CPU demo), not neural 3D reconstruction."
-        )
-    else:
-        lines.append("- **Mesh type:** Mesh from the selected backend path.")
 
-    if parameters.get("fallback_reason"):
-        lines.append(f"- **Fallback:** {parameters['fallback_reason']}")
-
-    lines.append("\n### Suggested next steps")
-    if is_preview:
-        lines.extend(
-            [
-                "- Review the capture score and normalized preview before another run.",
-                "- Download GLB, OBJ, and manifest when the preview looks acceptable.",
-                "- Switch to **balanced** or **high** after improving capture if you need more detail.",
-            ]
-        )
-    else:
-        lines.extend(
-            [
-                "- Reopen this run from **History** without losing prior artifacts.",
-                "- Download exports when mesh validation reports **ok**.",
-            ]
-        )
-    return "\n".join(lines)
+def _history_inspect_html(payload: dict[str, Any], missing_keys: list[str]) -> str:
+    card = _manifest_ui.run_status_card_html(payload)
+    artifacts = payload.get("artifacts", {})
+    if not isinstance(artifacts, dict):
+        artifacts = {}
+    strip = _manifest_ui.artifact_strip_html(artifacts, missing=missing_keys)
+    return "\n".join(part for part in (card, strip) if part)
 
 
 def _hero_shell_html(
@@ -609,79 +567,7 @@ def _stale_artifact_report(run_id: str, missing_keys: list[str]) -> str:
 
 
 def _format_report(result: dict[str, Any]) -> str:
-    parameters = result.get("parameters", {})
-    if not isinstance(parameters, dict):
-        parameters = {}
-    validation = result.get("validation", {})
-    mesh = result.get("mesh_report", {})
-    issues = validation.get("issues", [])
-    warnings = mesh.get("warnings", [])
-    adapter_name = (
-        result.get("adapter")
-        or parameters.get("selected_adapter")
-        or parameters.get("requested_adapter")
-        or "unknown"
-    )
-    adapter_label = _backend_display_label(adapter_name)
-    quality_name = parameters.get("quality") if isinstance(parameters, dict) else None
-    quality_label = _quality_tier_label(str(quality_name) if quality_name else None)
-    lines = [
-        _comprehension_exit_markdown(result),
-        "",
-        "---",
-        "",
-        f"### {result.get('stage', 'done').title()}",
-        f"Run ID: `{result.get('run_id', 'unknown')}`",
-        f"Output tier: **{quality_label}**",
-        f"Adapter: `{adapter_label}`",
-        f"Input score: **{validation.get('score', 'n/a')} / 100**",
-        f"Mesh status: **{mesh.get('status', 'unchecked')}**",
-    ]
-    starter_flow = parameters.get("starter_flow_label") or parameters.get(
-        "starter_flow"
-    )
-    if starter_flow:
-        lines.insert(3, f"Starter flow: **{starter_flow}**")
-    runtime = parameters.get("runtime", {})
-    if isinstance(runtime, dict):
-        lines.append("\n**Runtime Decision**")
-        lines.append(
-            f"- Requested backend: `{_backend_display_label(parameters.get('requested_adapter', 'auto'))}`"
-        )
-        lines.append(f"- Runtime mode: `{runtime.get('requested_mode', 'auto')}`")
-        lines.append(
-            f"- Executed backend: `{_backend_display_label(parameters.get('selected_adapter', adapter_name))}`"
-        )
-    if issues:
-        lines.append("\n**Input Notes**")
-        lines.extend(f"- {item}" for item in issues)
-    if warnings:
-        lines.append("\n**Mesh Notes**")
-        lines.extend(f"- {item}" for item in warnings)
-    if isinstance(parameters, dict) and parameters.get("fallback_reason"):
-        lines.append("\n**Runtime Fallback**")
-        lines.append(f"- {parameters['fallback_reason']}")
-    disclaimer = parameters.get("preview_disclaimer") if isinstance(parameters, dict) else None
-    if disclaimer:
-        lines.append("\n**Preview Disclaimer**")
-        lines.append(str(disclaimer))
-    elif isinstance(parameters, dict) and parameters.get("fallback_reason"):
-        adapter_key = str(
-            parameters.get("selected_adapter") or adapter_name or ""
-        ).lower()
-        if "cpu" in adapter_key or "demo" in adapter_key:
-            lines.append("\n**Preview Disclaimer**")
-            lines.append(PREVIEW_FALLBACK_DISCLAIMER)
-    if isinstance(parameters, dict) and parameters.get("project_brief"):
-        lines.append("\n**Project Brief**")
-        lines.append(_summarize_text(parameters["project_brief"]))
-    if isinstance(parameters, dict) and parameters.get("reference_brief_name"):
-        lines.append("\n**Attached Brief**")
-        lines.append(f"- {parameters['reference_brief_name']}")
-    lines.append(
-        "\nArtifacts are stored in the run folder and listed in the manifest; conversion never overwrites prior outputs."
-    )
-    return "\n".join(lines)
+    return _manifest_ui.format_run_report_markdown(result)
 
 
 def _error_report(message: str) -> str:
@@ -1185,6 +1071,9 @@ def build_demo():
                                 clear_color=_MODEL_CLEAR_COLOR,
                                 elem_classes="model-panel",
                             )
+                            history_inspect = gr.HTML(
+                                elem_classes="history-inspect-shell",
+                            )
                             history_status = gr.Markdown(
                                 "Select a run and open it to inspect the manifest and exports.",
                                 elem_classes="status-panel",
@@ -1315,6 +1204,7 @@ def build_demo():
             if not run_id:
                 return (
                     None,
+                    "",
                     "Select a run to inspect.",
                     None,
                     None,
@@ -1328,6 +1218,7 @@ def build_demo():
             except FileNotFoundError as exc:
                 return (
                     None,
+                    "",
                     _error_report(str(exc)),
                     None,
                     None,
@@ -1344,6 +1235,7 @@ def build_demo():
             if missing_keys:
                 return (
                     None,
+                    _history_inspect_html(payload, missing_keys),
                     _stale_artifact_report(run_id, missing_keys),
                     None,
                     None,
@@ -1358,6 +1250,7 @@ def build_demo():
             ) or verified_artifacts.get("obj")
             return (
                 history_model_path,
+                _history_inspect_html(payload, missing_keys),
                 _format_report(payload),
                 verified_artifacts.get("manifest"),
                 verified_artifacts.get("glb"),
@@ -1571,6 +1464,7 @@ def build_demo():
             inputs=[history_run],
             outputs=[
                 history_model,
+                history_inspect,
                 history_status,
                 history_manifest,
                 history_glb,
@@ -2493,6 +2387,60 @@ _CSS = """
 .history-action-row {
     gap: 10px;
     margin-top: 4px;
+}
+
+/* ─── Manifest-driven run cards ─────────────────────────────────────────── */
+.run-status-card,
+.artifact-strip {
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin: 8px 0 10px;
+    border: 1px solid var(--iez-line) !important;
+    background: var(--iez-surface-2) !important;
+    box-shadow: none !important;
+}
+
+.run-status-card * ,
+.artifact-strip * {
+    color: var(--iez-ink) !important;
+    font-size: 0.86rem !important;
+    line-height: 1.55 !important;
+}
+
+.run-status-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.run-status-chip,
+.draft-quality-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(0, 112, 243, 0.08);
+    border: 1px solid rgba(0, 112, 243, 0.14);
+    font-size: 0.78rem !important;
+    font-weight: 600;
+}
+
+.run-status-chip.fallback {
+    background: rgba(245, 158, 11, 0.10);
+    border-color: rgba(245, 158, 11, 0.22);
+}
+
+.artifact-strip ul {
+    margin: 8px 0 0 1.1rem !important;
+    padding: 0 !important;
+}
+
+.artifact-ok {
+    color: var(--iez-ink) !important;
+}
+
+.artifact-missing {
+    color: #b45309 !important;
 }
 
 /* ─── Quality intake ────────────────────────────────────────────────────── */
