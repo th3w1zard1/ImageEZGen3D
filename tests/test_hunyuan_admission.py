@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+import json
+import os
+import subprocess
+import sys
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from imageezgen3d.adapters.hunyuan import HunyuanPlaceholderAdapter
@@ -35,6 +41,23 @@ class HunyuanAdmissionTests(unittest.TestCase):
         report = format_admission_report(evaluate_admission_gates())
         self.assertIn("adapter_configured=False", report)
         self.assertIn("G9", report)
+
+    def test_audit_script_writes_record_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_path = Path(directory) / "audit.json"
+            subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/hunyuan_admission_audit.py",
+                    "--record",
+                    str(record_path),
+                ],
+                check=True,
+                env={**os.environ, "PYTHONPATH": "src"},
+            )
+            payload = json.loads(record_path.read_text(encoding="utf-8"))
+            self.assertFalse(payload["adapter_configured"])
+            self.assertEqual(len(payload["gates"]), 9)
 
 
 if __name__ == "__main__":

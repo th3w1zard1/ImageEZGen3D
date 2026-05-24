@@ -1,0 +1,22 @@
+from __future__ import annotations
+
+import unittest
+from pathlib import Path
+
+
+class WorkflowContractTests(unittest.TestCase):
+    def test_hosted_golden_smoke_workflow_runs_admission_audit(self) -> None:
+        source = Path(".github/workflows/hosted-golden-smoke.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("hunyuan_admission_audit.py", source)
+        self.assertIn("hunyuan-admission-audit.json", source)
+
+    def test_ci_workflow_runs_admission_audit_job(self) -> None:
+        source = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
+        self.assertIn("hunyuan-admission-audit:", source)
+        self.assertIn("hunyuan_admission_audit.py", source)
+
+
+if __name__ == "__main__":
+    unittest.main()
