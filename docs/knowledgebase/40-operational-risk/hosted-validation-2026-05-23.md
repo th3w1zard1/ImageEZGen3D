@@ -26,6 +26,17 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 024 validation (History compare MVP)
+
+After PR #14 branch deploy (2026-05-24) and `scripts/hosted_history_compare_smoke.py`:
+
+- **Run ids:** `20260524-181625-e4af8ed8` and `20260524-181623-469e4213` (Block sample `assets/examples/teal_block.png`, seeds 42 and 43 via smoke script)
+- **Compare:** Gradio API `/compare_history_runs` returns `## Run comparison` markdown with backend/quality/artifact diff
+- **History list:** `/history_updates` (or `_1` alias) returns ≥2 recent run labels after generates
+- **Mode:** hosted CPU fallback (`cpu-demo`)
+- **Browser:** History tab shows **Compare Runs** control on live Space
+- **Evidence:** `PYTHONPATH=src python scripts/hosted_history_compare_smoke.py` exit 0
+
 ## Plan 021 validation (History session parity)
 
 After PR #12 merge (`03b82fc` on `main`) and deploy (2026-05-24):

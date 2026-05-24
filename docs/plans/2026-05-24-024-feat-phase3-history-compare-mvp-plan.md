@@ -1,7 +1,7 @@
 ---
 title: "feat: Phase 3 history compare MVP"
 type: feat
-status: active
+status: completed
 date: 2026-05-24
 origin: docs/ideation/2026-05-24-post-trust-slice-refresh.md
 ---

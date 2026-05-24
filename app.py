@@ -1503,11 +1503,13 @@ def build_demo():
                 history_summary,
                 create_history_summary,
             ],
+            api_name="history_updates",
         )
         history_compare_btn.click(
             compare_history_runs,
             inputs=[history_run, history_compare_run],
             outputs=[history_compare],
+            api_name="compare_history_runs",
         )
         history_open.click(
             open_history_run,
