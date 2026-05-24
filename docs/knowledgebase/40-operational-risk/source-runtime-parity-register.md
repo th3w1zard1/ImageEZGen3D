@@ -18,11 +18,11 @@ Living log of surfaces where repository source, built assets, documentation, and
 | P1 | App port | `pyproject.toml` → `[tool.imageezgen3d.app].port` = 7865 | 2026-05-23 | `[REPO]` Port migrated from 7860 across config, Docker, `.env.example` | Confirm live HF Space exposes same port | `[OPEN]` |
 | P2 | Config loader default | `src/imageezgen3d/config.py` `port: int = 7865` | 2026-05-23 | Aligns with pyproject | None | OK |
 | P3 | Docker expose | `Dockerfile` EXPOSE / CMD port | 2026-05-23 | `[REPO]` Uses 7865 | Verify Space container binding | `[OPEN]` |
-| P4 | Deploy asset templates | `scripts/render_deploy_assets.py` → `deploy/` | 2026-05-23 | `[REPO]` `--container-port` default 7865; **syntax corruption** in argparse (`required=True)7865`) | Fix script before re-render; verify Helm/K8s/Nomad/Podman outputs | **BLOCKED** |
-| P5 | Deploy assets module | `src/imageezgen3d/deploy_assets.py` | 2026-05-23 | `[REPO]` **Invalid annotation** `podman_dir: Path7865787865` | Fix type annotation; run deploy_assets tests | **BLOCKED** |
+| P4 | Deploy asset templates | `scripts/render_deploy_assets.py` → `deploy/` | 2026-05-23 | `[REPO]` Stray `7865` token removed from argparse; render uses `.tmpl` only; port 7865 in outputs | Re-render on image/port changes | OK |
+| P5 | Deploy assets module | `src/imageezgen3d/deploy_assets.py` | 2026-05-23 | `[REPO]` Fixed `podman_dir: Path` annotation; `_render_tree` skips non-`.tmpl` sources | Run deploy_assets tests on deploy changes | OK |
 | P6 | Requirements vs pyproject | `requirements.txt` vs `[project.optional-dependencies]` | 2026-05-23 | Space uses requirements-first install | Diff on every dependency change | Review on dep PRs |
 | P7 | AGENTS.md vs project-intent | `AGENTS.md` vs `project-intent.md` | 2026-05-23 | `[REPO]` Intent doc previously denied AGENTS.md existence | Refreshed 2026-05-23 KB pass | OK |
-| P8 | KB vs runtime claims | KB docs vs `app.py` / exporters | 2026-05-23 | `[OPEN]` In-flight UI/export diff may ahead of export-guide | Re-check after code lands | `[OPEN]` |
+| P8 | KB vs runtime claims | KB docs vs `app.py` / exporters | 2026-05-23 | `[REPO]` UI fidelity CSS + port 7865 slice landed; export-guide not re-audited | Re-check export-guide after merge | `[OPEN]` |
 | P9 | VS Code tasks vs CI | `.vscode/tasks.json` vs `.github/workflows/ci.yml` | 2026-05-23 | `[REPO]` verification.md asserts sync | Spot-check on workflow edits | OK |
 | P10 | Live HF Space behavior | Hosted app vs README frontmatter | — | Not executed this pass | Run Block/Vase E2E; record in mode matrix evidence template | `[OPEN]` |
 
@@ -35,11 +35,11 @@ Living log of surfaces where repository source, built assets, documentation, and
 
 ## Repo Implications
 
-- Do not claim deploy parity while P4/P5 remain blocked.
+- Do not claim deploy parity while P4/P5 remain blocked. *(P4/P5 resolved 2026-05-23 in vertical-slice pass.)*
 - Port 7865 migration requires vertical slice: pyproject, config, Docker, deploy scripts, rendered templates, Space settings.
 - Hosted verification (P10) is mandatory for runtime/export PRs per `AGENTS.md`.
 
 ## Caveats
 
 - `[OPEN]` No browser validation executed during 2026-05-23 KB pass.
-- Rendered `deploy/` artifacts may still reference 7860 until P4 is fixed and templates re-rendered.
+- Rendered `deploy/` artifacts use port 7865 after 2026-05-23 vertical-slice re-render (P4 OK).

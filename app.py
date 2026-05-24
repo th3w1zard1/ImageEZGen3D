@@ -357,17 +357,6 @@ def _hero_shell_html(title: str, resolution: AdapterResolution) -> str:
         )
         for label, value in chips
     )
-    quick_html = "".join(
-        (
-            '<article class="hero-idea-card">'
-            f'<span class="hero-idea-badge">{escape(str(template["badge"]))}</span>'
-            f"<h3>{escape(str(template['title']))}</h3>"
-            f"<p>{escape(str(template['summary']))}</p>"
-            f'<span class="hero-idea-meta">{escape(_STARTER_FLOW_BY_KEY[str(template["starter"])] ["label"])} · {escape(str(template["quality"]).title())}</span>'
-            "</article>"
-        )
-        for template in _PROMPT_TEMPLATES[:3]
-    )
     return "\n".join(
         [
             '<section class="hero-shell">',
@@ -376,15 +365,10 @@ def _hero_shell_html(title: str, resolution: AdapterResolution) -> str:
             f"<h1>{escape(title)}</h1>",
             (
                 '<p class="hero-copy-text">'
-                "Start with one primary image and a short brief. Generate quickly, then refine with presets and optional views."
+                "One image, one brief \u2014 generate a 3D mesh in seconds."
                 "</p>"
             ),
-            f'<p class="hero-runtime-note">{escape(resolution.message)}</p>',
             f'<div class="hero-chip-row">{chip_html}</div>',
-            "</div>",
-            '<div class="hero-ideas">',
-            '<div class="hero-ideas-header">Quick starts</div>',
-            quick_html,
             "</div>",
             "</section>",
         ]
@@ -591,19 +575,14 @@ def _starter_spec(starter_key: str | None) -> dict[str, str]:
     return _STARTER_FLOW_BY_KEY[_DEFAULT_STARTER]
 
 
-def _starter_markdown(starter_key: str | None) -> str:
+def _mode_summary_markdown(starter_key: str | None, quality_name: str | None) -> str:
     starter = _starter_spec(starter_key)
+    quality = quality_name if quality_name in _QUALITY_GUIDANCE else starter["quality"]
     return (
-        f"**{starter['label']}**\n\n"
-        f"{starter['summary']}\n\n"
-        f"Capture guidance: {starter['capture']}\n\n"
-        f"Suggested quality: **{starter['quality'].title()}**"
+        f"**{starter['label']}** · {starter['summary']}\n\n"
+        f"**{quality.title()} mode** — {_QUALITY_GUIDANCE[quality]}\n\n"
+        f"Capture hint: {starter['capture']}"
     )
-
-
-def _quality_markdown(quality_name: str | None) -> str:
-    quality = quality_name if quality_name in _QUALITY_GUIDANCE else "draft"
-    return f"**{quality.title()}**\n\n{_QUALITY_GUIDANCE[quality]}"
 
 
 def _capture_check_markdown(
@@ -759,17 +738,31 @@ def build_demo():
 
         with gr.Tabs(elem_classes="workspace-tabs"):
             with gr.Tab("Create"):
-                gr.HTML(_hero_shell_html(config.app.title, resolution))
                 with gr.Row(equal_height=False, elem_classes="workspace-layout"):
-                    with gr.Column(scale=7, min_width=720, elem_classes="main-column"):
+                    with gr.Column(scale=8, min_width=760, elem_classes="main-column"):
                         with gr.Group(elem_classes="workspace-panel composer-panel"):
-                            gr.HTML(
-                                _surface_header_html(
-                                    "Create",
-                                    "Lead with one dominant composer",
-                                    "Borrow the strongest pattern from the five reference apps: keep the brief, hero image, controls, and action in one unmistakable creation surface.",
-                                )
-                            )
+                            gr.HTML(_hero_shell_html(config.app.title, resolution))
+                            template_buttons: list[tuple[Any, str]] = []
+                            with gr.Row(
+                                equal_height=False,
+                                elem_classes="starter-card-row",
+                            ):
+                                for template in _PROMPT_TEMPLATES[:3]:
+                                    with gr.Column(scale=1, min_width=210):
+                                        with gr.Group(
+                                            elem_classes="template-card starter-card"
+                                        ):
+                                            gr.HTML(
+                                                _prompt_template_card_html(template)
+                                            )
+                                            template_button = gr.Button(
+                                                f"Use {template['title']}",
+                                                variant="secondary",
+                                                elem_classes="template-apply",
+                                            )
+                                            template_buttons.append(
+                                                (template_button, str(template["key"]))
+                                            )
                             with gr.Row(
                                 equal_height=False, elem_classes="composer-grid"
                             ):
@@ -791,6 +784,32 @@ def build_demo():
                                         sources=["upload", "clipboard"],
                                         elem_classes="primary-input composer-primary",
                                     )
+                                    with gr.Accordion(
+                                        "Repo-local sample captures",
+                                        open=False,
+                                        elem_classes="sample-capture-accordion",
+                                    ):
+                                        with gr.Row(
+                                            equal_height=False,
+                                            elem_classes="sample-pack-row",
+                                        ):
+                                            for pack in sample_packs:
+                                                with gr.Column(scale=1, min_width=210):
+                                                    with gr.Group(
+                                                        elem_classes="sample-pack-surface"
+                                                    ):
+                                                        gr.HTML(
+                                                            _sample_pack_header_html(
+                                                                pack
+                                                            )
+                                                        )
+                                                        gr.Examples(
+                                                            examples=pack["examples"],
+                                                            inputs=[primary],
+                                                            examples_per_page=pack[
+                                                                "count"
+                                                            ],
+                                                        )
                                     with gr.Accordion(
                                         "Optional labeled views",
                                         open=False,
@@ -831,10 +850,10 @@ def build_demo():
                                             variant="primary",
                                             elem_classes="generate-button composer-cta",
                                         )
-                                        gr.Markdown(
-                                            "Generate early, then refine with presets or advanced controls.",
-                                            elem_classes="subtle-note action-note",
-                                        )
+                                    gr.Markdown(
+                                        "Generate early, then refine with presets or advanced controls.",
+                                        elem_classes="subtle-note action-note",
+                                    )
                                     starter = gr.Dropdown(
                                         label="Starter flow",
                                         choices=[
@@ -848,6 +867,13 @@ def build_demo():
                                         choices=["draft", "balanced", "high"],
                                         value=config.generation.quality,
                                         elem_classes="quality-pills composer-control",
+                                    )
+                                    mode_summary = gr.Markdown(
+                                        _mode_summary_markdown(
+                                            _DEFAULT_STARTER,
+                                            config.generation.quality,
+                                        ),
+                                        elem_classes="note-panel compact-note mode-summary",
                                     )
                                     with gr.Accordion(
                                         "Advanced run controls",
@@ -872,100 +898,8 @@ def build_demo():
                                             type="filepath",
                                             elem_classes="reference-brief",
                                         )
-                                    with gr.Accordion(
-                                        "Live guidance",
-                                        open=False,
-                                        elem_classes="helper-accordion",
-                                    ):
-                                        with gr.Row(
-                                            equal_height=False,
-                                            elem_classes="support-grid compact-support-grid",
-                                        ):
-                                            with gr.Column(scale=1, min_width=220):
-                                                starter_help = gr.Markdown(
-                                                    _starter_markdown(_DEFAULT_STARTER),
-                                                    elem_classes="note-panel compact-note",
-                                                )
-                                            with gr.Column(scale=1, min_width=220):
-                                                quality_help = gr.Markdown(
-                                                    _quality_markdown(
-                                                        config.generation.quality
-                                                    ),
-                                                    elem_classes="note-panel compact-note",
-                                                )
 
-                        with gr.Accordion(
-                            "Launch kits",
-                            open=False,
-                            elem_classes="launch-kits-accordion",
-                        ):
-                            with gr.Group(elem_classes="workspace-panel template-panel"):
-                                gr.HTML(
-                                    _surface_header_html(
-                                        "Prompt Lab",
-                                        "Apply visual launch kits",
-                                        "Keep quick starts visual, compact, and immediately actionable instead of burying them in plain text.",
-                                    )
-                                )
-                                template_buttons: list[tuple[Any, str]] = []
-                                for row_start in range(0, len(_PROMPT_TEMPLATES), 3):
-                                    with gr.Row(
-                                        equal_height=True,
-                                        elem_classes="template-grid-row",
-                                    ):
-                                        for template in _PROMPT_TEMPLATES[
-                                            row_start : row_start + 3
-                                        ]:
-                                            with gr.Column(scale=1, min_width=220):
-                                                with gr.Group(elem_classes="template-card"):
-                                                    gr.HTML(
-                                                        _prompt_template_card_html(template)
-                                                    )
-                                                    template_button = gr.Button(
-                                                        f"Use {template['title']}",
-                                                        variant="secondary",
-                                                        elem_classes="template-apply",
-                                                    )
-                                                    template_buttons.append(
-                                                        (
-                                                            template_button,
-                                                            str(template["key"]),
-                                                        )
-                                                    )
-
-                        with gr.Accordion(
-                            "Sample captures",
-                            open=False,
-                            elem_classes="discover-accordion",
-                        ):
-                            with gr.Group(elem_classes="workspace-panel discover-panel"):
-                                gr.HTML(
-                                    _surface_header_html(
-                                        "Discover",
-                                        "Browse repo-local starter captures",
-                                        "Keep the strongest browse behavior from the reference apps: image-led starter choices that are visible before you commit to a run.",
-                                    )
-                                )
-                                gr.Markdown(
-                                    _sample_packs_note(sample_packs),
-                                    elem_classes="subtle-note discover-note",
-                                )
-                                with gr.Row(
-                                    equal_height=False, elem_classes="sample-pack-row"
-                                ):
-                                    for pack in sample_packs:
-                                        with gr.Column(scale=1, min_width=210):
-                                            with gr.Group(
-                                                elem_classes="sample-pack-surface"
-                                            ):
-                                                gr.HTML(_sample_pack_header_html(pack))
-                                                gr.Examples(
-                                                    examples=pack["examples"],
-                                                    inputs=[primary],
-                                                    examples_per_page=pack["count"],
-                                                )
-
-                    with gr.Column(scale=5, min_width=360, elem_classes="rail-column"):
+                    with gr.Column(scale=4, min_width=340, elem_classes="rail-column"):
                         with gr.Group(elem_classes="workspace-panel rail-panel"):
                             gr.HTML(
                                 _surface_header_html(
@@ -1197,8 +1131,7 @@ def build_demo():
             return (
                 quality_value,
                 brief_value,
-                _starter_markdown(starter_spec["key"]),
-                _quality_markdown(quality_value),
+                _mode_summary_markdown(starter_spec["key"], quality_value),
                 preview,
                 status_text,
             )
@@ -1215,9 +1148,8 @@ def build_demo():
             return (
                 starter_key,
                 str(template["brief"]),
-                _starter_markdown(starter_key),
                 quality_value,
-                _quality_markdown(quality_value),
+                _mode_summary_markdown(starter_key, quality_value),
                 preview,
                 status_text,
             )
@@ -1226,7 +1158,11 @@ def build_demo():
             preview, status_text = preview_primary(
                 primary_image, starter_key, quality_name
             )
-            return _quality_markdown(quality_name), preview, status_text
+            return (
+                _mode_summary_markdown(starter_key, quality_name),
+                preview,
+                status_text,
+            )
 
         def open_history_run(history_choice):
             run_id = _selected_run_id(history_choice)
@@ -1408,8 +1344,7 @@ def build_demo():
             outputs=[
                 quality,
                 project_brief,
-                starter_help,
-                quality_help,
+                mode_summary,
                 validation_preview,
                 validation_status,
             ],
@@ -1417,7 +1352,7 @@ def build_demo():
         quality.change(
             update_quality_help,
             inputs=[quality, primary, starter],
-            outputs=[quality_help, validation_preview, validation_status],
+            outputs=[mode_summary, validation_preview, validation_status],
         )
         for template_button, template_key in template_buttons:
             template_button.click(
@@ -1429,9 +1364,8 @@ def build_demo():
                 outputs=[
                     starter,
                     project_brief,
-                    starter_help,
                     quality,
-                    quality_help,
+                    mode_summary,
                     validation_preview,
                     validation_status,
                 ],
@@ -1585,40 +1519,29 @@ _CSS = """
 /* ─── Hero ───────────────────────────────────────────────────────────────── */
 .hero-shell {
     display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.8fr);
-    gap: 22px;
-    padding: 26px 30px;
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 14px 22px;
     border-radius: var(--r-xl);
-    margin-bottom: 18px;
+    margin-bottom: 10px;
     overflow: hidden;
     position: relative;
-    background: var(--iez-ink);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: var(--shadow-xl);
-    color: white;
+    background: var(--iez-surface);
+    border: 1px solid var(--iez-line);
+    box-shadow: var(--shadow-md);
+    color: var(--iez-ink);
 }
 
 .hero-shell::before {
     content: "";
     position: absolute;
-    inset: -60% -30% -20% 20%;
-    background: conic-gradient(
-        from 200deg at 70% 40%,
-        rgba(0, 112, 243, 0.45),
-        rgba(124, 58, 237, 0.38),
-        rgba(0, 166, 126, 0.28),
-        rgba(0, 112, 243, 0.0)
-    );
-    filter: blur(72px);
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0, 112, 243, 0.04) 0%, rgba(124, 58, 237, 0.02) 100%);
     pointer-events: none;
 }
 
 .hero-shell::after {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(circle at 15% 50%, rgba(0, 112, 243, 0.12) 0%, transparent 50%);
-    pointer-events: none;
+    display: none;
 }
 
 .hero-copy {
@@ -1632,67 +1555,66 @@ _CSS = """
 .hero-copy .surface-eyebrow {
     display: block;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    font-size: 0.70rem;
     font-weight: 700;
-    color: rgba(130, 190, 255, 0.92);
-    margin: 0 0 16px;
+    color: var(--iez-accent);
+    margin: 0 0 6px;
 }
 
 .hero-copy h1 {
-    margin: 0 0 10px;
-    font-size: clamp(2rem, 2.5vw + 0.8rem, 3.2rem);
+    margin: 0 0 8px;
+    font-size: clamp(1.7rem, 2.1vw + 0.7rem, 2.6rem);
     line-height: 0.92;
     letter-spacing: -0.055em;
-    color: white;
+    color: var(--iez-ink);
     font-weight: 800;
 }
 
 .hero-copy-text {
     max-width: 56ch;
-    margin: 0 0 10px;
-    color: rgba(255, 255, 255, 0.68);
+    margin: 0 0 6px;
+    color: var(--iez-muted);
     font-size: 1.05rem;
     line-height: 1.7;
 }
 
 .hero-runtime-note {
-    margin: 0 0 14px;
-    color: rgba(255, 255, 255, 0.50);
+    margin: 0 0 10px;
+    color: var(--iez-muted-lighter);
     font-size: 0.88rem;
 }
 
 .hero-chip-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 4px;
+    gap: 8px;
+    margin-top: 10px;
 }
 
 .hero-chip {
-    padding: 9px 12px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    backdrop-filter: blur(12px);
-    min-width: 120px;
+    padding: 9px 13px;
+    border-radius: 12px;
+    background: var(--iez-surface-2);
+    border: 1px solid var(--iez-line);
+    flex: 1 1 120px;
 }
 
 .hero-chip-label {
     display: block;
     text-transform: uppercase;
-    letter-spacing: 0.16em;
-    font-size: 0.68rem;
+    letter-spacing: 0.13em;
+    font-size: 0.65rem;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.50);
-    margin: 0 0 6px;
+    color: var(--iez-muted-2);
+    margin: 0 0 5px;
 }
 
 .hero-chip-value {
     display: block;
     font-size: 0.92rem;
-    font-weight: 700;
-    color: white;
+    font-weight: 800;
+    color: var(--iez-ink);
 }
 
 /* Hero sidebar — launch kit cards */
@@ -1701,7 +1623,7 @@ _CSS = """
     z-index: 1;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+    gap: 8px;
     align-content: start;
 }
 
@@ -1711,32 +1633,32 @@ _CSS = """
     letter-spacing: 0.16em;
     font-size: 0.70rem;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.44);
+    color: var(--iez-muted);
     margin: 0 0 4px;
 }
 
 .hero-idea-card {
-    padding: 12px 14px;
+    padding: 10px 12px;
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: var(--iez-surface-3);
+    border: 1px solid var(--iez-line);
     cursor: default;
     transition: background 0.18s, border-color 0.18s;
 }
 
 .hero-idea-card:hover {
-    background: rgba(255, 255, 255, 0.10);
-    border-color: rgba(255, 255, 255, 0.16);
+    background: var(--iez-surface-2);
+    border-color: var(--iez-line);
 }
 
 .hero-idea-badge {
     display: inline-block;
-    margin: 0 0 8px;
+    margin: 0 0 6px;
     padding: 2px 9px;
     border-radius: 99px;
-    background: rgba(0, 112, 243, 0.28);
-    border: 1px solid rgba(0, 112, 243, 0.38);
-    color: rgba(140, 196, 255, 0.96);
+    background: rgba(0, 112, 243, 0.10);
+    border: 1px solid rgba(0, 112, 243, 0.25);
+    color: var(--iez-accent);
     font-size: 0.70rem;
     font-weight: 700;
     letter-spacing: 0.10em;
@@ -1744,16 +1666,16 @@ _CSS = """
 }
 
 .hero-idea-card h3 {
-    margin: 0 0 5px;
+    margin: 0 0 3px;
     font-size: 0.96rem;
     font-weight: 700;
     line-height: 1.2;
-    color: white;
+    color: var(--iez-ink);
 }
 
 .hero-idea-card p {
     margin: 0 0 10px;
-    color: rgba(255, 255, 255, 0.58);
+    color: var(--iez-muted);
     font-size: 0.82rem;
     line-height: 1.55;
 }
@@ -1762,7 +1684,7 @@ _CSS = """
     display: inline-flex;
     font-size: 0.80rem;
     font-weight: 700;
-    color: rgba(100, 175, 255, 0.92);
+    color: var(--iez-accent);
 }
 
 /* ─── Main layout ───────────────────────────────────────────────────────── */
@@ -1824,45 +1746,34 @@ _CSS = """
     position: relative;
     overflow: hidden;
     border: none !important;
-    background: var(--iez-ink) !important;
-    box-shadow: var(--shadow-xl) !important;
+    background: var(--iez-surface) !important;
+    box-shadow: var(--shadow-lg) !important;
 }
 
 .composer-panel::before {
     content: "";
     position: absolute;
-    top: -40%; right: -20%; bottom: 0; left: 30%;
-    background: conic-gradient(
-        from 160deg at 60% 30%,
-        rgba(0, 112, 243, 0.40),
-        rgba(124, 58, 237, 0.32),
-        rgba(0, 166, 126, 0.22),
-        transparent
-    );
-    filter: blur(80px);
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0, 112, 243, 0.02) 0%, rgba(124, 58, 237, 0.01) 100%);
     pointer-events: none;
 }
 
 .composer-panel::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 8% 80%, rgba(0, 112, 243, 0.10), transparent 45%);
-    pointer-events: none;
+    display: none;
 }
 
 .composer-panel .surface-header-copy .surface-eyebrow {
-    color: rgba(100, 190, 255, 0.86) !important;
+    color: var(--iez-accent) !important;
 }
 
 .composer-panel .surface-header-copy h2 {
-    color: white !important;
+    color: var(--iez-ink) !important;
     font-size: clamp(1.65rem, 1.7vw + 0.9rem, 2.2rem);
     max-width: 22ch;
 }
 
 .composer-panel .surface-header-copy .surface-copy {
-    color: rgba(255, 255, 255, 0.60) !important;
+    color: var(--iez-muted) !important;
     max-width: 62ch;
 }
 
@@ -1874,6 +1785,54 @@ _CSS = """
     align-items: stretch;
 }
 
+.starter-card-row {
+    position: relative;
+    z-index: 1;
+    gap: 10px;
+    margin: 0 0 8px;
+}
+
+.hero-ideas-summary {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.starter-card .template-card-copy {
+    min-height: unset;
+    padding: 14px 16px 12px;
+    gap: 6px;
+}
+
+.starter-card .template-card-meta {
+    display: none;
+}
+
+.starter-card .template-card-summary {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    font-size: 0.88rem;
+}
+
+.sample-capture-accordion {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--iez-line);
+    background: var(--iez-surface-2);
+}
+
+.sample-capture-accordion > button {
+    min-height: 48px !important;
+    background: var(--iez-surface-3) !important;
+    color: var(--iez-ink) !important;
+    border-bottom: 1px solid var(--iez-line) !important;
+}
+
+.mode-summary {
+    margin-top: 2px;
+}
+
 .composer-media-column,
 .composer-control-column {
     display: grid;
@@ -1881,20 +1840,20 @@ _CSS = """
     align-content: start;
 }
 
-/* Dark Gradio blocks inside composer */
+/* Light Gradio blocks inside composer */
 .composer-panel .block,
 .composer-panel fieldset.block,
 .composer-panel .form .block {
     border-radius: 18px !important;
-    border: 1px solid rgba(255, 255, 255, 0.09) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--iez-line) !important;
+    background: var(--iez-surface) !important;
     box-shadow: none !important;
 }
 
 .composer-panel [data-testid="block-info"],
 .composer-panel [data-testid="block-label"],
 .composer-panel label span {
-    color: rgba(255, 255, 255, 0.60) !important;
+    color: var(--iez-muted) !important;
     font-weight: 700 !important;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -1907,12 +1866,12 @@ _CSS = """
 .composer-panel .wrap-inner,
 .composer-panel .input-container {
     background: transparent !important;
-    color: rgba(255, 255, 255, 0.92) !important;
+    color: var(--iez-ink) !important;
 }
 
 .composer-panel textarea::placeholder,
 .composer-panel input::placeholder {
-    color: rgba(255, 255, 255, 0.36) !important;
+    color: var(--iez-muted-lighter) !important;
 }
 
 .composer-panel .composer-brief textarea {
@@ -1939,8 +1898,8 @@ _CSS = """
 
 .composer-panel .quality-pills label {
     border-radius: 99px !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    background: rgba(255, 255, 255, 0.07) !important;
+    border: 1px solid var(--iez-line) !important;
+    background: var(--iez-surface-2) !important;
     padding: 9px 18px !important;
     transition: background 0.18s, border-color 0.18s, box-shadow 0.18s;
 }
@@ -1952,8 +1911,12 @@ _CSS = """
 }
 
 .composer-panel .quality-pills label span {
-    color: white !important;
+    color: var(--iez-ink) !important;
     font-weight: 600;
+}
+
+.composer-panel .quality-pills label.selected span {
+    color: white !important;
 }
 
 /* Compact notes inside composer */
@@ -1962,17 +1925,17 @@ _CSS = """
 }
 
 .composer-panel .note-panel {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: var(--iez-surface-2) !important;
+    border: 1px solid var(--iez-line) !important;
     border-radius: 16px;
 }
 
 .composer-panel .note-panel * {
-    color: rgba(255, 255, 255, 0.76) !important;
+    color: var(--iez-muted) !important;
 }
 
 .composer-panel .note-panel strong {
-    color: rgba(255, 255, 255, 0.96) !important;
+    color: var(--iez-ink) !important;
 }
 
 /* Composer footer */
@@ -1980,10 +1943,10 @@ _CSS = """
     position: relative;
     z-index: 1;
     margin-top: 8px;
-    padding: 16px 20px;
+    padding: 10px 14px !important;
     border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--iez-line);
+    background: var(--iez-surface-2);
     align-items: center;
 }
 
@@ -1994,8 +1957,8 @@ _CSS = """
 .advanced-accordion,
 .helper-accordion {
     border-radius: 14px !important;
-    border: 1px solid rgba(255, 255, 255, 0.10) !important;
-    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid var(--iez-line) !important;
+    background: var(--iez-surface-2) !important;
 }
 
 .advanced-accordion > button,
@@ -2004,13 +1967,21 @@ _CSS = """
     font-size: 0.84rem !important;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.78) !important;
+    color: var(--iez-muted) !important;
 }
 
-.composer-footer .action-note,
-.composer-footer .action-note * {
-    color: rgba(255, 255, 255, 0.56) !important;
+.action-note,
+.action-note * {
+    color: var(--iez-muted) !important;
     font-size: 0.88rem !important;
+}
+
+.action-note.block {
+    padding: 4px 0 !important;
+    min-height: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 /* Generate button */
@@ -2319,6 +2290,48 @@ _CSS = """
     transform: scale(1.05);
 }
 
+/* ─── Rail column: compact, secondary to composer ───────────────────────── */
+.rail-column .workspace-panel {
+    padding: 18px 20px;
+    box-shadow: var(--shadow-xs) !important;
+}
+
+.rail-column .surface-header-copy {
+    margin-bottom: 12px;
+}
+
+.rail-column .surface-header-copy .surface-copy {
+    display: none;
+}
+
+.rail-column .surface-header-copy h2 {
+    font-size: 1.08rem !important;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+
+.rail-column .surface-header-copy .surface-eyebrow {
+    margin-bottom: 4px;
+    font-size: 0.65rem;
+}
+
+.rail-column .status-panel {
+    padding: 10px 12px;
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+
+.rail-column .preview-panel .status-panel,
+.rail-column .validation-panel .status-panel {
+    padding: 8px 10px;
+    font-size: 0.80rem;
+    line-height: 1.45;
+}
+
+.main-column .composer-panel {
+    box-shadow: var(--shadow-lg) !important;
+}
+
 /* ─── Rail panel (project history) ──────────────────────────────────────── */
 .rail-panel {
     position: sticky;
@@ -2439,12 +2452,12 @@ _CSS = """
 
 /* ─── Artifact files ────────────────────────────────────────────────────── */
 .artifact-row {
-    gap: 10px;
+    gap: 6px;
 }
 
 .artifact-file {
     min-width: 0;
-    min-height: 64px;
+    min-height: 48px;
     overflow: hidden !important;
     border: 1px solid var(--iez-line) !important;
     border-radius: 14px !important;
@@ -2462,8 +2475,8 @@ _CSS = """
 }
 
 .artifact-file .empty.large {
-    min-height: 38px !important;
-    height: 38px !important;
+    min-height: 26px !important;
+    height: 26px !important;
     margin-top: 0 !important;
     padding: 0 !important;
 }
@@ -2491,8 +2504,8 @@ _CSS = """
 /* ─── Capture preview ───────────────────────────────────────────────────── */
 .capture-preview-img > div[data-testid="empty"],
 .capture-preview-img .empty {
-    min-height: 110px !important;
-    height: 110px !important;
+    min-height: 72px !important;
+    height: 72px !important;
 }
 
 .capture-preview-img .empty .wrap span,
@@ -2503,14 +2516,18 @@ _CSS = """
 /* ─── 3D Model viewer ───────────────────────────────────────────────────── */
 .model-panel canvas,
 .model-panel model-viewer {
-    min-height: 200px;
+    min-height: 84px;
     border-radius: 16px;
 }
 
 .model-panel > .wrap > .empty,
-.model-panel > div > .empty {
-    min-height: 120px !important;
-    height: 120px !important;
+.model-panel > div > .empty,
+.model-panel .empty.large,
+.model-panel .empty.unpadded_box,
+.model-panel [data-testid="empty"] {
+    min-height: 84px !important;
+    height: 84px !important;
+    padding: 0 !important;
 }
 
 /* ─── Misc Gradio overrides ─────────────────────────────────────────────── */
