@@ -26,6 +26,15 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 046 validation (PR #28 merge to main)
+
+After squash-merge PR #28 (`3d638ac` on `main`, 2026-05-24):
+
+- **Merge:** Plan 045 ship docs (ideation + `hosted-validation` Plan 045 section + completed plan file)
+- **Post-trust guardrail track:** marked complete in ideation; no Space redeploy required
+- **Sanity:** `PYTHONPATH=src .venv/bin/python -m unittest discover -s tests` on `main` after merge
+- **Mode:** hosted CPU fallback unchanged; Hunyuan **not** enabled
+
 ## Plan 045 validation (PR #27 merge to main)
 
 After squash-merge PR #27 (`b2eebd2` on `main`, 2026-05-24):
