@@ -96,6 +96,15 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         self.assertIn("High mode", summary)
         self.assertIn("Capture hint:", summary)
 
+    def test_create_tab_places_composer_before_starter_cards(self) -> None:
+        source = Path(app.__file__).read_text(encoding="utf-8")
+        create_section = source.split('with gr.Tab("Create"):')[1].split(
+            'with gr.Tab("History")'
+        )[0]
+        composer_idx = create_section.index('elem_classes="composer-grid"')
+        starter_idx = create_section.index('elem_classes="starter-card-row"')
+        self.assertLess(composer_idx, starter_idx)
+
     def test_verified_artifact_state_filters_missing_files(self) -> None:
         store = RunStore(Path.cwd() / "outputs")
         with patch.object(store, "artifact_value", side_effect=["/tmp/mesh.glb", None]):

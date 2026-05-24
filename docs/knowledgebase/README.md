@@ -40,6 +40,7 @@ Navigation map for all knowledgebase documents. Use this index to find authority
 
 | Doc | Rank | Purpose |
 |-----|------|---------|
+| [20-theory/frontier-image-to-3d-2026-05-23.md](20-theory/frontier-image-to-3d-2026-05-23.md) | Frontier | Tier-3 image-to-3D trends (May 2026); not product truth |
 | [3d-reconstruction-theory.md](3d-reconstruction-theory.md) | Frontier | Reconstruction approaches and tradeoffs |
 | [evaluation-metrics.md](evaluation-metrics.md) | Frontier | Quality framing and metrics |
 | [capture-guide.md](capture-guide.md) | Companion | Input capture guidance |

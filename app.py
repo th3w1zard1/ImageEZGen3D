@@ -744,26 +744,6 @@ def build_demo():
                             gr.HTML(_hero_shell_html(config.app.title, resolution))
                             template_buttons: list[tuple[Any, str]] = []
                             with gr.Row(
-                                equal_height=False,
-                                elem_classes="starter-card-row",
-                            ):
-                                for template in _PROMPT_TEMPLATES[:3]:
-                                    with gr.Column(scale=1, min_width=210):
-                                        with gr.Group(
-                                            elem_classes="template-card starter-card"
-                                        ):
-                                            gr.HTML(
-                                                _prompt_template_card_html(template)
-                                            )
-                                            template_button = gr.Button(
-                                                f"Use {template['title']}",
-                                                variant="secondary",
-                                                elem_classes="template-apply",
-                                            )
-                                            template_buttons.append(
-                                                (template_button, str(template["key"]))
-                                            )
-                            with gr.Row(
                                 equal_height=False, elem_classes="composer-grid"
                             ):
                                 with gr.Column(
@@ -898,6 +878,26 @@ def build_demo():
                                             type="filepath",
                                             elem_classes="reference-brief",
                                         )
+                            with gr.Row(
+                                equal_height=False,
+                                elem_classes="starter-card-row",
+                            ):
+                                for template in _PROMPT_TEMPLATES[:3]:
+                                    with gr.Column(scale=1, min_width=210):
+                                        with gr.Group(
+                                            elem_classes="template-card starter-card"
+                                        ):
+                                            gr.HTML(
+                                                _prompt_template_card_html(template)
+                                            )
+                                            template_button = gr.Button(
+                                                f"Use {template['title']}",
+                                                variant="secondary",
+                                                elem_classes="template-apply",
+                                            )
+                                            template_buttons.append(
+                                                (template_button, str(template["key"]))
+                                            )
 
                     with gr.Column(scale=4, min_width=340, elem_classes="rail-column"):
                         with gr.Group(elem_classes="workspace-panel rail-panel"):
@@ -1674,6 +1674,15 @@ _CSS = """
     box-shadow: var(--shadow-lg) !important;
 }
 
+.composer-panel .hero-shell {
+    padding: 10px 18px;
+    margin-bottom: 6px;
+}
+
+.composer-panel .hero-copy h1 {
+    font-size: clamp(1.4rem, 1.5vw + 0.6rem, 2rem) !important;
+}
+
 .composer-panel::before {
     content: "";
     position: absolute;
@@ -1713,7 +1722,7 @@ _CSS = """
     position: relative;
     z-index: 1;
     gap: 10px;
-    margin: 0 0 8px;
+    margin: 12px 0 0;
 }
 
 .starter-card .template-card-copy {
