@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import unittest
 
 from imageezgen3d import manifest_ui as mu
@@ -78,6 +79,39 @@ class ManifestUiTests(unittest.TestCase):
 
         self.assertIn("## Run comparison", report)
         self.assertIn("All compared fields match", report)
+
+    def test_compare_runs_payload_lists_changed_fields(self) -> None:
+        payload = mu.compare_runs_payload(
+            {
+                "run_id": "run-left",
+                "adapter": "cpu-demo",
+                "quality": "draft",
+                "validation": {"score": 70},
+                "parameters": {"quality": "draft"},
+                "artifacts": {"glb": "/tmp/left.glb", "obj": "/tmp/left.obj"},
+            },
+            {
+                "run_id": "run-right",
+                "adapter": "hunyuan-zerogpu",
+                "quality": "balanced",
+                "validation": {"score": 88},
+                "parameters": {"quality": "balanced"},
+                "artifacts": {"glb": "/tmp/right.glb"},
+            },
+        )
+
+        self.assertEqual(payload["left_run_id"], "run-left")
+        self.assertIn("Backend", payload["changed_fields"])
+        self.assertEqual(payload["artifacts_only_on_left"], ["obj"])
+
+    def test_compare_runs_json_is_valid_payload(self) -> None:
+        raw = mu.compare_runs_json(
+            {"run_id": "a", "adapter": "cpu-demo", "artifacts": {}},
+            {"run_id": "b", "adapter": "cpu-demo", "artifacts": {"glb": "/x"}},
+        )
+        parsed = json.loads(raw)
+        self.assertEqual(parsed["left_run_id"], "a")
+        self.assertIn("glb", parsed["artifacts_only_on_right"])
 
     def test_compare_runs_highlights_adapter_and_artifact_diffs(self) -> None:
         left = {

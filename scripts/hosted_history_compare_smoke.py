@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 import tempfile
@@ -125,16 +126,38 @@ def main(argv: list[str] | None = None) -> int:
     if primary == secondary:
         print("FAIL: history compare needs two distinct runs", file=sys.stderr)
         return 1
-    compare_md = client.predict(
+    compare_result = client.predict(
         primary,
         secondary,
         api_name="/compare_history_runs",
     )
-    text = compare_md if isinstance(compare_md, str) else str(compare_md)
+    if isinstance(compare_result, (list, tuple)):
+        text = str(compare_result[0] or "")
+        json_export = compare_result[1] if len(compare_result) > 1 else None
+    else:
+        text = str(compare_result)
+        json_export = None
     if "## Run comparison" not in text:
         print("FAIL: compare markdown missing expected header", file=sys.stderr)
         print(text[:1200], file=sys.stderr)
         return 1
+    if json_export:
+        export_path = Path(str(json_export))
+        if not export_path.is_file():
+            print(
+                f"FAIL: compare JSON export path missing: {export_path}",
+                file=sys.stderr,
+            )
+            return 1
+        payload = json.loads(export_path.read_text(encoding="utf-8"))
+        for key in ("left_run_id", "right_run_id", "changed_fields"):
+            if key not in payload:
+                print(f"FAIL: compare JSON missing {key!r}", file=sys.stderr)
+                return 1
+        print(
+            "Compare JSON export ok "
+            f"({len(payload.get('changed_fields', []))} changed field(s))"
+        )
 
     print("OK: hosted history compare smoke passed")
     print(text.splitlines()[0])

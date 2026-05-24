@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from html import escape
 from typing import Any, Mapping
 
@@ -349,13 +350,68 @@ def _compare_cell(value: Any) -> str:
     return str(value)
 
 
+def compare_runs_payload(
+    left: Mapping[str, Any],
+    right: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Structured manifest diff for two runs (export + UI)."""
+    left_snapshot = _run_compare_snapshot(left)
+    right_snapshot = _run_compare_snapshot(right)
+    rows = [
+        ("Run ID", left_snapshot["run_id"], right_snapshot["run_id"]),
+        ("Stage", left_snapshot["stage"], right_snapshot["stage"]),
+        ("Backend", left_snapshot["adapter"], right_snapshot["adapter"]),
+        ("Quality tier", left_snapshot["quality"], right_snapshot["quality"]),
+        ("Input score", left_snapshot["score"], right_snapshot["score"]),
+        ("Starter flow", left_snapshot["starter"], right_snapshot["starter"]),
+        ("Mesh status", left_snapshot["mesh_status"], right_snapshot["mesh_status"]),
+        (
+            "Fallback",
+            left_snapshot["fallback"] or "—",
+            right_snapshot["fallback"] or "—",
+        ),
+        (
+            "Artifacts",
+            ", ".join(left_snapshot["artifact_keys"]) or "none",
+            ", ".join(right_snapshot["artifact_keys"]) or "none",
+        ),
+    ]
+    changed: list[str] = []
+    for label, left_value, right_value in rows:
+        if _compare_cell(left_value) != _compare_cell(right_value) and label != "Run ID":
+            changed.append(label)
+    only_left = sorted(
+        set(left_snapshot["artifact_keys"]) - set(right_snapshot["artifact_keys"])
+    )
+    only_right = sorted(
+        set(right_snapshot["artifact_keys"]) - set(left_snapshot["artifact_keys"])
+    )
+    return {
+        "left_run_id": left_snapshot["run_id"],
+        "right_run_id": right_snapshot["run_id"],
+        "left": left_snapshot,
+        "right": right_snapshot,
+        "changed_fields": changed,
+        "artifacts_only_on_left": only_left,
+        "artifacts_only_on_right": only_right,
+    }
+
+
+def compare_runs_json(
+    left: Mapping[str, Any],
+    right: Mapping[str, Any],
+) -> str:
+    return json.dumps(compare_runs_payload(left, right), indent=2, sort_keys=True)
+
+
 def compare_runs_markdown(
     left: Mapping[str, Any],
     right: Mapping[str, Any],
 ) -> str:
     """Manifest-backed diff for two runs (Phase 3 history compare MVP)."""
-    left_snapshot = _run_compare_snapshot(left)
-    right_snapshot = _run_compare_snapshot(right)
+    payload = compare_runs_payload(left, right)
+    left_snapshot = payload["left"]
+    right_snapshot = payload["right"]
     rows = [
         ("Run ID", left_snapshot["run_id"], right_snapshot["run_id"]),
         ("Stage", left_snapshot["stage"], right_snapshot["stage"]),
@@ -382,13 +438,11 @@ def compare_runs_markdown(
         "| Field | Left | Right |",
         "| --- | --- | --- |",
     ]
-    changed: list[str] = []
     for label, left_value, right_value in rows:
-        left_text = _compare_cell(left_value)
-        right_text = _compare_cell(right_value)
-        if left_text != right_text and label != "Run ID":
-            changed.append(label)
-        lines.append(f"| {label} | {left_text} | {right_text} |")
+        lines.append(
+            f"| {label} | {_compare_cell(left_value)} | {_compare_cell(right_value)} |"
+        )
+    changed = payload["changed_fields"]
     if changed:
         lines.extend(
             [
@@ -399,16 +453,12 @@ def compare_runs_markdown(
         )
     else:
         lines.extend(["", "All compared fields match aside from run identity."])
-    only_left = set(left_snapshot["artifact_keys"]) - set(
-        right_snapshot["artifact_keys"]
-    )
-    only_right = set(right_snapshot["artifact_keys"]) - set(
-        left_snapshot["artifact_keys"]
-    )
+    only_left = payload["artifacts_only_on_left"]
+    only_right = payload["artifacts_only_on_right"]
     if only_left or only_right:
         lines.append("\n### Artifact-only differences")
         if only_left:
-            lines.append(f"- Only on left: {', '.join(sorted(only_left))}")
+            lines.append(f"- Only on left: {', '.join(only_left)}")
         if only_right:
-            lines.append(f"- Only on right: {', '.join(sorted(only_right))}")
+            lines.append(f"- Only on right: {', '.join(only_right)}")
     return "\n".join(lines)
