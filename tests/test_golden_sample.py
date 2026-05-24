@@ -31,6 +31,7 @@ class GoldenSampleTests(unittest.TestCase):
         self.assertIn("glb", attestation.artifacts)
         self.assertIn("obj", attestation.artifacts)
         self.assertIn("manifest", attestation.artifacts)
+        self.assertIn("export_sidecar", attestation.artifacts)
 
     def test_attestation_fails_when_sample_missing(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -6,7 +6,8 @@ import io
 from PIL import Image, ImageStat
 
 from .base import AdapterCapabilities, GenerationRequest, GenerationResult
-from ..exporters import export_all, make_box_mesh
+from ..export_tiers import build_export_sidecar
+from ..exporters import export_all, make_box_mesh, mesh_topology
 
 
 class CpuDemoAdapter:
@@ -46,7 +47,20 @@ class CpuDemoAdapter:
             color=(red, green, blue, 1.0),
             b64_image=b64_img,
         )
-        paths = export_all(mesh, request.run_dir / "exports", stem="cpu_demo_mesh")
+        vertex_count, face_count = mesh_topology(mesh)
+        sidecar = build_export_sidecar(
+            quality=request.quality,
+            decimation_target=request.decimation_target,
+            vertex_count=vertex_count,
+            face_count=face_count,
+            adapter=self.capabilities.name,
+        )
+        paths = export_all(
+            mesh,
+            request.run_dir / "exports",
+            stem="cpu_demo_mesh",
+            export_sidecar=sidecar,
+        )
         return GenerationResult(
             adapter=self.capabilities.name,
             artifacts=paths,
@@ -57,5 +71,8 @@ class CpuDemoAdapter:
                     [path for path in request.view_images.values() if path.exists()]
                 ),
                 "quality": request.quality,
+                "decimation_target": request.decimation_target,
+                "face_count": face_count,
+                "vertex_count": vertex_count,
             },
         )

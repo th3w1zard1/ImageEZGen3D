@@ -231,8 +231,20 @@ def write_glb(mesh: SimpleMesh, path: Path) -> None:
     atomic_write_bytes(path, header + json_header + json_blob + bin_header + bin_blob)
 
 
+def mesh_topology(mesh: SimpleMesh) -> tuple[int, int]:
+    return len(mesh.vertices), len(mesh.faces)
+
+
+def write_export_sidecar(path: Path, payload: dict[str, object]) -> None:
+    atomic_write_text(path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
+
+
 def export_all(
-    mesh: SimpleMesh, directory: Path, stem: str = "draft_mesh"
+    mesh: SimpleMesh,
+    directory: Path,
+    stem: str = "draft_mesh",
+    *,
+    export_sidecar: dict[str, object] | None = None,
 ) -> dict[str, Path]:
     directory.mkdir(parents=True, exist_ok=True)
     paths = {
@@ -245,4 +257,8 @@ def export_all(
     write_obj(mesh, paths["obj"])
     write_ply(mesh, paths["ply"])
     write_stl(mesh, paths["stl"])
+    if export_sidecar is not None:
+        sidecar_path = directory / f"{stem}.export.json"
+        write_export_sidecar(sidecar_path, export_sidecar)
+        paths["export_sidecar"] = sidecar_path
     return paths

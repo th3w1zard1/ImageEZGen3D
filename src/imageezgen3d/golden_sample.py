@@ -12,8 +12,14 @@ from .mesh_checks import inspect_artifacts
 from .orchestrator import ImageEZOrchestrator
 
 DEFAULT_SAMPLE_PATH = Path("assets/examples/teal_block.png")
-REQUIRED_ARTIFACT_KEYS = ("manifest", "glb", "obj")
-MIN_ARTIFACT_BYTES = {"manifest": 400, "glb": 800, "obj": 100}
+REQUIRED_ARTIFACT_KEYS = ("manifest", "glb", "obj", "export_sidecar")
+MIN_ARTIFACT_BYTES = {
+    "manifest": 400,
+    "glb": 800,
+    "obj": 100,
+    "export_sidecar": 80,
+}
+DRAFT_DECIMATION_TARGET = 25_000
 
 
 @dataclass(frozen=True)
@@ -80,6 +86,16 @@ def run_golden_sample_attestation(
     if not run_id:
         issues.append("Missing run_id in generation result")
 
+    parameters = result.get("parameters") or {}
+    if not isinstance(parameters, dict):
+        parameters = {}
+    decimation_target = parameters.get("decimation_target")
+    if decimation_target != DRAFT_DECIMATION_TARGET:
+        issues.append(
+            "Expected decimation_target "
+            f"{DRAFT_DECIMATION_TARGET} for draft quality, got {decimation_target!r}"
+        )
+
     raw_artifacts = result.get("artifacts") or {}
     for key in REQUIRED_ARTIFACT_KEYS:
         path_value = raw_artifacts.get(key)
@@ -99,8 +115,9 @@ def run_golden_sample_attestation(
             )
 
     if not issues:
+        inspection_keys = [key for key in ("glb", "obj") if key in raw_artifacts]
         inspection = inspect_artifacts(
-            {key: Path(str(raw_artifacts[key])) for key in REQUIRED_ARTIFACT_KEYS}
+            {key: Path(str(raw_artifacts[key])) for key in inspection_keys}
         )
         for warning in inspection.warnings:
             issues.append(f"Mesh inspection warning: {warning}")

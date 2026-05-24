@@ -23,6 +23,7 @@ class GenerationRequest:
     view_images: dict[str, Path]
     quality: str
     seed: int
+    decimation_target: int = 500_000
 
 
 @dataclass
