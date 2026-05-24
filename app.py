@@ -1475,6 +1475,16 @@ def build_demo():
             ],
         )
 
+        demo.load(
+            history_updates,
+            outputs=[
+                history_run,
+                history_notice,
+                history_summary,
+                create_history_summary,
+            ],
+        )
+
     return demo
 
 

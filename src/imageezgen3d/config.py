@@ -59,6 +59,29 @@ def _running_on_hugging_face_space() -> bool:
     return any(os.environ.get(marker) for marker in markers)
 
 
+def resolve_output_dir(
+    *,
+    configured: str = "outputs",
+    data_root: Path | None = None,
+    space_runtime: bool | None = None,
+) -> Path:
+    """Pick run storage root: explicit env, then Space /data when writable, else configured."""
+    if "IMAGEEZ_OUTPUT_DIR" in os.environ:
+        return Path(os.environ["IMAGEEZ_OUTPUT_DIR"])
+
+    on_space = (
+        _running_on_hugging_face_space()
+        if space_runtime is None
+        else space_runtime
+    )
+    if on_space:
+        root = data_root if data_root is not None else Path("/data")
+        if root.is_dir() and os.access(root, os.W_OK):
+            return root / "outputs"
+
+    return Path(configured)
+
+
 def _resolve_launch_port(launch_raw: dict[str, object]) -> int:
     default_port = _int_value(launch_raw, "port", LaunchSettings.port)
     port = _env_int(
@@ -230,11 +253,10 @@ def load_config(path: str | Path | None = None) -> AppConfig:
             title=_env_str(
                 "IMAGEEZ_TITLE", _str_value(app_raw, "title", AppSettings.title)
             ),
-            output_dir=Path(
-                _env_str(
-                    "IMAGEEZ_OUTPUT_DIR",
-                    _str_value(app_raw, "output_dir", str(AppSettings.output_dir)),
-                )
+            output_dir=resolve_output_dir(
+                configured=_str_value(
+                    app_raw, "output_dir", str(AppSettings.output_dir)
+                ),
             ),
             adapter=_env_str(
                 "IMAGEEZ_ADAPTER", _str_value(app_raw, "adapter", AppSettings.adapter)
