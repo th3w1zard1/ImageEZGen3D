@@ -26,6 +26,17 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 034 validation (PR #18 merge to main)
+
+After squash-merge PR #18 (`bac08f5` on `main`, 2026-05-24):
+
+- **Merge:** Mesh decimation post-process + `{stem}.raw.glb` for balanced/high CPU demo
+- **Hub deploy:** `hf_space_sync --execute` commit `5570f748`
+- **Hosted draft smoke:** `hosted_golden_smoke.py` exit 0 — run `20260524-191908-d5c06190`
+- **Hosted balanced generate:** run `20260524-191912-86cf0afe` — status shows **Export budget** 150,000 faces
+- **Local attestation:** `golden_sample_attestation.py` exit 0; CI balanced integration test verifies `raw_glb` + `decimation_applied` in sidecar
+- **Mode:** hosted CPU fallback (`cpu-demo`)
+
 ## Plan 032 validation (PR #17 merge to main)
 
 After squash-merge PR #17 (`b04f55f` on `main`, 2026-05-24):

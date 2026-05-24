@@ -13,13 +13,14 @@ Trust slice (Plans 012–022) is landed on `main`: fallback honesty, Phase 1 UX,
 
 ## Recommended next slices (ranked)
 
-1. **Mesh cleanup (remaining)** — real decimation post-process + RAW mesh tier. **Now top priority** after export sidecar + hosted golden smoke CI (Plans 029–031).
-2. **Hunyuan gate closure** — only when product intentionally enables adapter; walk G1–G9 in `docs/knowledgebase/hunyuan-admission-gates.md`.
+1. **Hunyuan gate closure** — only when product intentionally enables adapter; walk G1–G9 in `docs/knowledgebase/hunyuan-admission-gates.md`. **Top priority** when enabling neural path.
+2. **Mesh polish (optional)** — quadric decimation (trimesh), neural adapter hookup for decimation at export.
 ## Completed since this ideation doc
 
 - **Phase 3 history compare** — MVP compare UI (PR #14), manifest JSON/MD export (PR #15), hosted smoke + KB evidence.
 - **Export sidecar + decimation presets** — PR #16 merged; golden attestation + hosted Block E2E (Plan 030).
 - **Hosted golden smoke CI** — scheduled workflow + `hosted_golden_smoke.py` (Plan 031).
+- **Mesh decimation + RAW export** — PR #18 merged; largest-face decimation MVP + `raw.glb` tier (Plan 033/034).
 
 ## Explicitly defer
 
