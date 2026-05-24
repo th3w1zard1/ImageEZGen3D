@@ -1,7 +1,7 @@
 ---
 title: "feat: Ship fallback honesty + hosted Space validation"
 type: feat
-status: active
+status: completed
 date: 2026-05-24
 origin: docs/plans/2026-05-23-012-feat-fallback-honesty-labeling-plan.md
 ---
