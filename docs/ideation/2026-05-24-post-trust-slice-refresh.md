@@ -21,6 +21,8 @@ Trust slice (Plans 012–022) is landed on `main`: fallback honesty, Phase 1 UX,
 - **Export sidecar + decimation presets** — PR #16 merged; golden attestation + hosted Block E2E (Plan 030).
 - **Hosted golden smoke CI** — scheduled workflow + `hosted_golden_smoke.py` (Plan 031).
 - **Mesh decimation + RAW export** — PR #18 merged; largest-face decimation MVP + `raw.glb` tier (Plan 033/034).
+- **Hosted export tier smoke** — PR #19 merged; manifest validation for draft/balanced (Plan 035/036).
+- **Gradio export tier downloads** — PR #20 merged; Export sidecar + RAW GLB on Create/History (Plan 037/038).
 
 ## Explicitly defer
 
