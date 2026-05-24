@@ -10,6 +10,20 @@ Legal and redistribution rules live in [license-audit.md](license-audit.md). Run
 
 `HunyuanPlaceholderAdapter` remains `configured=False` in code until every gate below is explicitly closed with written evidence.
 
+## Automated audit (repo-grounded)
+
+Run from the repository root (does **not** enable the adapter):
+
+```bash
+PYTHONPATH=src python scripts/hunyuan_admission_audit.py
+```
+
+Machine-readable output: `PYTHONPATH=src python scripts/hunyuan_admission_audit.py --json`
+
+The audit exits **0** while `configured=False`. It exits **1** if the adapter were enabled while gates remain open (safety guard for enablement PRs).
+
+**Last audit:** 2026-05-24 — Plan 041; adapter `configured=False`; G1–G8 **OPEN**; G9 **PASS** (disabled as required).
+
 ## Completed prerequisites
 
 | Prerequisite | Evidence |
