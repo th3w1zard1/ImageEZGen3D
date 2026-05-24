@@ -8,6 +8,13 @@ from PIL import Image, ImageStat
 from .base import AdapterCapabilities, GenerationRequest, GenerationResult
 from ..export_tiers import build_export_sidecar
 from ..exporters import export_all, make_box_mesh, mesh_topology
+from ..mesh_decimation import decimate_mesh, subdivide_mesh
+
+_SUBDIVIDE_LEVELS_BY_QUALITY: dict[str, int] = {
+    "draft": 0,
+    "balanced": 7,
+    "high": 8,
+}
 
 
 class CpuDemoAdapter:
@@ -35,7 +42,6 @@ class CpuDemoAdapter:
         quality_height = {"draft": 0.85, "balanced": 1.0, "high": 1.15}.get(
             request.quality, 0.9
         )
-        # Encode the processed image as a JPEG thumbnail for use as a texture
         thumb = image.resize((512, 512), Image.LANCZOS)
         buf = io.BytesIO()
         thumb.save(buf, format="JPEG", quality=85)
@@ -47,19 +53,33 @@ class CpuDemoAdapter:
             color=(red, green, blue, 1.0),
             b64_image=b64_img,
         )
-        vertex_count, face_count = mesh_topology(mesh)
+
+        subdivide_levels = _SUBDIVIDE_LEVELS_BY_QUALITY.get(request.quality, 0)
+        raw_mesh = None
+        if subdivide_levels > 0:
+            raw_mesh = subdivide_mesh(mesh, subdivide_levels)
+            export_mesh, decimation_meta = decimate_mesh(
+                raw_mesh, request.decimation_target
+            )
+        else:
+            export_mesh, decimation_meta = decimate_mesh(mesh, request.decimation_target)
+
+        vertex_count, face_count = mesh_topology(export_mesh)
         sidecar = build_export_sidecar(
             quality=request.quality,
             decimation_target=request.decimation_target,
             vertex_count=vertex_count,
             face_count=face_count,
             adapter=self.capabilities.name,
+            decimation=decimation_meta,
+            raw_exported=raw_mesh is not None,
         )
         paths = export_all(
-            mesh,
+            export_mesh,
             request.run_dir / "exports",
             stem="cpu_demo_mesh",
             export_sidecar=sidecar,
+            raw_mesh=raw_mesh,
         )
         return GenerationResult(
             adapter=self.capabilities.name,
@@ -74,5 +94,7 @@ class CpuDemoAdapter:
                 "decimation_target": request.decimation_target,
                 "face_count": face_count,
                 "vertex_count": vertex_count,
+                "decimation_applied": decimation_meta.get("decimation_applied", False),
+                "raw_exported": raw_mesh is not None,
             },
         )

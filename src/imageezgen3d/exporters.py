@@ -116,9 +116,17 @@ def _pad4(data: bytes, pad_byte: bytes) -> bytes:
 
 def write_glb(mesh: SimpleMesh, path: Path) -> None:
     positions = b"".join(struct.pack("<3f", *vertex) for vertex in mesh.vertices)
-    indices = b"".join(
-        struct.pack("<H", index) for face in mesh.faces for index in face
-    )
+    use_u32_indices = len(mesh.vertices) > 65535
+    if use_u32_indices:
+        indices = b"".join(
+            struct.pack("<I", index) for face in mesh.faces for index in face
+        )
+        index_component_type = 5125
+    else:
+        indices = b"".join(
+            struct.pack("<H", index) for face in mesh.faces for index in face
+        )
+        index_component_type = 5123
 
     mins = [min(vertex[i] for vertex in mesh.vertices) for i in range(3)]
     maxs = [max(vertex[i] for vertex in mesh.vertices) for i in range(3)]
@@ -201,7 +209,7 @@ def write_glb(mesh: SimpleMesh, path: Path) -> None:
             },
             {
                 "bufferView": 1,
-                "componentType": 5123,
+                "componentType": index_component_type,
                 "count": len(mesh.faces) * 3,
                 "type": "SCALAR",
             },
@@ -245,6 +253,7 @@ def export_all(
     stem: str = "draft_mesh",
     *,
     export_sidecar: dict[str, object] | None = None,
+    raw_mesh: SimpleMesh | None = None,
 ) -> dict[str, Path]:
     directory.mkdir(parents=True, exist_ok=True)
     paths = {
@@ -253,6 +262,10 @@ def export_all(
         "ply": directory / f"{stem}.ply",
         "stl": directory / f"{stem}.stl",
     }
+    if raw_mesh is not None:
+        raw_path = directory / f"{stem}.raw.glb"
+        write_glb(raw_mesh, raw_path)
+        paths["raw_glb"] = raw_path
     write_glb(mesh, paths["glb"])
     write_obj(mesh, paths["obj"])
     write_ply(mesh, paths["ply"])
