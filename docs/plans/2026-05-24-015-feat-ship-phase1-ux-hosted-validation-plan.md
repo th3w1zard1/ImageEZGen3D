@@ -1,7 +1,7 @@
 ---
 title: "feat: Ship Phase 1 UX + hosted validation"
 type: feat
-status: active
+status: completed
 date: 2026-05-24
 origin: docs/plans/2026-05-24-014-feat-trust-first-phase1-ux-plan.md
 ---

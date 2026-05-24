@@ -26,6 +26,17 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 014 validation (trust-first Phase 1 UX)
+
+After PR #6 merge (`8dd87f1` on `main`) and deploy commit `dfd4990adc93bbaba18ff05541a0ae186307caba`:
+
+- **Run id:** `20260524-121906-f2550d30`
+- **Mode:** hosted CPU fallback (`Local CPU Preview` / `cpu-demo`)
+- **Comprehension exit:** status includes `## What happened`, output tier, mesh type, fallback, and suggested next steps
+- **Quality intake:** live Create tab shows “Choose your output tier” panel (browser smoke)
+- **Artifacts verified:** manifest ☑ (quality=`draft` in parameters) GLB ☑ OBJ ☑
+- **Evidence:** Gradio API `/generate` with Block sample
+
 ## Post-merge validation (main)
 
 After PR #2 merge (`95d452d` on `main`):
