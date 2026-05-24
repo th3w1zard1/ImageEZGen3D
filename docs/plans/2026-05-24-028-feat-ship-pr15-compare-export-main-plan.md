@@ -1,7 +1,7 @@
 ---
 title: "feat: Ship PR #15 compare export to main"
 type: feat
-status: active
+status: completed
 date: 2026-05-24
 origin: docs/plans/2026-05-24-027-feat-history-compare-manifest-export-plan.md
 ---

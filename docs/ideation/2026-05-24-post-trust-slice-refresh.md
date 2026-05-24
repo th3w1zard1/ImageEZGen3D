@@ -13,10 +13,13 @@ Trust slice (Plans 012–022) is landed on `main`: fallback honesty, Phase 1 UX,
 
 ## Recommended next slices (ranked)
 
-1. **Phase 3 history compare** — side-by-side run diff, manifest diff export, reuse `manifest_ui` components (ideation #7 compound leverage).
-2. **Mesh cleanup / export tiers** — RAW + sidecar, decimation presets tied to quality tier (Track 4; ideation #12).
+1. **Mesh cleanup / export tiers** — RAW + sidecar, decimation presets tied to quality tier (Track 4; ideation #12). **Now top priority** after Phase 3 compare shipped (PRs #14–#15).
+2. **Hosted golden smoke (optional)** — scheduled workflow against live Space URL; separate from local `golden-sample` CI job.
 3. **Hunyuan gate closure** — only when product intentionally enables adapter; walk G1–G9 in `docs/knowledgebase/hunyuan-admission-gates.md`.
-4. **Hosted golden smoke (optional)** — scheduled workflow against live Space URL; separate from local `golden-sample` CI job.
+
+## Completed since this ideation doc
+
+- **Phase 3 history compare** — MVP compare UI (PR #14), manifest JSON/MD export (PR #15), hosted smoke + KB evidence.
 
 ## Explicitly defer
 

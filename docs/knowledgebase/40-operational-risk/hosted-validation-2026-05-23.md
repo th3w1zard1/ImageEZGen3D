@@ -26,6 +26,16 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 028 validation (PR #15 merge to main)
+
+After squash-merge PR #15 (`3228f59` on `main`, 2026-05-24):
+
+- **Merge:** History compare manifest export (JSON + MD downloads, `compare_runs_payload`)
+- **Post-merge smoke:** `hosted_history_compare_smoke.py` exit 0 with JSON export field checks
+- **Run ids:** `20260524-183056-5bd10391` vs `20260524-183054-82b997e5`
+- **Hub deploy:** post-merge `hf_space_sync --execute` (2026-05-24)
+- **Browser:** History tab shows **Compare diff (JSON)** and **Compare report (MD)**
+
 ## Plan 026 validation (PR #14 merge to main)
 
 After squash-merge PR #14 (`76fa267` on `main`, 2026-05-24):
