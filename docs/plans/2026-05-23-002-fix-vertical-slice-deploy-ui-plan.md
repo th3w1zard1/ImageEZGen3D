@@ -1,7 +1,7 @@
 ---
 title: "fix: Land deploy parity and UI fidelity vertical slice"
 type: fix
-status: active
+status: completed
 date: 2026-05-23
 origin: docs/ideation/2026-05-23-next-focus-ideation.md
 ---
