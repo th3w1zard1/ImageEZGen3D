@@ -26,9 +26,19 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 032 validation (PR #17 merge to main)
+
+After squash-merge PR #17 (`b04f55f` on `main`, 2026-05-24):
+
+- **Merge:** Hosted golden smoke workflow + `hosted_golden_smoke` module
+- **Post-merge smoke:** `scripts/hosted_golden_smoke.py` exit 0
+- **Hosted run id:** `20260524-185656-88b04dad` (Block, draft, seed 42)
+- **GitHub Actions:** first `workflow_dispatch` run `26369938085`
+- **Mode:** hosted CPU fallback (`Local CPU Preview` / `cpu-demo`)
+
 ## Plan 031 validation (hosted golden smoke CI)
 
-After PR merge (2026-05-24):
+Branch preflight before merge (2026-05-24):
 
 - **Workflow:** `.github/workflows/hosted-golden-smoke.yml` — daily schedule + `workflow_dispatch`
 - **Script:** `scripts/hosted_golden_smoke.py` — Block `/generate` with export budget + adapter checks

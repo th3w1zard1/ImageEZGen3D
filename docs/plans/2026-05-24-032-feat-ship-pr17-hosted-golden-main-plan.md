@@ -1,7 +1,7 @@
 ---
 title: "feat: Ship PR #17 hosted golden smoke to main"
 type: feat
-status: active
+status: completed
 date: 2026-05-24
 origin: docs/plans/2026-05-24-031-feat-hosted-golden-smoke-workflow-plan.md
 ---
