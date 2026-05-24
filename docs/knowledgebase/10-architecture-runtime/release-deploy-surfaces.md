@@ -76,6 +76,7 @@ This aligns with `AGENTS.md` Space payload hygiene: do not upload workspace-only
 
 ## Caveats
 
-- `[OPEN]` P10 hosted Block/Vase E2E not executed as of 2026-05-23 KB refresh
-- `[OPEN]` ZeroGPU adapter path not verified on live Space
+- P10 hosted Block/Vase E2E executed 2026-05-24 — see [hosted-validation-2026-05-23.md](../40-operational-risk/hosted-validation-2026-05-23.md)
+- `[OPEN]` ZeroGPU adapter path not verified on live Space (CPU fallback validated with honest labeling)
+- `[OPEN]` History tab on hosted Space may show no runs until an in-browser generation; API-only runs are not guaranteed to appear in the browser session
 - `[OFFICIAL]` Space build order requires self-contained `requirements.txt` — no editable install at build time

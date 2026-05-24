@@ -36,6 +36,7 @@ After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b57809293
 - **Quality intake:** live Create tab shows “Choose your output tier before generating” and fallback notice in Project Rail (browser smoke)
 - **Artifacts verified:** manifest ☑ (2536 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`), starter flow `single-photo-draft`
+- **History inspect:** `[REPO]` `tests/test_app.py::test_history_inspect_html_composes_status_card_and_artifact_strip` covers `run-status-card` + `artifact-strip` composition; `[UI]` History tab loads on live Space but lists runs only after in-session generation (API `/generate` alone did not populate browser History on 2026-05-24)
 
 ## Plan 014 validation (trust-first Phase 1 UX)
 
