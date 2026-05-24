@@ -15,6 +15,11 @@ from .preprocess import save_input_bundle
 from .runtime import RuntimeStatus, runtime_status
 from .storage import RunStore
 
+PREVIEW_FALLBACK_DISCLAIMER = (
+    "Preview mesh only — this run uses the CPU demo adapter and does not perform "
+    "neural 3D reconstruction."
+)
+
 
 @dataclass(frozen=True)
 class AdapterResolution:
@@ -191,6 +196,8 @@ class ImageEZOrchestrator:
             )
         if fallback_reason:
             manifest.parameters["fallback_reason"] = fallback_reason
+        if fallback_reason and adapter_key == self.config.app.cpu_adapter:
+            manifest.parameters["preview_disclaimer"] = PREVIEW_FALLBACK_DISCLAIMER
         self.store.save_manifest(run_dir, manifest)
 
         try:

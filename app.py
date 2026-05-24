@@ -22,7 +22,8 @@ else:
 
 from imageezgen3d.config import load_config  # noqa: E402
 from imageezgen3d.exporters import make_box_mesh, write_glb  # noqa: E402
-from imageezgen3d.orchestrator import AdapterResolution, ImageEZOrchestrator  # noqa: E402
+from imageezgen3d.orchestrator import AdapterResolution, ImageEZOrchestrator
+from imageezgen3d.orchestrator import PREVIEW_FALLBACK_DISCLAIMER  # noqa: E402
 from imageezgen3d.preprocess import normalize_image, validate_image  # noqa: E402
 from imageezgen3d.runtime import running_on_hugging_face_space  # noqa: E402
 from imageezgen3d.storage import RunStore  # noqa: E402
@@ -335,6 +336,28 @@ def _backend_display_label(value: object) -> str:
     return raw_value.replace("-", " ").replace("_", " ").title()
 
 
+def _is_preview_fallback(resolution: AdapterResolution) -> bool:
+    selected = str(resolution.selected or "").lower()
+    return bool(resolution.fallback_reason) and (
+        "cpu" in selected or "demo" in selected
+    )
+
+
+def _fallback_notice_html(resolution: AdapterResolution) -> str:
+    if not _is_preview_fallback(resolution):
+        return ""
+    reason = resolution.fallback_reason or resolution.message
+    return "\n".join(
+        [
+            '<section class="fallback-notice">',
+            "<p><strong>CPU preview fallback is active.</strong></p>",
+            f"<p>{escape(reason)}</p>",
+            f"<p>{escape(PREVIEW_FALLBACK_DISCLAIMER)}</p>",
+            "</section>",
+        ]
+    )
+
+
 def _hero_shell_html(title: str, resolution: AdapterResolution) -> str:
     runtime = resolution.runtime
     chips = [
@@ -346,7 +369,9 @@ def _hero_shell_html(title: str, resolution: AdapterResolution) -> str:
         ("ZeroGPU live", "Yes" if runtime.zerogpu_runtime_available else "No"),
         (
             "Fallback",
-            "Armed" if resolution.fallback_reason or resolution.selected else "Ready",
+            "Active"
+            if resolution.fallback_reason
+            else ("Armed" if resolution.selected else "Ready"),
         ),
     ]
     chip_html = "".join(
@@ -542,6 +567,17 @@ def _format_report(result: dict[str, Any]) -> str:
     if isinstance(parameters, dict) and parameters.get("fallback_reason"):
         lines.append("\n**Runtime Fallback**")
         lines.append(f"- {parameters['fallback_reason']}")
+    disclaimer = parameters.get("preview_disclaimer") if isinstance(parameters, dict) else None
+    if disclaimer:
+        lines.append("\n**Preview Disclaimer**")
+        lines.append(str(disclaimer))
+    elif isinstance(parameters, dict) and parameters.get("fallback_reason"):
+        adapter_key = str(
+            parameters.get("selected_adapter") or adapter_name or ""
+        ).lower()
+        if "cpu" in adapter_key or "demo" in adapter_key:
+            lines.append("\n**Preview Disclaimer**")
+            lines.append(PREVIEW_FALLBACK_DISCLAIMER)
     if isinstance(parameters, dict) and parameters.get("project_brief"):
         lines.append("\n**Project Brief**")
         lines.append(_summarize_text(parameters["project_brief"]))
@@ -912,6 +948,10 @@ def build_demo():
                             create_history_summary = gr.HTML(
                                 _history_overview_html(history_runs),
                                 elem_classes="history-overview-shell",
+                            )
+                            gr.HTML(
+                                _fallback_notice_html(resolution),
+                                elem_classes="fallback-notice-shell",
                             )
                             gr.Markdown(
                                 _runtime_banner(resolution),
@@ -2341,6 +2381,22 @@ _CSS = """
 .history-action-row {
     gap: 10px;
     margin-top: 4px;
+}
+
+/* ─── Fallback notice ───────────────────────────────────────────────────── */
+.fallback-notice {
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(234, 88, 12, 0.06)) !important;
+    border: 1px solid rgba(245, 158, 11, 0.22) !important;
+    box-shadow: none !important;
+}
+
+.fallback-notice * {
+    color: var(--iez-ink) !important;
+    font-size: 0.86rem !important;
+    line-height: 1.55 !important;
 }
 
 /* ─── Runtime banner ────────────────────────────────────────────────────── */

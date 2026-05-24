@@ -9,7 +9,7 @@ from PIL import Image
 
 from imageezgen3d.config import AppConfig, AppSettings, StorageSettings
 from imageezgen3d.mesh_checks import inspect_artifacts
-from imageezgen3d.orchestrator import ImageEZOrchestrator
+from imageezgen3d.orchestrator import PREVIEW_FALLBACK_DISCLAIMER, ImageEZOrchestrator
 from imageezgen3d.runtime import RuntimeStatus
 
 
@@ -64,6 +64,32 @@ class CpuDemoTests(unittest.TestCase):
             self.assertTrue(Path(artifacts["obj"]).exists())
             self.assertTrue(Path(artifacts["manifest"]).exists())
             self.assertEqual(result["stage"], "done")
+
+    def test_generate_records_preview_disclaimer_on_cpu_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            config = AppConfig(
+                app=AppSettings(output_dir=Path(directory)),
+                storage=StorageSettings(retention_runs=10),
+            )
+            orchestrator = ImageEZOrchestrator(config)
+            mocked_status = RuntimeStatus(
+                requested_mode="auto",
+                prefer_zerogpu=True,
+                zerogpu_enabled=True,
+                zerogpu_runtime_available=True,
+                cpu_fallback_allowed=True,
+                reason="ZeroGPU runtime is available and preferred.",
+            )
+            image = Image.new("RGBA", (640, 640), (40, 120, 180, 255))
+            with patch(
+                "imageezgen3d.orchestrator.runtime_status", return_value=mocked_status
+            ):
+                result = orchestrator.generate(image, adapter_name="auto", seed=3)
+
+            self.assertEqual(
+                result["parameters"]["preview_disclaimer"], PREVIEW_FALLBACK_DISCLAIMER
+            )
+            self.assertIn("not enabled yet", result["parameters"]["fallback_reason"])
 
     def test_generate_records_workspace_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
