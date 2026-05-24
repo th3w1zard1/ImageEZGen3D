@@ -1,7 +1,7 @@
 ---
 title: "feat: Hosted E2E validation and HF deploy best-practices KB"
 type: feat
-status: active
+status: completed
 date: 2026-05-23
 origin: docs/ideation/2026-05-23-next-focus-ideation.md
 ---

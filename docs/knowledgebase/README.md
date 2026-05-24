@@ -65,6 +65,7 @@ Navigation map for all knowledgebase documents. Use this index to find authority
 |-----|------|---------|
 | [verification.md](verification.md) | Canonical | Validation ladder and artifact checks |
 | [40-operational-risk/mode-validation-matrix.md](40-operational-risk/mode-validation-matrix.md) | Canonical | Four-mode honesty matrix |
+| [40-operational-risk/hosted-validation-2026-05-23.md](40-operational-risk/hosted-validation-2026-05-23.md) | Dated slice | Live Space Block E2E evidence (hosted CPU fallback) |
 | [40-operational-risk/source-runtime-parity-register.md](40-operational-risk/source-runtime-parity-register.md) | Canonical | Living drift log |
 | [failure-modes.md](failure-modes.md) | Canonical | Failure classes and recovery |
 

@@ -43,6 +43,7 @@ When a solution and KB doc overlap, prefer KB for procedure and solutions for th
 | [architecture-patterns/hf-space-staged-payload-ci-deploy-2026-05-23.md](architecture-patterns/hf-space-staged-payload-ci-deploy-2026-05-23.md) | Knowledge | Staged HF upload on branch + tag |
 | [best-practices/ci-upload-vs-hosted-e2e-2026-05-23.md](best-practices/ci-upload-vs-hosted-e2e-2026-05-23.md) | Knowledge | CI sync ≠ browser E2E |
 | [tooling-decisions/gradio-port-env-precedence-2026-05-23.md](tooling-decisions/gradio-port-env-precedence-2026-05-23.md) | Knowledge | PORT / GRADIO_SERVER_PORT chain |
+| [tooling-decisions/hf-space-demo-port-binding-2026-05-24.md](tooling-decisions/hf-space-demo-port-binding-2026-05-24.md) | Knowledge | Module-level demo + Space port 7860 |
 
 ## Related
 

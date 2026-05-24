@@ -1,7 +1,7 @@
 ---
 title: "feat: Bootstrap docs/solutions institutional learnings store"
 type: feat
-status: active
+status: completed
 date: 2026-05-23
 origin: /ce-learnings-researcher — docs/solutions/ empty; compound recent session work
 ---

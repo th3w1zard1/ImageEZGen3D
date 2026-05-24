@@ -40,7 +40,8 @@ class ReleaseConfigTests(unittest.TestCase):
                 "image = 'custom-image'\n",
                 encoding="utf-8",
             )
-            settings = load_release_settings(path)
+            with patch.dict(os.environ, {}, clear=True):
+                settings = load_release_settings(path)
             self.assertEqual(settings.repository.owner, "demo-owner")
             self.assertEqual(settings.repository.repo, "demo-repo")
             self.assertEqual(settings.branches.primary_branch, "stable")

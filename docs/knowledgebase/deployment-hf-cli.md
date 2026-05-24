@@ -105,8 +105,10 @@ Important details:
 ## Port And Launch
 
 - `[REPO]` Local default port is **7865** in `pyproject.toml`.
-- `[OFFICIAL]` Hugging Face Gradio Spaces inject `GRADIO_SERVER_PORT` (commonly `7860`). The config loader honors `GRADIO_SERVER_PORT` over `IMAGEEZ_PORT` and pyproject defaults.
-- If a Space stays in `APP_STARTING`, verify the app binds to `GRADIO_SERVER_PORT`, not a hardcoded local port.
+- `[OFFICIAL]` Hugging Face Gradio Spaces inject `GRADIO_SERVER_PORT` (commonly `7860`). The config loader honors `PORT` → `GRADIO_SERVER_PORT` → `IMAGEEZ_PORT` → pyproject default.
+- `[REPO]` When Space env markers are present and no port env vars are set, `load_config()` defaults launch port to **7860** (see `_resolve_launch_port()` in `config.py`).
+- `[REPO]` Export a module-level `demo = build_demo()` in `app.py` so the Spaces Gradio launcher can bind the queued app; omit explicit `server_port` in `launch()` on Spaces.
+- If a Space stays in `APP_STARTING`, verify the app binds to the platform port (7860), not the local pyproject default alone.
 
 ## Package Contract
 

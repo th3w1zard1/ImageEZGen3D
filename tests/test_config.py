@@ -56,6 +56,11 @@ class ConfigTests(unittest.TestCase):
             config = load_config(Path("missing.yaml"))
         self.assertEqual(config.launch.port, 8080)
 
+    def test_space_runtime_defaults_launch_port_to_7860(self) -> None:
+        with patch.dict(os.environ, {"SPACE_ID": "th3w1zard1/ImageEZGen3D"}, clear=True):
+            config = load_config(Path("missing.yaml"))
+        self.assertEqual(config.launch.port, 7860)
+
 
 if __name__ == "__main__":
     unittest.main()

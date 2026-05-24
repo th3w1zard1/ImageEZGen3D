@@ -54,6 +54,31 @@ def _env_str(name: str, current: str) -> str:
     return os.environ.get(name, current)
 
 
+def _running_on_hugging_face_space() -> bool:
+    markers = ("SPACE_ID", "SPACE_HOST", "SPACE_AUTHOR_NAME", "SPACE_REPO_NAME")
+    return any(os.environ.get(marker) for marker in markers)
+
+
+def _resolve_launch_port(launch_raw: dict[str, object]) -> int:
+    default_port = _int_value(launch_raw, "port", LaunchSettings.port)
+    port = _env_int(
+        "PORT",
+        _env_int(
+            "GRADIO_SERVER_PORT",
+            _env_int("IMAGEEZ_PORT", default_port),
+        ),
+    )
+    if (
+        _running_on_hugging_face_space()
+        and port == default_port
+        and "PORT" not in os.environ
+        and "GRADIO_SERVER_PORT" not in os.environ
+        and "IMAGEEZ_PORT" not in os.environ
+    ):
+        return 7860
+    return port
+
+
 def _str_value(section: dict[str, object], key: str, default: str) -> str:
     value = section.get(key, default)
     return str(value)
@@ -227,16 +252,7 @@ def load_config(path: str | Path | None = None) -> AppConfig:
             host=_env_str(
                 "IMAGEEZ_HOST", _str_value(launch_raw, "host", LaunchSettings.host)
             ),
-            port=_env_int(
-                "PORT",
-                _env_int(
-                    "GRADIO_SERVER_PORT",
-                    _env_int(
-                        "IMAGEEZ_PORT",
-                        _int_value(launch_raw, "port", LaunchSettings.port),
-                    ),
-                ),
-            ),
+            port=_resolve_launch_port(launch_raw),
             share=_env_bool(
                 "IMAGEEZ_SHARE", _bool_value(launch_raw, "share", LaunchSettings.share)
             ),
