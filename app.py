@@ -24,6 +24,7 @@ from imageezgen3d.config import load_config  # noqa: E402
 from imageezgen3d.exporters import make_box_mesh, write_glb  # noqa: E402
 from imageezgen3d.orchestrator import AdapterResolution, ImageEZOrchestrator  # noqa: E402
 from imageezgen3d.preprocess import normalize_image, validate_image  # noqa: E402
+from imageezgen3d.runtime import running_on_hugging_face_space  # noqa: E402
 from imageezgen3d.storage import RunStore  # noqa: E402
 
 
@@ -2571,15 +2572,19 @@ button {
 }
 """
 
+demo = build_demo()
+
 if __name__ == "__main__":
     launch_config = load_config().launch
-    build_demo().queue(
+    launch_kwargs = {
+        "server_name": launch_config.host,
+        "share": launch_config.share,
+        "theme": _build_theme(),
+        "css": _CSS,
+    }
+    if not running_on_hugging_face_space():
+        launch_kwargs["server_port"] = launch_config.port
+    demo.queue(
         max_size=launch_config.queue_max_size,
         default_concurrency_limit=launch_config.default_concurrency_limit,
-    ).launch(
-        server_name=launch_config.host,
-        server_port=launch_config.port,
-        share=launch_config.share,
-        theme=_build_theme(),
-        css=_CSS,
-    )
+    ).launch(**launch_kwargs)
