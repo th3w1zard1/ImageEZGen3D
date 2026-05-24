@@ -57,6 +57,8 @@ Nuance:
 ### Launch
 
 - `host` and `port` control the Gradio bind address;
+- `[REPO]` effective port resolves in order: `PORT` → `GRADIO_SERVER_PORT` → `IMAGEEZ_PORT` → `[tool.imageezgen3d.app].port` (default **7865** for local dev);
+- `[SYNTH]` Hugging Face Gradio Spaces typically set `GRADIO_SERVER_PORT`; local `.vscode` tasks use pyproject default unless overridden;
 - `share` controls public Gradio sharing behavior;
 - `queue_max_size` and `default_concurrency_limit` shape the hosted request lane.
 
@@ -121,6 +123,7 @@ The code currently supports these environment-level overrides.
 
 - `IMAGEEZ_HOST`
 - `IMAGEEZ_PORT`
+- `PORT` and `GRADIO_SERVER_PORT` (hosted Spaces inject the latter; see port precedence below)
 - `IMAGEEZ_SHARE`
 - `IMAGEEZ_QUEUE_MAX_SIZE`
 - `IMAGEEZ_DEFAULT_CONCURRENCY_LIMIT`

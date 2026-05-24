@@ -15,7 +15,8 @@ This synthesis is based on:
 - current Hugging Face Spaces and ZeroGPU documentation;
 - current 2025-2026 research trends around feed-forward reconstruction, Gaussian splatting, mesh extraction, texturing, evaluation, and creator-facing UX patterns;
 - `[REPO]` repo-local `AGENTS.md` (hosted validation, mode-specific reporting, Space payload hygiene);
-- `[REPO]` `docs/knowledgebase/README.md` and authority docs added 2026-05-23 (agent operating contract, parity register, mode validation matrix, ideation-to-PR pipeline).
+- `[REPO]` `STRATEGY.md` (product anchor: problem, approach, metrics, tracks);
+- `[REPO]` `docs/knowledgebase/README.md` and authority docs added 2026-05-23 (agent operating contract, parity register, mode validation matrix, ideation-to-PR pipeline, release deploy surfaces).
 
 Git history now includes multiple commits beyond the initial scaffold (UI fidelity, export, deploy, and runtime work). Patterns below remain stable intent; refresh this doc when major direction shifts land.
 

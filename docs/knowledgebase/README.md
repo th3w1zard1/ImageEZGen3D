@@ -30,6 +30,7 @@ Navigation map for all knowledgebase documents. Use this index to find authority
 |-----|------|---------|
 | [architecture.md](architecture.md) | Canonical | Module boundaries and orchestration shape |
 | [configuration.md](configuration.md) | Canonical | `pyproject.toml` contract and manifest visibility |
+| [10-architecture-runtime/release-deploy-surfaces.md](10-architecture-runtime/release-deploy-surfaces.md) | Canonical | HF CI deploy paths, staged payload, port binding |
 | [zerogpu-runtime.md](zerogpu-runtime.md) | Canonical | ZeroGPU policy and adapter gating |
 | [deployment-hf-cli.md](deployment-hf-cli.md) | Canonical | Hugging Face Space deploy via CLI |
 | [release-automation.md](release-automation.md) | Companion | CI/CD, forge mirrors, artifact workflows |
@@ -86,7 +87,8 @@ Navigation map for all knowledgebase documents. Use this index to find authority
 
 | If you need… | Start here |
 |--------------|------------|
-| Project goals and non-goals | [project-intent.md](project-intent.md) |
+| Project goals and non-goals | [project-intent.md](project-intent.md) + [STRATEGY.md](../../STRATEGY.md) |
+| HF deploy / CI upload contract | [10-architecture-runtime/release-deploy-surfaces.md](10-architecture-runtime/release-deploy-surfaces.md) |
 | Agent validation rules | [00-intent/agent-operating-contract.md](00-intent/agent-operating-contract.md) |
 | What to run before claiming done | [verification.md](verification.md) + [mode-validation-matrix.md](40-operational-risk/mode-validation-matrix.md) |
 | Drift between source and hosted | [source-runtime-parity-register.md](40-operational-risk/source-runtime-parity-register.md) |
@@ -99,5 +101,6 @@ Navigation map for all knowledgebase documents. Use this index to find authority
 
 ## Caveats
 
-- `[OPEN]` Hosted Space runtime state and port 7865 deploy parity are not verified in this index pass.
+- `[OPEN]` Hosted Space Block/Vase E2E (P10) not verified — CI upload success is not E2E validation.
+- `[REPO]` Port env chain (`PORT` / `GRADIO_SERVER_PORT` / `IMAGEEZ_PORT`) documented 2026-05-23; live Space binding still `[OPEN]`.
 - Dated slices may lag in-flight UI changes; check git diff against `app.py` when implementing UX work.

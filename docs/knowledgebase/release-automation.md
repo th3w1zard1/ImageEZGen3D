@@ -12,6 +12,8 @@ This repo now has dedicated release workflows for forge mirroring, Hugging Face 
 
 That split is intentional: each workflow owns one deliverable family instead of mixing unrelated external targets into one file.
 
+For architecture-level deploy path comparison (staged payload vs legacy mirror, tag triggers, CI vs E2E), see [10-architecture-runtime/release-deploy-surfaces.md](10-architecture-runtime/release-deploy-surfaces.md).
+
 ## Default Behavior
 
 The release surfaces follow the same anti-magic rule as the runtime path.

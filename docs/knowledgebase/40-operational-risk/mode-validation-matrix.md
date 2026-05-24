@@ -55,6 +55,7 @@ Copy into PR descriptions, session notes, or parity register updates after a hos
 - Completion claims for runtime/export/deploy PRs must name a mode from this matrix.
 - Successful hosted CPU fallback is **not** ZeroGPU validation.
 - Hunyuan ZeroGPU placeholder (`configured=False`) must not be reported as production ZeroGPU generation.
+- `[REPO]` `hf-space.yml` CI sync success uploads staged files to the Space but **does not** satisfy the hosted CPU fallback or hosted ZeroGPU rows — browser E2E on live `hf.space` is still required per `AGENTS.md`.
 
 ## Caveats
 
