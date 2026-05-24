@@ -1,0 +1,56 @@
+# Hunyuan Admission Gates
+
+This document is the **enablement checklist** for the `hunyuan-zerogpu` adapter. It does not authorize turning the adapter on by itself.
+
+Legal and redistribution rules live in [license-audit.md](license-audit.md). Runtime policy lives in [zerogpu-runtime.md](zerogpu-runtime.md). Hosted honesty requirements live in [40-operational-risk/hosted-validation-2026-05-23.md](40-operational-risk/hosted-validation-2026-05-23.md).
+
+## Current decision
+
+**Status: NOT ENABLED**
+
+`HunyuanPlaceholderAdapter` remains `configured=False` in code until every gate below is explicitly closed with written evidence.
+
+## Completed prerequisites
+
+| Prerequisite | Evidence |
+| --- | --- |
+| Hosted CPU fallback path validated | Plan 015 — run `20260524-121906-f2550d30`; fallback + comprehension exit on live Space |
+| Fallback honesty labeling | Plan 012/013 — preview disclaimer in UI and manifest |
+| Space deploy contract | `scripts/hf_space_sync.py`, port binding fix on `main` |
+
+## Admission gates
+
+Record evidence in this table (or linked PR) before setting `configured=True` on the Hunyuan adapter.
+
+| Gate | ID | Pass criteria | Evidence required | Status |
+| --- | --- | --- | --- | --- |
+| Legal review | G1 | License, commercial use, attribution, and redistribution rights documented for code, weights, and wheels | Filled rows in [license-audit.md](license-audit.md) for Hunyuan3D-2.1 at a pinned revision | **OPEN** |
+| Weight access | G2 | Gated downloads, tokens, and acceptance flows documented; no secrets in repo | HF model card + dry-run `hf download` log; Space secret plan | **OPEN** |
+| Dependency audit | G3 | Python/CUDA deps pinned; wheels redistribution rights known; install reproducible on Space | Lockfile or constraints PR; CI install smoke on target Python | **OPEN** |
+| ZeroGPU wiring | G4 | GPU work only inside `@spaces.GPU`; CPU path unchanged | Code review + [zerogpu-runtime.md](zerogpu-runtime.md) checklist | **OPEN** |
+| Resource fit | G5 | VRAM/time budget acceptable on Space hardware class | Benchmark note with hardware SKU and wall time | **OPEN** |
+| Manifest parity | G6 | Manifest records adapter, quality, fallback, and trust fields same as cpu-demo | Sample manifest JSON attached to enablement PR | **OPEN** |
+| Hosted E2E | G7 | Live Space run with **real** Hunyuan path (not cpu-demo fallback); Block or Vase sample | Entry in hosted-validation doc with run id + artifacts | **OPEN** |
+| UX honesty | G8 | UI never implies ZeroGPU/neural reconstruction when fallback ran | Browser + API evidence; mode-validation-matrix satisfied | **OPEN** |
+| Enablement PR | G9 | Explicit PR enables adapter; rollback steps documented | Merged PR link; `AGENTS.md` validation loop repeated | **OPEN** |
+
+## Enablement procedure (when gates close)
+
+1. Update [license-audit.md](license-audit.md) snapshot table to **Allowed** with revision pins.
+2. Implement GPU-isolated generation behind `@spaces.GPU` without breaking local CPU dev.
+3. Set `HunyuanPlaceholderAdapter.capabilities.configured = True` only in the same PR that satisfies G1–G8.
+4. Deploy Space, run hosted E2E (G7), update [source-runtime-parity-register.md](40-operational-risk/source-runtime-parity-register.md).
+5. Do **not** claim ZeroGPU validation if execution still falls back to `cpu-demo`.
+
+## Red flags (stop)
+
+- Enabling because "ZeroGPU runtime is available" while the adapter is still a stub.
+- Skipping hosted E2E after flip of `configured`.
+- Vendoring weights or sample meshes without provenance.
+- Presenting preview box meshes as Hunyuan reconstruction.
+
+## Source basis
+
+- `[REPO]` `src/imageezgen3d/adapters/hunyuan.py` — placeholder, `configured=False`
+- `[REPO]` Hosted validation records Plans 005, 012–015
+- `[SYNTH]` Ideation #3 — audit prep only, no enablement in this pass

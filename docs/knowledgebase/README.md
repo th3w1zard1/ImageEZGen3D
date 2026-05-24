@@ -46,6 +46,7 @@ Navigation map for all knowledgebase documents. Use this index to find authority
 | [evaluation-metrics.md](evaluation-metrics.md) | Frontier | Quality framing and metrics |
 | [capture-guide.md](capture-guide.md) | Companion | Input capture guidance |
 | [license-audit.md](license-audit.md) | Canonical | Legal gates for adapters and assets |
+| [hunyuan-admission-gates.md](hunyuan-admission-gates.md) | Canonical | Hunyuan enablement checklist (gates G1–G9); adapter stays off until closed |
 
 ### 30 — Product & UX
 

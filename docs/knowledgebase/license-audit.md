@@ -101,3 +101,5 @@ Before a heavy adapter moves from research reference to enabled path, all of the
 5. verification and failure-mode docs have been updated for the new path.
 
 Until then, the correct status is not "probably fine." It is "not enabled yet."
+
+For Hunyuan3D-2.1 specifically, use the gate checklist in [hunyuan-admission-gates.md](hunyuan-admission-gates.md) before changing `HunyuanPlaceholderAdapter` to `configured=True`.

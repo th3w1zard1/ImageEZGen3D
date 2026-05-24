@@ -16,6 +16,7 @@ class HunyuanPlaceholderAdapter:
 
     def generate(self, request: GenerationRequest) -> GenerationResult:
         raise RuntimeError(
-            "The Hunyuan ZeroGPU adapter is intentionally disabled. Complete docs/knowledgebase/license-audit.md, "
-            "install audited dependencies, and wire GPU work behind @spaces.GPU before enabling it."
+            "The Hunyuan ZeroGPU adapter is intentionally disabled. "
+            "Complete the admission gates in docs/knowledgebase/hunyuan-admission-gates.md "
+            "(and license-audit.md) before enabling this adapter."
         )

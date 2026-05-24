@@ -69,7 +69,7 @@ These reasons should not stay internal. They belong in the manifest and near the
 
 ## Current Adapter State
 
-- `hunyuan-zerogpu`: preferred future hosted adapter, intentionally unconfigured pending license, dependency, and runtime work;
+- `hunyuan-zerogpu`: preferred future hosted adapter, intentionally unconfigured — see [hunyuan-admission-gates.md](hunyuan-admission-gates.md);
 - `cpu-demo`: fallback adapter for local development, tests, and no-GPU environments.
 
 The important point is that the hosted path is a future real target, not current theater.
