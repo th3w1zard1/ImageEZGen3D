@@ -25,17 +25,18 @@ def _replace_tokens(content: str, replacements: dict[str, str]) -> str:
     return rendered
 
 
-def _render_tree(source_root: Path, destination_root: Path, replacements: dict[str, str]) -> None:
-    for source_path in source_root.rglob("*"):
+def _render_tree(
+    source_root: Path, destination_root: Path, replacements: dict[str, str]
+) -> None:
+    for source_path in source_root.rglob("*.tmpl"):
         relative_path = source_path.relative_to(source_root)
         destination_path = destination_root / relative_path
-        if source_path.is_dir():
-            destination_path.mkdir(parents=True, exist_ok=True)
-            continue
-        target_name = destination_path.name[:-5] if destination_path.name.endswith(".tmpl") else destination_path.name
+        target_name = destination_path.name[:-5]
         target_path = destination_path.with_name(target_name)
         target_path.parent.mkdir(parents=True, exist_ok=True)
-        rendered = _replace_tokens(source_path.read_text(encoding="utf-8"), replacements)
+        rendered = _replace_tokens(
+            source_path.read_text(encoding="utf-8"), replacements
+        )
         target_path.write_text(rendered, encoding="utf-8")
 
 
@@ -54,7 +55,7 @@ def render_deploy_assets(
     output_dir: str | Path,
     *,
     app_name: str = "imageezgen3d",
-    container_port: int = 7860,
+    container_port: int = 7865,
     service_port: int = 80,
 ) -> DeployAssetBundle:
     repository, tag = _split_image_reference(image_reference)

@@ -7,7 +7,6 @@ __pycache__/
 .history/
 .cache/
 .hf-cache/
-assets/examples/*.png
 outputs/
 tmp/
 logs/

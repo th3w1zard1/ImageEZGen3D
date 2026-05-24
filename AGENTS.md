@@ -1,5 +1,10 @@
 # ImageEZGen3D Agent Notes
 
+## Institutional Learnings
+
+- Before implementing deploy, CI, runtime, or verification changes, search `docs/solutions/` for applicable past learnings (`ce-learnings-researcher` or `rg -l "tags:.*<topic>" docs/solutions/`).
+- Start at [docs/solutions/README.md](docs/solutions/README.md) for the index. Prefer solutions for distilled lessons; use `docs/knowledgebase/` for full runbooks.
+
 ## Runtime and Deployment Validation
 
 - For any change that affects Gradio, Hugging Face Spaces, ZeroGPU, model selection, exports, or runtime fallback behavior, check current official documentation for the named platform or library before changing code.

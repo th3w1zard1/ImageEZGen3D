@@ -13,9 +13,12 @@ This synthesis is based on:
 - `.vscode/tasks.json` and `.vscode/launch.json`;
 - current Gradio documentation for `Model3D`, Blocks workflows, and Spaces integrations;
 - current Hugging Face Spaces and ZeroGPU documentation;
-- current 2025-2026 research trends around feed-forward reconstruction, Gaussian splatting, mesh extraction, texturing, evaluation, and creator-facing UX patterns.
+- current 2025-2026 research trends around feed-forward reconstruction, Gaussian splatting, mesh extraction, texturing, evaluation, and creator-facing UX patterns;
+- `[REPO]` repo-local `AGENTS.md` (hosted validation, mode-specific reporting, Space payload hygiene);
+- `[REPO]` `STRATEGY.md` (product anchor: problem, approach, metrics, tracks);
+- `[REPO]` `docs/knowledgebase/README.md` and authority docs added 2026-05-23 (agent operating contract, parity register, mode validation matrix, ideation-to-PR pipeline, release deploy surfaces).
 
-No repo-local `AGENTS.md`, `copilot-instructions.md`, `*.instructions.md`, `*.agent.md`, or similar customization files were found inside the repository. The current git history also appears to contain a single foundational commit, so the patterns below describe the scaffold's explicit design choices more than a long series of later cleanups.
+Git history now includes multiple commits beyond the initial scaffold (UI fidelity, export, deploy, and runtime work). Patterns below remain stable intent; refresh this doc when major direction shifts land.
 
 ## What The Project Is Trying To Be
 
@@ -168,6 +171,11 @@ Recommended companion docs:
 
 Operational companion docs:
 
+- `docs/knowledgebase/README.md` — KB index and taxonomy map
+- `docs/knowledgebase/00-intent/agent-operating-contract.md` — agent rules and evidence labels
+- `docs/knowledgebase/40-operational-risk/source-runtime-parity-register.md` — drift log
+- `docs/knowledgebase/40-operational-risk/mode-validation-matrix.md` — four-mode validation honesty
+- `docs/knowledgebase/50-execution/ideation-to-pr-pipeline.md` — CE workflow stage map
 - `docs/knowledgebase/configuration.md`
 - `docs/knowledgebase/zerogpu-runtime.md`
 - `docs/knowledgebase/deployment-hf-cli.md`
@@ -191,4 +199,4 @@ The stable conclusions from that research are:
 
 ## History Caveat
 
-This repository currently exposes very little historical drift in git. If more branches or older commits are imported later, this document should be updated with concrete cleanup trends from those changes. For now, the strongest evidence comes from the scaffold's architecture, docs, operational guardrails, and the current external research layer summarized in the companion knowledgebase notes.
+Early versions of this doc assumed a single foundational commit. History now includes UI fidelity, export, and deploy iterations. Update this section when importing older branches or when parity register rows close. Strongest evidence remains architecture, `AGENTS.md`, operational guardrails, and companion KB notes — see [source-runtime-parity-register.md](40-operational-risk/source-runtime-parity-register.md) for current drift status.

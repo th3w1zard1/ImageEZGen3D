@@ -44,6 +44,18 @@ class ConfigTests(unittest.TestCase):
         self.assertIn("numpy>=1.26", lines)
         self.assertNotIn("-e .[app]", lines)
 
+    def test_gradio_server_port_overrides_launch_port(self) -> None:
+        with patch.dict(os.environ, {"GRADIO_SERVER_PORT": "7860"}, clear=True):
+            config = load_config(Path("missing.yaml"))
+        self.assertEqual(config.launch.port, 7860)
+
+    def test_port_env_overrides_gradio_server_port(self) -> None:
+        with patch.dict(
+            os.environ, {"PORT": "8080", "GRADIO_SERVER_PORT": "7860"}, clear=True
+        ):
+            config = load_config(Path("missing.yaml"))
+        self.assertEqual(config.launch.port, 8080)
+
 
 if __name__ == "__main__":
     unittest.main()
