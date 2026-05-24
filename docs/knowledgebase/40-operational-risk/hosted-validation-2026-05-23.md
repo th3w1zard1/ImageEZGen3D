@@ -15,6 +15,17 @@ Evidence for Plan 005 hosted E2E (parity register P10). Follows the template in 
 - **Build/load:** no error ☑ (Space stage `RUNNING` after deploy commit `3ad22d80`)
 - **Evidence link:** Gradio API `/generate` call via `gradio_client`; manifest 2339 bytes; GLB 12144 bytes; OBJ 369 bytes
 
+## Plan 012 validation (fallback honesty UI)
+
+After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85906082f032e15b1d68b`:
+
+- **Run id:** `20260524-095746-972cc9ea`
+- **Mode:** hosted CPU fallback (`Local CPU Preview` / `cpu-demo`)
+- **Fallback reason:** ZeroGPU runtime present; configured ZeroGPU model adapter not enabled yet
+- **Preview disclaimer:** present in status markdown and manifest `preview_disclaimer`
+- **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
+- **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
+
 ## Post-merge validation (main)
 
 After PR #2 merge (`95d452d` on `main`):
