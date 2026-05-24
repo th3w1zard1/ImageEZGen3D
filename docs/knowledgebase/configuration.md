@@ -233,6 +233,8 @@ Use `IMAGEEZ_CONFIG=/path/to/other.toml` when you want a different committed con
 
 Set `IMAGEEZ_OUTPUT_DIR` when you want test runs or experiments to write somewhere other than the default `outputs/` tree.
 
+On Hugging Face Spaces, when `SPACE_ID` (or related Space env markers) is set and `/data` is writable, the app defaults run storage to `/data/outputs` so History and exports survive restarts. Set `IMAGEEZ_OUTPUT_DIR` explicitly to override that behavior.
+
 ### Runtime Tuning For Hosted Environments
 
 Adjust launch queue and concurrency intentionally rather than letting multiple implicit knobs drift:

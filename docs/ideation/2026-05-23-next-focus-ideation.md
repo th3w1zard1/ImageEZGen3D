@@ -12,7 +12,7 @@ run_id: a8f3d4dd
 
 **Codebase context:** ZeroGPU-first Gradio image-to-3D scaffold with CPU demo workflow proof, gated Hunyuan adapter, and broad KB (27 docs + new index/parity register from PR #1). Roadmap states the frontier shifted from documentation to **trustworthy generation without breaking legal/runtime/local-dev contract**.
 
-**Active blockers:** Parity P8 closed 2026-05-24. P10 closed via hosted Block E2E (Plans 005–018). Trust-first ideation sequence (items 1–4) shipped 2026-05-24. Remaining frontier: ZeroGPU adapter enablement (gates G1–G9), hosted History session parity, golden-sample CI attestation.
+**Active blockers:** Parity P8 closed 2026-05-24. P10 closed via hosted Block E2E (Plans 005–018). Trust-first sequence + golden CI (020) + History parity (021) shipped 2026-05-24. Remaining frontier: ZeroGPU adapter enablement (gates G1–G9) when intentionally enabling Hunyuan.
 
 **Recent landings:** HF Space auto-deploy (plan 006), KB refresh (007), docs/solutions bootstrap (008), Space port/demo fix + hosted E2E (005/009).
 
@@ -29,7 +29,7 @@ For the **next implementation pass**, pick from the ranked ideas below (sequence
 3. ~~Hunyuan admission audit prep~~ — shipped (Plan 016, PR #8)
 4. ~~Manifest-driven UI components~~ — shipped (Plan 017–018, PR #9–#10)
 
-**Suggested next slice:** hosted History session parity (API vs browser runs on Space) or Hunyuan gate closure only when intentionally enabling the adapter. Golden-sample CI attestation shipped (Plan 020).
+**Suggested next slice:** Hunyuan gate closure only when intentionally enabling the adapter, or golden-sample hosted smoke in CI (optional). History session parity shipped (Plan 021). Golden-sample CI attestation shipped (Plan 020).
 
 **Completed (2026-05-24):** deploy parity P4/P5, vertical slice UI/export/port, hosted Block E2E (P10), HF release-tag CI deploy, KB/solutions bootstrap, `STRATEGY.md` anchor, trust slice PRs #4–#10.
 

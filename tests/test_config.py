@@ -61,6 +61,36 @@ class ConfigTests(unittest.TestCase):
             config = load_config(Path("missing.yaml"))
         self.assertEqual(config.launch.port, 7860)
 
+    def test_resolve_output_dir_uses_data_on_space_when_writable(self) -> None:
+        from imageezgen3d.config import resolve_output_dir
+
+        with tempfile.TemporaryDirectory() as directory:
+            data_root = Path(directory)
+            with patch.dict(os.environ, {}, clear=True):
+                resolved = resolve_output_dir(
+                    configured="outputs",
+                    data_root=data_root,
+                    space_runtime=True,
+                )
+            self.assertEqual(resolved, data_root / "outputs")
+
+    def test_resolve_output_dir_honors_explicit_env(self) -> None:
+        from imageezgen3d.config import resolve_output_dir
+
+        with patch.dict(os.environ, {"IMAGEEZ_OUTPUT_DIR": "/tmp/runs"}, clear=True):
+            resolved = resolve_output_dir(space_runtime=True)
+        self.assertEqual(resolved, Path("/tmp/runs"))
+
+    def test_load_config_uses_resolve_output_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            data_root = Path(directory) / "outputs"
+            with patch(
+                "imageezgen3d.config.resolve_output_dir",
+                return_value=data_root,
+            ):
+                config = load_config(Path("missing.yaml"))
+            self.assertEqual(config.app.output_dir, data_root)
+
 
 if __name__ == "__main__":
     unittest.main()
