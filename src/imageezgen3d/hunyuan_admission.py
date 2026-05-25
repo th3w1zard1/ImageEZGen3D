@@ -10,6 +10,7 @@ GateStatus = Literal["pass", "open", "fail"]
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _LICENSE_AUDIT = _REPO_ROOT / "docs/knowledgebase/license-audit.md"
+_WEIGHT_ACCESS = _REPO_ROOT / "docs/knowledgebase/hunyuan-weight-access.md"
 _ADMISSION_GATES = _REPO_ROOT / "docs/knowledgebase/hunyuan-admission-gates.md"
 _HOSTED_VALIDATION = (
     _REPO_ROOT / "docs/knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md"
@@ -43,13 +44,19 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
     hunyuan_source = _read_text(_HUNYUAN_ADAPTER)
     requirements_text = _read_text(_REQUIREMENTS)
 
+    weight_text = _read_text(_WEIGHT_ACCESS)
     g1_status: GateStatus = (
         "pass"
         if "G1_STATUS: PASS" in license_text
         and "Hunyuan3D-2.1 audit record" in license_text
         else "open"
     )
-    g2_status: GateStatus = "open"
+    g2_status: GateStatus = (
+        "pass"
+        if "G2_STATUS: PASS" in weight_text
+        and "dry-run" in weight_text.lower()
+        else "open"
+    )
     g3_status: GateStatus = "open"
     g3_evidence = (
         "requirements.txt has no Hunyuan wheel pins (expected while blocked)",
@@ -115,8 +122,10 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
             "Weight access",
             g2_status,
             (
-                "Document HF gated download + Space secrets plan",
-                "hf_cli.py lists dry-run commands; no stored download log in repo",
+                f"hunyuan-weight-access.md present: {_WEIGHT_ACCESS.is_file()}",
+                "G2_STATUS: PASS"
+                if g2_status == "pass"
+                else "G2 weight-access record missing in hunyuan-weight-access.md",
             ),
         ),
         GateResult(

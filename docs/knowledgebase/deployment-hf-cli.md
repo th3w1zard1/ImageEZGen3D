@@ -71,6 +71,19 @@ hf cache verify tencent/Hunyuan3D-2.1
 
 Use dry runs to inspect size, cache behavior, and access expectations before pretending a model is ready for hosted use.
 
+**Recorded dry-run (G2, 2026-05-24):** `tencent/Hunyuan3D-2.1` — 30 files, **14.9 GB** total; Hub `gated=false`; see [hunyuan-weight-access.md](hunyuan-weight-access.md).
+
+### Hunyuan Space secrets (when adapter is enabled)
+
+Until G3–G8 close, do **not** enable Hunyuan inference. When enabled:
+
+| Secret | Purpose |
+| --- | --- |
+| `HF_TOKEN` | Hub download / cache for `tencent/Hunyuan3D-2.1` at runtime |
+| (optional) `HF_HOME` | Pin hub cache directory on Space persistent storage if disk is tight |
+
+Set via Hugging Face Space **Settings → Repository secrets**. Never commit token values to git or `requirements.txt`.
+
 ## Upload App
 
 **Prefer staged minimal payload** — full-repo uploads can timeout or include workspace junk. `[REPO]` `stage_space_payload()` in `src/imageezgen3d/hf_cli.py` copies only Space-required paths (~30 files).

@@ -11,23 +11,12 @@ mode: repo-grounded
 
 - Guardrail track complete on `main` (Plans 037–048, PRs #20–#31).
 - **G1 legal audit** documented (Plan 049) — Hunyuan still **not enabled** (`configured=False`).
+- **G2 weight access** documented (Plan 050) — 14.9 GB dry-run + Space secrets plan; still **not enabled**.
 - Ship-only loops (merge PR → KB paragraph) are done; further value needs a **runtime or UX driver**.
 
 ## Ranked next slices (product-driven)
 
-### 1. **G2 — Weight access & Space secrets plan** (recommended next)
-
-**Driver:** Cannot wire Hunyuan inference without documented HF download path, cache size, and Space secret handling.
-
-**Deliverables:**
-
-- Run and record `hf download tencent/Hunyuan3D-2.1 --dry-run` (size, file list, auth expectations).
-- Document `HF_TOKEN` / gated-file handling in `docs/knowledgebase/deployment-hf-cli.md` + admission G2 row.
-- No weights in git; no `configured=True`.
-
-**Why first:** Natural sequence after G1; unblocks G3 dependency pinning with real install attempt.
-
-### 2. **G4 — ZeroGPU wiring scaffold (no enablement)**
+### 1. **G4 — ZeroGPU wiring scaffold (no enablement)** (recommended next)
 
 **Driver:** Hosted Space already exposes ZeroGPU runtime; adapter stub should isolate GPU work per `zerogpu-runtime.md`.
 
@@ -36,7 +25,19 @@ mode: repo-grounded
 - `@spaces.GPU` decorator shell on future `generate()` path; keep `configured=False`.
 - Tests that adapter refuses generation until gates close.
 
-**Why second:** Code shape without legal/weight risk if G2 still in flight.
+**Why first:** Code shape without downloading 14.9 GB into the repo.
+
+### 2. **G3 — Dependency audit (install smoke)**
+
+**Driver:** Hunyuan integration needs pinned Python/CUDA deps with known redistribution rights before Space install.
+
+**Deliverables:**
+
+- Constraints or lockfile slice for Hunyuan-only optional extra (not enabled by default).
+- CI job or documented install smoke on target Python (3.11 Space baseline).
+- Update admission G3 row with evidence.
+
+**Why second:** Requires knowing which packages the G4 GPU path will import.
 
 ### 3. **Creator UX — “What backend ran?” chip hardening**
 
@@ -57,6 +58,7 @@ mode: repo-grounded
 
 ## Evidence
 
-- `[REPO]` `hunyuan-admission-gates.md` — G1 PASS, G2–G8 OPEN
+- `[REPO]` `hunyuan-admission-gates.md` — G1–G2 PASS, G3–G8 OPEN
+- `[REPO]` `hunyuan-weight-access.md` — G2 dry-run 2026-05-24
 - `[REPO]` `license-audit.md` — G1 audit record 2026-05-24
 - `[OFFICIAL]` Tencent Hunyuan 3D 2.1 Community License (pinned in license audit)
