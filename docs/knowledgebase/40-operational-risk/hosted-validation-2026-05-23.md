@@ -26,6 +26,15 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 048 validation (PR #30 merge to main)
+
+After squash-merge PR #30 (`f7d77cd` on `main`, 2026-05-24):
+
+- **Merge:** Plan 047 ship docs (Plan 047 plan file + Plan 047 KB section + ideation PR #29 note)
+- **Hosted golden smoke:** run `20260524-221015-2f024fec` via `hosted_golden_smoke.py` (Block / balanced; Local CPU Preview)
+- **Sanity:** `unittest discover` on `main` after merge
+- **Mode:** hosted CPU fallback; Hunyuan **not** enabled
+
 ## Plan 047 validation (PR #29 merge to main)
 
 After squash-merge PR #29 (`3222161` on `main`, 2026-05-24):
