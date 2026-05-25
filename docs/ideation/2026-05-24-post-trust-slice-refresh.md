@@ -17,10 +17,12 @@ Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and H
 
 ## Recommended next slices (ranked)
 
-1. **Hunyuan G3 dependency audit** — pins + CI install smoke (`docs/ideation/2026-05-24-next-runtime-slice.md`). **Top priority** for neural path.
-2. **Hunyuan G5 resource fit** — Space disk/VRAM benchmark before enablement.
+1. **Hunyuan G5 resource fit** — Space disk/VRAM benchmark before enablement. **Top priority** for neural path.
+2. **Hunyuan G7 hosted E2E** — real Hunyuan path on Space after G5.
 3. **Hunyuan G1** — **done** (Plan 049); `license-audit.md`.
-4. **Hunyuan G2** — **done** (Plan 050); `hunyuan-weight-access.md` (14.9 GB dry-run).
+4. **Hunyuan G2** — **done** (Plan 050); `hunyuan-weight-access.md`.
+5. **Hunyuan G3** — **done** (Plan 052); `hunyuan-dependencies.md` + `.[hunyuan-audit]`.
+6. **Hunyuan G4** — **done** (Plan 051); `@spaces.GPU` scaffold.
 4. **Neural decimation hookup (optional)** — wire real adapter decimation at export when a neural path ships; quadric MVP is done.
 
 ## Completed since this ideation doc
@@ -40,6 +42,8 @@ Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and H
 - **Plan 047 ship closure** — PR #30 merged; KB validation for PR #29 merge (Plan 048).
 - **Hunyuan G1 legal audit** — Plan 049; `G1_STATUS: PASS` in license-audit (adapter still disabled).
 - **Hunyuan G2 weight access** — Plan 050; `G2_STATUS: PASS` in hunyuan-weight-access (adapter still disabled).
+- **Hunyuan G3 dependency audit** — Plan 052; pins + CI smoke (adapter still disabled).
+- **Hunyuan G4 ZeroGPU wiring** — Plan 051; GPU scaffold (adapter still disabled).
 
 ## Explicitly defer
 

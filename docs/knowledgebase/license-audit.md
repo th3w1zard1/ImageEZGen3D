@@ -66,6 +66,7 @@ Superseded by the audit record below (Plan 049, 2026-05-24). Enablement still re
 `G1_STATUS: PASS` — legal terms documented at pinned revisions below. This closes **gate G1 only**; it does **not** authorize `configured=True`.
 
 **Audit date:** 2026-05-24  
+**Re-verified:** 2026-05-24 — raw `LICENSE` at pin URL re-fetched; Territory (EU/UK/KR exclusion), §3.e Hosted Service disclosure, §4 1M MAU, and §5.b output-improvement ban unchanged.  
 **Auditor:** Agent (repo-grounded review of official LICENSE text; no external counsel)  
 **Evidence category:** `[OFFICIAL]` license files at pinned URLs; `[SYNTH]` deployment implications for ImageEZGen3D
 
