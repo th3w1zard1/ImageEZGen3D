@@ -16,6 +16,19 @@ dependencies = [
 [project.optional-dependencies]
 app = ["gradio>=4.44,<7"]
 mesh = ["trimesh>=4.4", "fast-simplification>=0.1"]
+# G3 audit tier: pip-installable ML metadata stack (not full Hunyuan runtime).
+hunyuan-audit = [
+  "transformers==4.46.0",
+  "diffusers==0.30.0",
+  "accelerate==1.1.1",
+  "huggingface-hub==0.30.2",
+  "safetensors==0.4.4",
+  "einops==0.8.0",
+  "omegaconf==2.3.0",
+  "PyYAML==6.0.2",
+  "tqdm==4.66.5",
+  "pydantic==2.10.6",
+]
 dev = []
 
 [tool.setuptools.packages.find]

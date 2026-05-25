@@ -13,30 +13,28 @@ mode: repo-grounded
 - **G1 legal audit** documented (Plan 049) — Hunyuan still **not enabled** (`configured=False`).
 - **G2 weight access** documented (Plan 050) — 14.9 GB dry-run + Space secrets plan; still **not enabled**.
 - **G4 ZeroGPU wiring** scaffold (Plan 051) — `spaces.GPU` shell in `hunyuan.py`; still **not enabled**.
-- Ship-only loops are done; further value needs **G3 dependency audit** or UX honesty work.
+- **G3 dependency audit** (Plan 052) — `hunyuan-pins.txt`, `.[hunyuan-audit]`, CI smoke; still **not enabled**.
 
 ## Ranked next slices (product-driven)
 
-### 1. **G3 — Dependency audit (install smoke)** (recommended next)
+### 1. **G5 — Resource fit benchmark** (recommended next)
 
-**Driver:** Hunyuan integration needs pinned Python/CUDA deps with known redistribution rights before Space install.
-
-**Deliverables:**
-
-- Constraints or lockfile slice for Hunyuan-only optional extra (not enabled by default).
-- CI job or documented install smoke on target Python (3.11 Space baseline).
-- Update admission G3 row with evidence.
-
-**Why now:** G4 GPU shell is in place; pins and install smoke can be scoped to optional Hunyuan extra.
-
-### 2. **G5 — Resource fit benchmark**
-
-**Driver:** 14.9 GB weights + GPU duration need Space disk/VRAM evidence before enablement.
+**Driver:** 14.9 GB weights + tier-C deps need Space disk/VRAM evidence before enablement.
 
 **Deliverables:**
 
 - Benchmark note with hardware SKU, cold-start, wall time.
 - Update admission G5 row.
+
+### 2. **G7 — Hosted E2E (real Hunyuan path)**
+
+**Driver:** Prove real `hunyuan-zerogpu` generation on live Space (not cpu-demo fallback).
+
+**Deliverables:**
+
+- Block/Vase sample run with adapter enabled after G5 closes.
+- Entry in `hosted-validation-2026-05-23.md` with run id + manifest/GLB/OBJ.
+- Update admission G7 row.
 
 ### 3. **Creator UX — “What backend ran?” chip hardening**
 
@@ -57,7 +55,8 @@ mode: repo-grounded
 
 ## Evidence
 
-- `[REPO]` `hunyuan-admission-gates.md` — G1–G2 PASS, G3–G8 OPEN
+- `[REPO]` `hunyuan-admission-gates.md` — G1–G4 PASS, G5–G7 OPEN
+- `[REPO]` `hunyuan-dependencies.md` — G3 audit 2026-05-24
 - `[REPO]` `hunyuan-weight-access.md` — G2 dry-run 2026-05-24
 - `[REPO]` `license-audit.md` — G1 audit record 2026-05-24
 - `[OFFICIAL]` Tencent Hunyuan 3D 2.1 Community License (pinned in license audit)

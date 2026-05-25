@@ -11,6 +11,8 @@ GateStatus = Literal["pass", "open", "fail"]
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _LICENSE_AUDIT = _REPO_ROOT / "docs/knowledgebase/license-audit.md"
 _WEIGHT_ACCESS = _REPO_ROOT / "docs/knowledgebase/hunyuan-weight-access.md"
+_DEPENDENCIES = _REPO_ROOT / "docs/knowledgebase/hunyuan-dependencies.md"
+_HUNYUAN_PINS = _REPO_ROOT / "requirements/hunyuan-pins.txt"
 _ADMISSION_GATES = _REPO_ROOT / "docs/knowledgebase/hunyuan-admission-gates.md"
 _HOSTED_VALIDATION = (
     _REPO_ROOT / "docs/knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md"
@@ -57,13 +59,25 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
         and "dry-run" in weight_text.lower()
         else "open"
     )
-    g3_status: GateStatus = "open"
-    g3_evidence = (
-        "requirements.txt has no Hunyuan wheel pins (expected while blocked)",
+    deps_text = _read_text(_DEPENDENCIES)
+    g3_status: GateStatus = (
+        "pass"
+        if "G3_STATUS: PASS" in deps_text
+        and _HUNYUAN_PINS.is_file()
+        and "hunyuan-audit" in deps_text
+        else "open"
     )
-    if "hunyuan" in requirements_text.lower():
+    g3_evidence = (
+        f"hunyuan-dependencies.md present: {_DEPENDENCIES.is_file()}",
+        f"requirements/hunyuan-pins.txt present: {_HUNYUAN_PINS.is_file()}",
+        "G3_STATUS: PASS"
+        if g3_status == "pass"
+        else "G3 dependency audit record missing or pins file absent",
+    )
+    if g3_status == "pass" and "hunyuan" in requirements_text.lower():
         g3_evidence = (
-            "Hunyuan-related dependency present in requirements.txt without audit closure",
+            *g3_evidence,
+            "requirements.txt mentions hunyuan — ensure only optional extra, not default install",
         )
 
     g4_status: GateStatus = (
