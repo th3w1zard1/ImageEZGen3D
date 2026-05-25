@@ -26,6 +26,10 @@ class HunyuanAdmissionTests(unittest.TestCase):
         self.assertEqual(len(gates), 9)
         self.assertEqual([gate.gate_id for gate in gates], [f"G{i}" for i in range(1, 10)])
 
+    def test_g1_legal_gate_passes_with_audit_record(self) -> None:
+        gates = {gate.gate_id: gate for gate in evaluate_admission_gates()}
+        self.assertEqual(gates["G1"].status, "pass")
+
     def test_audit_exit_code_zero_while_disabled(self) -> None:
         self.assertEqual(audit_exit_code(), 0)
 
