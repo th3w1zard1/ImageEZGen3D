@@ -34,6 +34,10 @@ class HunyuanAdmissionTests(unittest.TestCase):
         gates = {gate.gate_id: gate for gate in evaluate_admission_gates()}
         self.assertEqual(gates["G2"].status, "pass")
 
+    def test_g4_zerogpu_wiring_gate_passes_with_gpu_scaffold(self) -> None:
+        gates = {gate.gate_id: gate for gate in evaluate_admission_gates()}
+        self.assertEqual(gates["G4"].status, "pass")
+
     def test_audit_exit_code_zero_while_disabled(self) -> None:
         self.assertEqual(audit_exit_code(), 0)
 

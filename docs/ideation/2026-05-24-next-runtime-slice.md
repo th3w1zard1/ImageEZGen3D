@@ -12,22 +12,12 @@ mode: repo-grounded
 - Guardrail track complete on `main` (Plans 037–048, PRs #20–#31).
 - **G1 legal audit** documented (Plan 049) — Hunyuan still **not enabled** (`configured=False`).
 - **G2 weight access** documented (Plan 050) — 14.9 GB dry-run + Space secrets plan; still **not enabled**.
-- Ship-only loops (merge PR → KB paragraph) are done; further value needs a **runtime or UX driver**.
+- **G4 ZeroGPU wiring** scaffold (Plan 051) — `spaces.GPU` shell in `hunyuan.py`; still **not enabled**.
+- Ship-only loops are done; further value needs **G3 dependency audit** or UX honesty work.
 
 ## Ranked next slices (product-driven)
 
-### 1. **G4 — ZeroGPU wiring scaffold (no enablement)** (recommended next)
-
-**Driver:** Hosted Space already exposes ZeroGPU runtime; adapter stub should isolate GPU work per `zerogpu-runtime.md`.
-
-**Deliverables:**
-
-- `@spaces.GPU` decorator shell on future `generate()` path; keep `configured=False`.
-- Tests that adapter refuses generation until gates close.
-
-**Why first:** Code shape without downloading 14.9 GB into the repo.
-
-### 2. **G3 — Dependency audit (install smoke)**
+### 1. **G3 — Dependency audit (install smoke)** (recommended next)
 
 **Driver:** Hunyuan integration needs pinned Python/CUDA deps with known redistribution rights before Space install.
 
@@ -37,7 +27,16 @@ mode: repo-grounded
 - CI job or documented install smoke on target Python (3.11 Space baseline).
 - Update admission G3 row with evidence.
 
-**Why second:** Requires knowing which packages the G4 GPU path will import.
+**Why now:** G4 GPU shell is in place; pins and install smoke can be scoped to optional Hunyuan extra.
+
+### 2. **G5 — Resource fit benchmark**
+
+**Driver:** 14.9 GB weights + GPU duration need Space disk/VRAM evidence before enablement.
+
+**Deliverables:**
+
+- Benchmark note with hardware SKU, cold-start, wall time.
+- Update admission G5 row.
 
 ### 3. **Creator UX — “What backend ran?” chip hardening**
 

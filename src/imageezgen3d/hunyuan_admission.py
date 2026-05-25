@@ -140,7 +140,9 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
             g4_status,
             (
                 f"zerogpu-runtime.md present: {_ZEROGPU_RUNTIME.is_file()}",
-                "Hunyuan adapter must use @spaces.GPU before enablement",
+                "Hunyuan adapter uses spaces.GPU scaffold"
+                if g4_status == "pass"
+                else "Hunyuan adapter must use @spaces.GPU before enablement",
             ),
         ),
         GateResult(

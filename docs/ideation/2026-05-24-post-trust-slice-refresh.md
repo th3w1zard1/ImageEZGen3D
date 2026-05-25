@@ -17,8 +17,8 @@ Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and H
 
 ## Recommended next slices (ranked)
 
-1. **Hunyuan G4 ZeroGPU wiring** — `@spaces.GPU` scaffold with adapter still disabled (`docs/ideation/2026-05-24-next-runtime-slice.md`). **Top priority** for neural path.
-2. **Hunyuan G3 dependency audit** — pins + CI install smoke after G4 scaffold.
+1. **Hunyuan G3 dependency audit** — pins + CI install smoke (`docs/ideation/2026-05-24-next-runtime-slice.md`). **Top priority** for neural path.
+2. **Hunyuan G5 resource fit** — Space disk/VRAM benchmark before enablement.
 3. **Hunyuan G1** — **done** (Plan 049); `license-audit.md`.
 4. **Hunyuan G2** — **done** (Plan 050); `hunyuan-weight-access.md` (14.9 GB dry-run).
 4. **Neural decimation hookup (optional)** — wire real adapter decimation at export when a neural path ships; quadric MVP is done.

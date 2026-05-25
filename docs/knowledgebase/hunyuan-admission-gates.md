@@ -22,7 +22,7 @@ Machine-readable output: `PYTHONPATH=src python scripts/hunyuan_admission_audit.
 
 The audit exits **0** while `configured=False`. It exits **1** if the adapter were enabled while gates remain open (safety guard for enablement PRs).
 
-**Last audit:** 2026-05-24 — Plan 050; adapter `configured=False`; **G1 PASS**, **G2 PASS** (documented); G3–G8 **OPEN**; G9 **PASS** (disabled as required).
+**Last audit:** 2026-05-24 — Plan 051; adapter `configured=False`; **G1–G2 PASS**, **G4 PASS** (GPU scaffold); G3, G5–G8 **OPEN**; G9 **PASS** (disabled as required).
 
 ## Completed prerequisites
 
@@ -41,7 +41,7 @@ Record evidence in this table (or linked PR) before setting `configured=True` on
 | Legal review | G1 | License, commercial use, attribution, and redistribution rights documented for code, weights, and wheels | [license-audit.md](license-audit.md) § Hunyuan3D-2.1 audit record — pins `82920d64` (GitHub) / `0b946776` (HF); `G1_STATUS: PASS` | **PASS** |
 | Weight access | G2 | Gated downloads, tokens, and acceptance flows documented; no secrets in repo | [hunyuan-weight-access.md](hunyuan-weight-access.md) — dry-run 14.9 GB / 30 files; `G2_STATUS: PASS` | **PASS** |
 | Dependency audit | G3 | Python/CUDA deps pinned; wheels redistribution rights known; install reproducible on Space | Lockfile or constraints PR; CI install smoke on target Python | **OPEN** |
-| ZeroGPU wiring | G4 | GPU work only inside `@spaces.GPU`; CPU path unchanged | Code review + [zerogpu-runtime.md](zerogpu-runtime.md) checklist | **OPEN** |
+| ZeroGPU wiring | G4 | GPU work only inside `@spaces.GPU`; CPU path unchanged | `src/imageezgen3d/adapters/hunyuan.py` — `_run_hunyuan_inference_on_gpu` uses `spaces.GPU` when importable | **PASS** |
 | Resource fit | G5 | VRAM/time budget acceptable on Space hardware class | Benchmark note with hardware SKU and wall time | **OPEN** |
 | Manifest parity | G6 | Manifest records adapter, quality, fallback, and trust fields same as cpu-demo | Sample manifest JSON attached to enablement PR | **OPEN** |
 | Hosted E2E | G7 | Live Space run with **real** Hunyuan path (not cpu-demo fallback); Block or Vase sample | Entry in hosted-validation doc with run id + artifacts | **OPEN** |

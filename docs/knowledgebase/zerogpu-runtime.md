@@ -70,6 +70,7 @@ These reasons should not stay internal. They belong in the manifest and near the
 ## Current Adapter State
 
 - `hunyuan-zerogpu`: preferred future hosted adapter, intentionally unconfigured — see [hunyuan-admission-gates.md](hunyuan-admission-gates.md);
+- **G4 scaffold (Plan 051):** `src/imageezgen3d/adapters/hunyuan.py` routes future inference through `_run_hunyuan_inference_on_gpu`, decorated with `spaces.GPU` when the package is importable (identity decorator locally). Adapter remains `configured=False`.
 - `cpu-demo`: fallback adapter for local development, tests, and no-GPU environments.
 
 The important point is that the hosted path is a future real target, not current theater.
