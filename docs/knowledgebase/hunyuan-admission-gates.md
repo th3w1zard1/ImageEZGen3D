@@ -22,7 +22,7 @@ Machine-readable output: `PYTHONPATH=src python scripts/hunyuan_admission_audit.
 
 The audit exits **0** while `configured=False`. It exits **1** if the adapter were enabled while gates remain open (safety guard for enablement PRs).
 
-**Last audit:** 2026-05-24 — Plan 041; adapter `configured=False`; G1–G8 **OPEN**; G9 **PASS** (disabled as required).
+**Last audit:** 2026-05-24 — Plan 049; adapter `configured=False`; **G1 PASS** (documented); G2–G8 **OPEN**; G9 **PASS** (disabled as required).
 
 ## Completed prerequisites
 
@@ -38,7 +38,7 @@ Record evidence in this table (or linked PR) before setting `configured=True` on
 
 | Gate | ID | Pass criteria | Evidence required | Status |
 | --- | --- | --- | --- | --- |
-| Legal review | G1 | License, commercial use, attribution, and redistribution rights documented for code, weights, and wheels | Filled rows in [license-audit.md](license-audit.md) for Hunyuan3D-2.1 at a pinned revision | **OPEN** |
+| Legal review | G1 | License, commercial use, attribution, and redistribution rights documented for code, weights, and wheels | [license-audit.md](license-audit.md) § Hunyuan3D-2.1 audit record — pins `82920d64` (GitHub) / `0b946776` (HF); `G1_STATUS: PASS` | **PASS** |
 | Weight access | G2 | Gated downloads, tokens, and acceptance flows documented; no secrets in repo | HF model card + dry-run `hf download` log; Space secret plan | **OPEN** |
 | Dependency audit | G3 | Python/CUDA deps pinned; wheels redistribution rights known; install reproducible on Space | Lockfile or constraints PR; CI install smoke on target Python | **OPEN** |
 | ZeroGPU wiring | G4 | GPU work only inside `@spaces.GPU`; CPU path unchanged | Code review + [zerogpu-runtime.md](zerogpu-runtime.md) checklist | **OPEN** |

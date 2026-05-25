@@ -44,10 +44,10 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
     requirements_text = _read_text(_REQUIREMENTS)
 
     g1_status: GateStatus = (
-        "open"
-        if "Blocked until explicit audit" in license_text
-        or "Blocked until" in license_text
-        else "pass"
+        "pass"
+        if "G1_STATUS: PASS" in license_text
+        and "Hunyuan3D-2.1 audit record" in license_text
+        else "open"
     )
     g2_status: GateStatus = "open"
     g3_status: GateStatus = "open"
@@ -107,7 +107,7 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
             g1_status,
             (
                 f"license-audit.md present: {_LICENSE_AUDIT.is_file()}",
-                "Hunyuan row must move from Blocked to Allowed with revision pins",
+                "G1_STATUS: PASS" if g1_status == "pass" else "G1 audit record missing in license-audit.md",
             ),
         ),
         GateResult(
