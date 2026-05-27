@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from imageezgen3d.hunyuan_g8_preflight import (
+    evaluate_g8_enablement_status,
     g8_enablement_validation_passed,
     validate_g8_cpu_fallback_status,
 )
@@ -67,6 +68,20 @@ class HunyuanG8PreflightTests(unittest.TestCase):
             ]
         )
         self.assertFalse(g8_enablement_validation_passed(text))
+
+    def test_evaluate_g8_enablement_status_placeholder(self) -> None:
+        text = "## G8 validation\n\nG8_STATUS: OPEN\n"
+        status = evaluate_g8_enablement_status(text, g8_gate_status="open")
+        self.assertTrue(status.section_present)
+        self.assertTrue(status.interim_open)
+        self.assertFalse(status.documented)
+        self.assertEqual(status.gate_status, "open")
+
+    def test_evaluate_g8_enablement_status_pass(self) -> None:
+        text = "## G8 validation\n\nG8_STATUS: PASS\n"
+        status = evaluate_g8_enablement_status(text, g8_gate_status="pass")
+        self.assertTrue(status.documented)
+        self.assertFalse(status.interim_open)
 
 
 if __name__ == "__main__":

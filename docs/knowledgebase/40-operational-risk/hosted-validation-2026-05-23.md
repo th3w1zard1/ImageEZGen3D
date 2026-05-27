@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 067 validation (G8 artifact visibility)
+
+After Plan 067 on `main` (2026-05-27):
+
+- **Enablement preflight:** text report includes `g8_enablement_documented=`
+- **Admission audit JSON:** `g8_enablement` block mirrors structured G8 section state (`interim_open` while `G8_STATUS: OPEN`)
+
 ## Plan 066 validation (G8 admission gate section alignment)
 
 After Plan 066 on `main` (2026-05-27):

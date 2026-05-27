@@ -14,8 +14,11 @@ PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py --json --record hu
 | Field | Meaning |
 | --- | --- |
 | `prerequisites_met` | G1–G6 pass (required before enablement) |
-| `blocking_enablement` | Gates still open (typically G7 hosted E2E) |
+| `g8_enablement_documented` | `G8_STATUS: PASS` in `## G8 validation` (post-enablement closure) |
+| `blocking_enablement` | Gates still open (typically G7 hosted E2E, G8 section) |
 | `enablement_complete` | Adapter on **and** all gates pass |
+
+Admission audit JSON also includes `g8_enablement` (`section_present`, `documented`, `interim_open`, `gate_status`) alongside `g7_readiness`.
 
 ## Related tools
 

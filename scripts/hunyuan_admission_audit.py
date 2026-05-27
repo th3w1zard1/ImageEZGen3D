@@ -9,7 +9,9 @@ from imageezgen3d.hunyuan_admission import (
     evaluate_admission_gates,
     format_admission_report,
 )
+from imageezgen3d.hunyuan_admission import _HOSTED_VALIDATION, _read_text
 from imageezgen3d.hunyuan_g7_preflight import evaluate_g7_readiness
+from imageezgen3d.hunyuan_g8_preflight import evaluate_g8_enablement_status
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -35,9 +37,15 @@ def main(argv: list[str] | None = None) -> int:
     from imageezgen3d.hunyuan_admission import _adapter_configured
 
     readiness = evaluate_g7_readiness(gates)
+    g8_gate = next((gate for gate in gates if gate.gate_id == "G8"), None)
+    g8_enablement = evaluate_g8_enablement_status(
+        _read_text(_HOSTED_VALIDATION),
+        g8_gate_status=g8_gate.status if g8_gate is not None else None,
+    )
     payload = {
         "adapter_configured": _adapter_configured(),
         "g7_readiness": readiness.to_dict(),
+        "g8_enablement": g8_enablement.to_dict(),
         "gates": [
             {
                 "id": gate.gate_id,
