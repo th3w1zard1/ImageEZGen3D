@@ -66,6 +66,24 @@ class HunyuanCiScriptsTests(unittest.TestCase):
             self.assertFalse(audit_payload["adapter_configured"])
             self.assertTrue(preflight_payload["prerequisites_met"])
 
+            verify = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/verify_hunyuan_ci_artifact_parity.py",
+                    str(audit_path),
+                    str(preflight_path),
+                ],
+                check=False,
+                env=env,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(
+                verify.returncode,
+                0,
+                msg=verify.stderr or verify.stdout,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

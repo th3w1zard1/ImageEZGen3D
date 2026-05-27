@@ -5,11 +5,15 @@ Gate **G9** closes when an explicit enablement PR merges with rollback steps doc
 ## Pre-flight (required)
 
 ```bash
-PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py
-PYTHONPATH=src python scripts/hunyuan_admission_audit.py
+PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py \
+  --record hunyuan-enablement-preflight.json
+PYTHONPATH=src python scripts/hunyuan_admission_audit.py \
+  --record hunyuan-admission-audit.json
+PYTHONPATH=src python scripts/verify_hunyuan_ci_artifact_parity.py \
+  hunyuan-admission-audit.json hunyuan-enablement-preflight.json
 ```
 
-Expect `prerequisites_met=True` and `blocking_enablement` listing **G7** (and **G8** post-enablement section) until hosted validation sections are updated.
+Expect `prerequisites_met=True` and `blocking_enablement` listing **G7** (and **G8** post-enablement section) until hosted validation sections are updated. The verify script must exit 0 before enablement work proceeds.
 
 ## Enablement PR checklist
 
