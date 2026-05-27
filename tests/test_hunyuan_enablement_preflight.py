@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+import json
+import os
+import subprocess
+import sys
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from imageezgen3d.hunyuan_admission import GateResult
@@ -76,6 +82,23 @@ class HunyuanEnablementPreflightTests(unittest.TestCase):
                 result = evaluate_enablement_preflight()
 
         self.assertEqual(enablement_preflight_exit_code(result), 1)
+
+    def test_enablement_preflight_script_writes_record_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_path = Path(directory) / "enablement-preflight.json"
+            subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/hunyuan_enablement_preflight.py",
+                    "--record",
+                    str(record_path),
+                ],
+                check=True,
+                env={**os.environ, "PYTHONPATH": "src"},
+            )
+            payload = json.loads(record_path.read_text(encoding="utf-8"))
+            self.assertFalse(payload["adapter_configured"])
+            self.assertTrue(payload["prerequisites_met"])
 
 
 if __name__ == "__main__":

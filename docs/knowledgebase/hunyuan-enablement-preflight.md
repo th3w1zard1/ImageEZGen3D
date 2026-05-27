@@ -1,0 +1,28 @@
+# Hunyuan enablement preflight
+
+Single snapshot before setting `HunyuanPlaceholderAdapter.configured = True`.
+
+## Command
+
+```bash
+PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py
+PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py --json --record hunyuan-enablement-preflight.json
+```
+
+## Interpreting output
+
+| Field | Meaning |
+| --- | --- |
+| `prerequisites_met` | G1–G6 pass (required before enablement) |
+| `blocking_enablement` | Gates still open (typically G7 hosted E2E) |
+| `enablement_complete` | Adapter on **and** all gates pass |
+
+## Related tools
+
+- [hunyuan-admission-gates.md](hunyuan-admission-gates.md) — gate definitions
+- [hunyuan-g7-preflight.md](hunyuan-g7-preflight.md) — G7 hosted neural run validator
+- [hunyuan-g8-preflight.md](hunyuan-g8-preflight.md) — G8 CPU fallback honesty (hosted golden smoke)
+
+## Scheduled CI
+
+The `hosted-golden-smoke` workflow uploads `hunyuan-enablement-preflight.json` alongside admission audit and golden smoke records.
