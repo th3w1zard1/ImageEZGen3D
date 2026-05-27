@@ -26,6 +26,15 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 063 validation (unified enablement preflight)
+
+After Plan 063 on `main` (2026-05-27):
+
+- **CLI:** `hunyuan_enablement_preflight.py` — G1–G9 snapshot; exit 1 if G1–G6 regress or adapter enabled with open G7–G9
+- **PR #44:** G8 golden smoke checks merged (`2c03a2b`)
+- **Hosted golden smoke:** run `20260527-163628-0b5ca207` (G8 honesty ok)
+- **G7:** **OPEN** (neural hosted E2E); G8/G9 scaffold pass while disabled
+
 ## Plan 062 validation (G8 fallback honesty in hosted golden smoke)
 
 After Plan 062 on `main` (2026-05-27):
