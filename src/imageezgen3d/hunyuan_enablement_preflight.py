@@ -53,9 +53,9 @@ def evaluate_enablement_preflight() -> EnablementPreflightResult:
     configured = HunyuanPlaceholderAdapter().capabilities.configured
     g7 = evaluate_g7_readiness(gates)
 
-    from .hunyuan_admission import _HOSTED_VALIDATION, _read_text
+    from .hosted_validation import HOSTED_VALIDATION_PATH, read_repo_text
 
-    hosted_text = _read_text(_HOSTED_VALIDATION)
+    hosted_text = read_repo_text(HOSTED_VALIDATION_PATH)
     by_id = {gate.gate_id: gate for gate in gates}
     g8_gate = by_id.get("G8")
     g8_status = evaluate_g8_enablement_status(

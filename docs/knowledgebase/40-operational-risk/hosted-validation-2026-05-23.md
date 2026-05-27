@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 069 validation (hosted doc paths + CI artifact parity)
+
+After Plan 069 on `main` (2026-05-27):
+
+- **`hosted_validation.py`:** `HOSTED_VALIDATION_PATH` + `read_repo_text()` (no private admission imports from enablement preflight)
+- **Parity test:** `test_hunyuan_ci_artifact_parity.py` locks admission audit vs enablement preflight G7/G8 snapshots
+
 ## Plan 068 validation (enablement JSON parity + hosted section helper)
 
 After Plan 068 on `main` (2026-05-27):

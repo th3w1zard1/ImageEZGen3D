@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Literal
 
 from .adapters.hunyuan import HunyuanPlaceholderAdapter
-from .hosted_validation import hosted_validation_section
+from .hosted_validation import HOSTED_VALIDATION_PATH, hosted_validation_section, read_repo_text
 from .hunyuan_g8_preflight import g8_enablement_validation_passed
 from .hunyuan_manifest_parity import (
     HUNYUAN_SAMPLE_MANIFEST,
@@ -23,9 +23,6 @@ _RESOURCE_FIT = _REPO_ROOT / "docs/knowledgebase/hunyuan-resource-fit.md"
 _HUNYUAN_PINS = _REPO_ROOT / "requirements/hunyuan-pins.txt"
 _ADMISSION_GATES = _REPO_ROOT / "docs/knowledgebase/hunyuan-admission-gates.md"
 _MANIFEST_PARITY = _REPO_ROOT / "docs/knowledgebase/hunyuan-manifest-parity.md"
-_HOSTED_VALIDATION = (
-    _REPO_ROOT / "docs/knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md"
-)
 _ZEROGPU_RUNTIME = _REPO_ROOT / "docs/knowledgebase/zerogpu-runtime.md"
 _HUNYUAN_ADAPTER = _REPO_ROOT / "src/imageezgen3d/adapters/hunyuan.py"
 _REQUIREMENTS = _REPO_ROOT / "requirements.txt"
@@ -37,12 +34,6 @@ class GateResult:
     title: str
     status: GateStatus
     evidence: tuple[str, ...]
-
-
-def _read_text(path: Path) -> str:
-    if not path.is_file():
-        return ""
-    return path.read_text(encoding="utf-8")
 
 
 def _g7_hosted_validation_passed(hosted_text: str) -> bool:
@@ -70,12 +61,12 @@ def _g6_sample_manifest_valid() -> bool:
 
 
 def evaluate_admission_gates() -> tuple[GateResult, ...]:
-    license_text = _read_text(_LICENSE_AUDIT)
-    hosted_text = _read_text(_HOSTED_VALIDATION)
-    hunyuan_source = _read_text(_HUNYUAN_ADAPTER)
-    requirements_text = _read_text(_REQUIREMENTS)
+    license_text = read_repo_text(_LICENSE_AUDIT)
+    hosted_text = read_repo_text(HOSTED_VALIDATION_PATH)
+    hunyuan_source = read_repo_text(_HUNYUAN_ADAPTER)
+    requirements_text = read_repo_text(_REQUIREMENTS)
 
-    weight_text = _read_text(_WEIGHT_ACCESS)
+    weight_text = read_repo_text(_WEIGHT_ACCESS)
     g1_status: GateStatus = (
         "pass"
         if "G1_STATUS: PASS" in license_text
@@ -88,7 +79,7 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
         and "dry-run" in weight_text.lower()
         else "open"
     )
-    deps_text = _read_text(_DEPENDENCIES)
+    deps_text = read_repo_text(_DEPENDENCIES)
     g3_status: GateStatus = (
         "pass"
         if "G3_STATUS: PASS" in deps_text
@@ -114,7 +105,7 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
         if "@spaces.GPU" in hunyuan_source or "spaces.GPU" in hunyuan_source
         else "open"
     )
-    resource_text = _read_text(_RESOURCE_FIT)
+    resource_text = read_repo_text(_RESOURCE_FIT)
     g5_status: GateStatus = (
         "pass"
         if "G5_STATUS: PASS" in resource_text
@@ -122,7 +113,7 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
         and "14.9" in resource_text
         else "open"
     )
-    manifest_parity_text = _read_text(_MANIFEST_PARITY)
+    manifest_parity_text = read_repo_text(_MANIFEST_PARITY)
     g6_status: GateStatus = (
         "pass"
         if "G6_STATUS: PASS" in manifest_parity_text
