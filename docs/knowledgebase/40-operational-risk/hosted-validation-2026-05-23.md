@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 072 validation (CI artifact verify script)
+
+After Plan 072 on `main` (2026-05-27):
+
+- **Verify script:** `scripts/verify_hunyuan_ci_artifact_parity.py` in `ci.yml` and scheduled `hosted-golden-smoke`
+- **Fails CI** when uploaded `hunyuan-admission-audit.json` and `hunyuan-enablement-preflight.json` disagree on G7/G8
+
 ## Plan 071 validation (G8 gates helper + CI scripts contract)
 
 After Plan 071 on `main` (2026-05-27):

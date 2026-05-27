@@ -31,4 +31,4 @@ Admission audit JSON uses the same nested `g7_readiness` / `g8_enablement` block
 
 ## Scheduled CI
 
-The `hosted-golden-smoke` workflow uploads `hunyuan-enablement-preflight.json` alongside admission audit and golden smoke records.
+The `hosted-golden-smoke` workflow uploads `hunyuan-enablement-preflight.json` alongside admission audit and golden smoke records, then runs `scripts/verify_hunyuan_ci_artifact_parity.py` so G7/G8 blocks cannot drift between files.

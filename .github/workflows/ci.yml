@@ -132,13 +132,22 @@ jobs:
         run: PYTHONPATH=src python scripts/hunyuan_resource_estimate.py
 
       - name: Run Hunyuan admission gate audit
-        run: PYTHONPATH=src python scripts/hunyuan_admission_audit.py
+        run: |
+          PYTHONPATH=src python scripts/hunyuan_admission_audit.py \
+            --record hunyuan-admission-audit.json
 
       - name: Hunyuan G7 preflight readiness (G1-G6)
         run: PYTHONPATH=src python scripts/hunyuan_g7_preflight.py
 
       - name: Hunyuan enablement preflight (G1-G9 snapshot)
-        run: PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py
+        run: |
+          PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py \
+            --record hunyuan-enablement-preflight.json
+
+      - name: Verify Hunyuan CI artifact parity
+        run: |
+          PYTHONPATH=src python scripts/verify_hunyuan_ci_artifact_parity.py \
+            hunyuan-admission-audit.json hunyuan-enablement-preflight.json
 
   hunyuan-dependency-smoke:
     runs-on: ubuntu-latest

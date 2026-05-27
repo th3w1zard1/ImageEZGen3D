@@ -1,31 +1,49 @@
 from __future__ import annotations
 
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
-from imageezgen3d.hunyuan_admission import evaluate_admission_gates
-from imageezgen3d.hunyuan_admission_audit import build_admission_audit_payload
-from imageezgen3d.hunyuan_enablement_preflight import evaluate_enablement_preflight
+from imageezgen3d.hunyuan_ci_artifact_parity import (
+    verify_hunyuan_ci_artifact_files,
+    verify_hunyuan_ci_artifact_parity,
+)
 
 
-class HunyuanCiArtifactParityTests(unittest.TestCase):
-    def test_admission_audit_payload_includes_g7_and_g8_blocks(self) -> None:
-        payload = build_admission_audit_payload()
-        self.assertIn("g7_readiness", payload)
-        self.assertIn("g8_enablement", payload)
-        self.assertIn("gates", payload)
-        self.assertFalse(payload["adapter_configured"])
+class HunyuanCiArtifactParityVerifyTests(unittest.TestCase):
+    def test_verify_passes_when_g7_g8_match(self) -> None:
+        payload = {
+            "g7_readiness": {"ready": True, "issues": []},
+            "g8_enablement": {"documented": False, "interim_open": True},
+        }
+        self.assertEqual(verify_hunyuan_ci_artifact_parity(payload, payload), [])
 
-    def test_g7_readiness_matches_between_preflight_and_audit_payload(self) -> None:
-        gates = evaluate_admission_gates()
-        preflight = evaluate_enablement_preflight()
-        payload = build_admission_audit_payload(gates)
-        self.assertEqual(payload["g7_readiness"], preflight.g7_readiness.to_dict())
+    def test_verify_fails_on_g8_mismatch(self) -> None:
+        audit = {"g7_readiness": {}, "g8_enablement": {"documented": False}}
+        preflight = {"g7_readiness": {}, "g8_enablement": {"documented": True}}
+        issues = verify_hunyuan_ci_artifact_parity(audit, preflight)
+        self.assertTrue(any("g8_enablement" in issue for issue in issues))
 
-    def test_g8_enablement_matches_between_audit_payload_and_preflight(self) -> None:
-        gates = evaluate_admission_gates()
-        preflight = evaluate_enablement_preflight()
-        payload = build_admission_audit_payload(gates)
-        self.assertEqual(payload["g8_enablement"], preflight.g8_enablement.to_dict())
+    def test_verify_files_from_disk(self) -> None:
+        payload = {
+            "g7_readiness": {"ready": True, "issues": [], "gates": []},
+            "g8_enablement": {
+                "section_present": True,
+                "documented": False,
+                "interim_open": True,
+                "gate_status": "open",
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            audit_path = Path(directory) / "audit.json"
+            preflight_path = Path(directory) / "preflight.json"
+            audit_path.write_text(json.dumps(payload), encoding="utf-8")
+            preflight_path.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertEqual(
+                verify_hunyuan_ci_artifact_files(audit_path, preflight_path),
+                [],
+            )
 
 
 if __name__ == "__main__":
