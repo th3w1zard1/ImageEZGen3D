@@ -26,6 +26,15 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 059 validation (G6 manifest sample + PR #40 deploy)
+
+After Plan 059 on `main` (2026-05-27):
+
+- **G6:** `hunyuan-manifest-parity.md` + `tests/fixtures/hunyuan-zerogpu-manifest.sample.json`; admission audit G6 **PASS** (sample contract only)
+- **PR #40:** History tab idle backend rail merged (`5f336b9`); Space deploy `73836dd`
+- **Hosted golden smoke:** run `20260527-161046-de25d276` (cpu-demo; rail HTML ok)
+- **Adapter:** Hunyuan **not** enabled; G7 hosted neural E2E still **OPEN**
+
 ## Plan 058 validation (History tab idle backend rail parity)
 
 After Plan 058 on `main` (2026-05-27):

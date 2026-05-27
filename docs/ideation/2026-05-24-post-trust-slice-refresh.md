@@ -18,7 +18,7 @@ Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and H
 ## Recommended next slices (ranked)
 
 1. **Hunyuan G7 hosted E2E** — real Hunyuan path on Space (wall-clock + artifacts). **Top priority** for neural path.
-2. **Hunyuan G6 manifest parity** — attach Hunyuan sample manifest to enablement PR.
+2. **Hunyuan G6 manifest parity** — **done (Plan 059)** — sample manifest + validator on `main`; G7 hosted E2E still OPEN.
 3. **Hunyuan G1** — **done** (Plan 049); `license-audit.md`.
 4. **Hunyuan G2** — **done** (Plan 050); `hunyuan-weight-access.md`.
 5. **Hunyuan G3** — **done** (Plan 052); `hunyuan-dependencies.md` + `.[hunyuan-audit]`.

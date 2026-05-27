@@ -22,7 +22,7 @@ Machine-readable output: `PYTHONPATH=src python scripts/hunyuan_admission_audit.
 
 The audit exits **0** while `configured=False`. It exits **1** if the adapter were enabled while gates remain open (safety guard for enablement PRs).
 
-**Last audit:** 2026-05-25 — Plan 053; adapter `configured=False`; **G1–G5 PASS**; G6–G7 **OPEN**; G8/G9 **PASS** (scaffold + disabled).
+**Last audit:** 2026-05-27 — Plan 059; adapter `configured=False`; **G1–G6 PASS** (G6 sample contract); G7 **OPEN**; G8/G9 **PASS** (scaffold + disabled).
 
 ## Completed prerequisites
 
@@ -43,7 +43,7 @@ Record evidence in this table (or linked PR) before setting `configured=True` on
 | Dependency audit | G3 | Python/CUDA deps pinned; wheels redistribution rights known; install reproducible on Space | [hunyuan-dependencies.md](hunyuan-dependencies.md) + `requirements/hunyuan-pins.txt`; `.[hunyuan-audit]` CI smoke; `G3_STATUS: PASS` | **PASS** |
 | ZeroGPU wiring | G4 | GPU work only inside `@spaces.GPU`; CPU path unchanged | `src/imageezgen3d/adapters/hunyuan.py` — `_run_hunyuan_inference_on_gpu` uses `spaces.GPU` when importable | **PASS** |
 | Resource fit | G5 | VRAM/time budget acceptable on Space hardware class | [hunyuan-resource-fit.md](hunyuan-resource-fit.md) — 29 GB VRAM / 14.9 GB weights; `G5_STATUS: PASS` | **PASS** |
-| Manifest parity | G6 | Manifest records adapter, quality, fallback, and trust fields same as cpu-demo | Sample manifest JSON attached to enablement PR | **OPEN** |
+| Manifest parity | G6 | Manifest records adapter, quality, fallback, and trust fields same as cpu-demo | [hunyuan-manifest-parity.md](hunyuan-manifest-parity.md) + `tests/fixtures/hunyuan-zerogpu-manifest.sample.json`; `G6_STATUS: PASS` (sample; not live Hunyuan run) | **PASS** |
 | Hosted E2E | G7 | Live Space run with **real** Hunyuan path (not cpu-demo fallback); Block or Vase sample | Entry in hosted-validation doc with run id + artifacts | **OPEN** |
 | UX honesty | G8 | UI never implies ZeroGPU/neural reconstruction when fallback ran | Browser + API evidence; mode-validation-matrix satisfied | **OPEN** |
 | Enablement PR | G9 | Explicit PR enables adapter; rollback steps documented | Merged PR link; `AGENTS.md` validation loop repeated | **OPEN** |

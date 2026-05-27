@@ -46,6 +46,10 @@ class HunyuanAdmissionTests(unittest.TestCase):
         gates = {gate.gate_id: gate for gate in evaluate_admission_gates()}
         self.assertEqual(gates["G5"].status, "pass")
 
+    def test_g6_manifest_parity_gate_passes_with_sample_fixture(self) -> None:
+        gates = {gate.gate_id: gate for gate in evaluate_admission_gates()}
+        self.assertEqual(gates["G6"].status, "pass")
+
     def test_audit_exit_code_zero_while_disabled(self) -> None:
         self.assertEqual(audit_exit_code(), 0)
 
