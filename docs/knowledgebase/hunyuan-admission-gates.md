@@ -44,9 +44,9 @@ Record evidence in this table (or linked PR) before setting `configured=True` on
 | ZeroGPU wiring | G4 | GPU work only inside `@spaces.GPU`; CPU path unchanged | `src/imageezgen3d/adapters/hunyuan.py` — `_run_hunyuan_inference_on_gpu` uses `spaces.GPU` when importable | **PASS** |
 | Resource fit | G5 | VRAM/time budget acceptable on Space hardware class | [hunyuan-resource-fit.md](hunyuan-resource-fit.md) — 29 GB VRAM / 14.9 GB weights; `G5_STATUS: PASS` | **PASS** |
 | Manifest parity | G6 | Manifest records adapter, quality, fallback, and trust fields same as cpu-demo | [hunyuan-manifest-parity.md](hunyuan-manifest-parity.md) + `tests/fixtures/hunyuan-zerogpu-manifest.sample.json`; `G6_STATUS: PASS` (sample; not live Hunyuan run) | **PASS** |
-| Hosted E2E | G7 | Live Space run with **real** Hunyuan path (not cpu-demo fallback); Block or Vase sample | Entry in hosted-validation doc with run id + artifacts | **OPEN** |
-| UX honesty | G8 | UI never implies ZeroGPU/neural reconstruction when fallback ran | Browser + API evidence; mode-validation-matrix satisfied | **OPEN** |
-| Enablement PR | G9 | Explicit PR enables adapter; rollback steps documented | Merged PR link; `AGENTS.md` validation loop repeated | **OPEN** |
+| Hosted E2E | G7 | Live Space run with **real** Hunyuan path (not cpu-demo fallback); Block or Vase sample | `## G7 validation` in hosted-validation with `G7_STATUS: PASS` | **OPEN** |
+| UX honesty | G8 | UI never implies ZeroGPU/neural reconstruction when fallback ran | Interim: `validate_g8_cpu_fallback_status` in hosted golden smoke; final: `## G8 validation` + `G8_STATUS: PASS` | **OPEN** (interim checks active) |
+| Enablement PR | G9 | Explicit PR enables adapter; rollback steps documented | [hunyuan-g9-enablement-runbook.md](hunyuan-g9-enablement-runbook.md); merged enablement PR link | **OPEN** |
 
 ## Enablement procedure (when gates close)
 

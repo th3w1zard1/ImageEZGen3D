@@ -106,6 +106,17 @@ class HunyuanAdmissionTests(unittest.TestCase):
         )
         self.assertTrue(_g7_hosted_validation_passed(text))
 
+    def test_g7_placeholder_open_does_not_close_gate(self) -> None:
+        text = "\n".join(
+            [
+                "## G7 validation",
+                "",
+                "G7_STATUS: OPEN",
+                "hunyuan-zerogpu path not validated yet",
+            ]
+        )
+        self.assertFalse(_g7_hosted_validation_passed(text))
+
 
 if __name__ == "__main__":
     unittest.main()
