@@ -117,6 +117,10 @@ class HunyuanAdmissionTests(unittest.TestCase):
         )
         self.assertFalse(_g7_hosted_validation_passed(text))
 
+    def test_g8_gate_open_until_hosted_validation_records_pass(self) -> None:
+        gates = {gate.gate_id: gate for gate in evaluate_admission_gates()}
+        self.assertEqual(gates["G8"].status, "open")
+
 
 if __name__ == "__main__":
     unittest.main()

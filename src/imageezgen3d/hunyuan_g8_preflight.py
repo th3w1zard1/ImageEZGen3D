@@ -41,6 +41,8 @@ def g8_enablement_validation_passed(hosted_text: str) -> bool:
     section = _hosted_validation_section(hosted_text, "G8 validation")
     if not section:
         return False
+    if "G8_STATUS: OPEN" in section:
+        return False
     return "G8_STATUS: PASS" in section
 
 

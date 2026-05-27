@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Literal
 
 from .adapters.hunyuan import HunyuanPlaceholderAdapter
+from .hunyuan_g8_preflight import g8_enablement_validation_passed
 from .hunyuan_manifest_parity import (
     HUNYUAN_SAMPLE_MANIFEST,
     load_hunyuan_sample_manifest,
@@ -136,10 +137,7 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
     )
     g7_status: GateStatus = "pass" if _g7_hosted_validation_passed(hosted_text) else "open"
     g8_status: GateStatus = (
-        "pass"
-        if "fallback" in hosted_text.lower()
-        and "preview disclaimer" in hosted_text.lower()
-        else "open"
+        "pass" if g8_enablement_validation_passed(hosted_text) else "open"
     )
     configured = _adapter_configured()
     open_gates = sum(
@@ -242,9 +240,10 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
             "UX honesty",
             g8_status,
             (
-                "Hosted validation references fallback + preview disclaimer",
+                "G8_STATUS: PASS in ## G8 validation section of hosted-validation doc"
+                if g8_status == "pass"
+                else "No G8_STATUS: PASS in ## G8 validation yet (interim CPU checks via golden smoke)",
                 "G8 preflight: hunyuan_g8_preflight + hosted golden smoke status checks",
-                "Post-enablement: ## G8 validation with G8_STATUS: PASS",
             ),
         ),
         GateResult(
