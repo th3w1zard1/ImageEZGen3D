@@ -215,6 +215,7 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
             (
                 "No hosted run with real Hunyuan adapter in validation doc",
                 "cpu-demo fallback runs documented instead",
+                "G7 preflight: scripts/hunyuan_g7_preflight.py (readiness + optional live probe)",
             ),
         ),
         GateResult(

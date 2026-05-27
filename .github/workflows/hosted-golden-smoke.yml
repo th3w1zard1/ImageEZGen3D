@@ -57,6 +57,9 @@ jobs:
           PYTHONPATH=src python scripts/hunyuan_admission_audit.py \
             --json --record hunyuan-admission-audit.json
 
+      - name: Hunyuan G7 preflight readiness
+        run: PYTHONPATH=src python scripts/hunyuan_g7_preflight.py
+
       - name: Upload hosted golden smoke record
         if: always()
         uses: actions/upload-artifact@v4
