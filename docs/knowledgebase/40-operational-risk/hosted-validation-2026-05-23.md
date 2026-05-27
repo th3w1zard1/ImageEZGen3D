@@ -15,6 +15,24 @@ Evidence for Plan 005 hosted E2E (parity register P10). Follows the template in 
 - **Build/load:** no error ☑ (Space stage `RUNNING` after deploy commit `3ad22d80`)
 - **Evidence link:** Gradio API `/generate` call via `gradio_client`; manifest 2339 bytes; GLB 12144 bytes; OBJ 369 bytes
 
+## G7 validation
+
+**G7_STATUS: OPEN**
+
+Placeholder for the first live Space run on the real Hunyuan ZeroGPU adapter path (not cpu-demo / Local CPU Preview fallback).
+
+When closing this gate, set `G7_STATUS: PASS` in this section only (not in plan prose) and record:
+
+- Run id and sample (Block or Vase / `assets/examples/teal_block.png`)
+- Status passes `validate_g7_hosted_generate_status()` from `hunyuan_g7_preflight.py`
+- Manifest, GLB, and OBJ artifacts verified
+
+## G8 validation
+
+**G8_STATUS: OPEN** (post-enablement re-verify)
+
+Interim CPU fallback honesty is enforced on every hosted golden smoke run via `validate_g8_cpu_fallback_status()`. After Hunyuan enablement, add `G8_STATUS: PASS` here following [hunyuan-g8-preflight.md](../hunyuan-g8-preflight.md).
+
 ## Plan 012 validation (fallback honesty UI)
 
 After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85906082f032e15b1d68b`:
@@ -25,6 +43,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Preview disclaimer:** present in status markdown and manifest `preview_disclaimer`
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
+
+## Plan 065 validation (G7/G8 validation placeholders + G9 runbook)
+
+After Plan 065 on `main` (2026-05-27):
+
+- **G7/G8 sections:** dedicated `## G7 validation` / `## G8 validation` placeholders (`G7_STATUS: OPEN`)
+- **G9 runbook:** [hunyuan-g9-enablement-runbook.md](../hunyuan-g9-enablement-runbook.md)
+- **PR #46:** scheduled enablement preflight artifact merged (`651ced8`)
 
 ## Plan 064 validation (enablement preflight on scheduled smoke)
 

@@ -55,6 +55,8 @@ def _g7_hosted_validation_passed(hosted_text: str) -> bool:
     section = _hosted_validation_section(hosted_text, "G7 validation")
     if not section:
         return False
+    if "G7_STATUS: OPEN" in section:
+        return False
     return "G7_STATUS: PASS" in section and "hunyuan-zerogpu" in section.lower()
 
 

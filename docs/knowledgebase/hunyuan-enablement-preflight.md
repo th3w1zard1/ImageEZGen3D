@@ -20,6 +20,7 @@ PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py --json --record hu
 ## Related tools
 
 - [hunyuan-admission-gates.md](hunyuan-admission-gates.md) — gate definitions
+- [hunyuan-g9-enablement-runbook.md](hunyuan-g9-enablement-runbook.md) — enablement PR + rollback checklist
 - [hunyuan-g7-preflight.md](hunyuan-g7-preflight.md) — G7 hosted neural run validator
 - [hunyuan-g8-preflight.md](hunyuan-g8-preflight.md) — G8 CPU fallback honesty (hosted golden smoke)
 
