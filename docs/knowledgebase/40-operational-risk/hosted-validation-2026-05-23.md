@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 073 validation (Hunyuan CI parity institutional learning)
+
+After Plan 073 on `main` (2026-05-27):
+
+- **Solutions:** [hunyuan-ci-artifact-parity-2026-05-27.md](../../solutions/best-practices/hunyuan-ci-artifact-parity-2026-05-27.md)
+- **G9 runbook:** preflight includes `verify_hunyuan_ci_artifact_parity.py`
+- **Tests:** `test_hunyuan_ci_scripts` invokes verify CLI after `--record`
+
 ## Plan 072 validation (CI artifact verify script)
 
 After Plan 072 on `main` (2026-05-27):
