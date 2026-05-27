@@ -125,6 +125,12 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e ".[app,dev,mesh]"
 
+      - name: Verify Hunyuan G1 LICENSE at pin
+        run: PYTHONPATH=src python scripts/hunyuan_g1_legal_verify.py
+
+      - name: Hunyuan G5 resource budget estimate
+        run: PYTHONPATH=src python scripts/hunyuan_resource_estimate.py
+
       - name: Run Hunyuan admission gate audit
         run: PYTHONPATH=src python scripts/hunyuan_admission_audit.py
 

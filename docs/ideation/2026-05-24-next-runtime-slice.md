@@ -14,19 +14,11 @@ mode: repo-grounded
 - **G2 weight access** documented (Plan 050) — 14.9 GB dry-run + Space secrets plan; still **not enabled**.
 - **G4 ZeroGPU wiring** scaffold (Plan 051) — `spaces.GPU` shell in `hunyuan.py`; still **not enabled**.
 - **G3 dependency audit** (Plan 052) — `hunyuan-pins.txt`, `.[hunyuan-audit]`, CI smoke; still **not enabled**.
+- **G5 resource fit** (Plan 053) — VRAM/disk budget documented; automated G1 LICENSE verify; still **not enabled**.
 
 ## Ranked next slices (product-driven)
 
-### 1. **G5 — Resource fit benchmark** (recommended next)
-
-**Driver:** 14.9 GB weights + tier-C deps need Space disk/VRAM evidence before enablement.
-
-**Deliverables:**
-
-- Benchmark note with hardware SKU, cold-start, wall time.
-- Update admission G5 row.
-
-### 2. **G7 — Hosted E2E (real Hunyuan path)**
+### 1. **G7 — Hosted E2E (real Hunyuan path)** (recommended next)
 
 **Driver:** Prove real `hunyuan-zerogpu` generation on live Space (not cpu-demo fallback).
 
@@ -36,7 +28,7 @@ mode: repo-grounded
 - Entry in `hosted-validation-2026-05-23.md` with run id + manifest/GLB/OBJ.
 - Update admission G7 row.
 
-### 3. **Creator UX — “What backend ran?” chip hardening**
+### 2. **Creator UX — “What backend ran?” chip hardening**
 
 **Driver:** Trust metric — users must see cpu-demo vs neural without reading manifest JSON.
 
@@ -55,7 +47,9 @@ mode: repo-grounded
 
 ## Evidence
 
-- `[REPO]` `hunyuan-admission-gates.md` — G1–G4 PASS, G5–G7 OPEN
+- `[REPO]` `hunyuan-admission-gates.md` — G1–G5 PASS, G6–G7 OPEN
+- `[REPO]` `hunyuan-resource-fit.md` — G5 budget 2026-05-25
+- `[REPO]` `scripts/hunyuan_g1_legal_verify.py` — automated G1 clause check
 - `[REPO]` `hunyuan-dependencies.md` — G3 audit 2026-05-24
 - `[REPO]` `hunyuan-weight-access.md` — G2 dry-run 2026-05-24
 - `[REPO]` `license-audit.md` — G1 audit record 2026-05-24
