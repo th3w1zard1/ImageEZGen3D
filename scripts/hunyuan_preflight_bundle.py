@@ -42,6 +42,11 @@ def main(argv: list[str] | None = None) -> int:
         default=Path("."),
         help="Directory for hunyuan-admission-audit.json and hunyuan-enablement-preflight.json",
     )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Pass --json to admission audit and enablement preflight subcommands",
+    )
     args = parser.parse_args(argv)
 
     record_dir = args.record_dir.resolve()
@@ -50,12 +55,15 @@ def main(argv: list[str] | None = None) -> int:
     preflight_path = record_dir / _PREFLIGHT_JSON
     python = sys.executable
 
+    json_args = ["--json"] if args.json else []
+
     steps: tuple[tuple[str, list[str]], ...] = (
         (
             "admission_audit",
             [
                 python,
                 "scripts/hunyuan_admission_audit.py",
+                *json_args,
                 "--record",
                 str(audit_path),
             ],
@@ -65,6 +73,7 @@ def main(argv: list[str] | None = None) -> int:
             [
                 python,
                 "scripts/hunyuan_enablement_preflight.py",
+                *json_args,
                 "--record",
                 str(preflight_path),
             ],

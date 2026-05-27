@@ -31,7 +31,7 @@ Operators may compare them to decide whether enablement is safe. If `g7_readines
 | Shared code | `g8_enablement_for_gates()`, `build_admission_audit_payload()` |
 | Unit tests | `tests/test_hunyuan_ci_artifact_parity.py`, `tests/test_hunyuan_ci_scripts.py` |
 | CLI verify | `scripts/verify_hunyuan_ci_artifact_parity.py` |
-| Workflows | `ci.yml` and `hosted-golden-smoke.yml` run verify after both `--record` steps |
+| Workflows | `ci.yml` and `hosted-golden-smoke.yml` run `hunyuan_preflight_bundle.py` (includes verify) |
 
 **Local check (one command):**
 

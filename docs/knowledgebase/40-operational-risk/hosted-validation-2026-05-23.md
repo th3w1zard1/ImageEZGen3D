@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 075 validation (CI workflows use preflight bundle)
+
+After Plan 075 on `main` (2026-05-27):
+
+- **`ci.yml` / `hosted-golden-smoke`:** Hunyuan JSON + verify via `hunyuan_preflight_bundle.py` (scheduled smoke uses `--json`)
+- **G7 preflight** remains a separate step after the bundle
+
 ## Plan 074 validation (Hunyuan preflight bundle CLI)
 
 After Plan 074 on `main` (2026-05-27):
