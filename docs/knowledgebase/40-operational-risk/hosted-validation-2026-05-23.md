@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 076 validation (lint + bundle docs)
+
+After Plan 076 on branch `feat/075-ci-workflows-use-preflight-bundle` (2026-05-27):
+
+- **Ruff:** removed unused `sys` from Hunyuan preflight scripts (unblocks PR #57 lint)
+- **Hosted golden smoke:** run `20260527-214844-3c7de80b` (cpu-demo / Local CPU Preview)
+
 ## Plan 075 validation (CI workflows use preflight bundle)
 
 After Plan 075 on `main` (2026-05-27):
