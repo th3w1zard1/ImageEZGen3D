@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 066 validation (G8 admission gate section alignment)
+
+After Plan 066 on `main` (2026-05-27):
+
+- **G8 admission:** `g8_status` uses `g8_enablement_validation_passed()` on `## G8 validation` only; `G8_STATUS: OPEN` does not close the gate
+- **Interim honesty:** `validate_g8_cpu_fallback_status()` still runs on every hosted golden smoke (unchanged)
+- **AGENTS.md:** links [hunyuan-g9-enablement-runbook.md](../hunyuan-g9-enablement-runbook.md)
+
 ## Plan 065 validation (G7/G8 validation placeholders + G9 runbook)
 
 After Plan 065 on `main` (2026-05-27):

@@ -57,6 +57,17 @@ class HunyuanG8PreflightTests(unittest.TestCase):
             g8_enablement_validation_passed("Plan notes G8_STATUS: PASS in prose\n")
         )
 
+    def test_g8_placeholder_open_does_not_close_gate(self) -> None:
+        text = "\n".join(
+            [
+                "## G8 validation",
+                "",
+                "G8_STATUS: OPEN",
+                "Interim CPU fallback honesty via golden smoke only",
+            ]
+        )
+        self.assertFalse(g8_enablement_validation_passed(text))
+
 
 if __name__ == "__main__":
     unittest.main()
