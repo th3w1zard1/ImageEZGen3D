@@ -22,7 +22,7 @@ Machine-readable output: `PYTHONPATH=src python scripts/hunyuan_admission_audit.
 
 The audit exits **0** while `configured=False`. It exits **1** if the adapter were enabled while gates remain open (safety guard for enablement PRs).
 
-**Last audit:** 2026-05-27 — Plan 070; adapter `configured=False`; **G1–G6 PASS**; G7/G8/G9 **OPEN**; audit JSON via `hunyuan_admission_audit.build_admission_audit_payload()`; parity with enablement preflight (`tests/test_hunyuan_ci_artifact_parity.py`).
+**Last audit:** 2026-05-27 — Plan 071; adapter `configured=False`; **G1–G6 PASS**; G7/G8/G9 **OPEN**; audit JSON via `build_admission_audit_payload()`; CLI artifact parity (`tests/test_hunyuan_ci_scripts.py`).
 
 ## Completed prerequisites
 

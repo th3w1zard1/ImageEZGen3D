@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from .hosted_validation import hosted_validation_section
+from .hosted_validation import HOSTED_VALIDATION_PATH, hosted_validation_section, read_repo_text
 
 _NEURAL_MARKERS = ("hosted zerogpu", "hunyuan-zerogpu", "neural reconstruction")
 
@@ -53,6 +53,15 @@ class G8EnablementStatus:
             "interim_open": self.interim_open,
             "gate_status": self.gate_status,
         }
+
+
+def g8_enablement_for_gates(gates: tuple[object, ...]) -> G8EnablementStatus:
+    """G8 section snapshot for the current admission gate tuple."""
+    g8_gate = next((gate for gate in gates if getattr(gate, "gate_id", None) == "G8"), None)
+    return evaluate_g8_enablement_status(
+        read_repo_text(HOSTED_VALIDATION_PATH),
+        g8_gate_status=getattr(g8_gate, "status", None) if g8_gate is not None else None,
+    )
 
 
 def evaluate_g8_enablement_status(

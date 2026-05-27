@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 071 validation (G8 gates helper + CI scripts contract)
+
+After Plan 071 on `main` (2026-05-27):
+
+- **`g8_enablement_for_gates()`** shared by admission audit builder and enablement preflight
+- **`tests/test_hunyuan_ci_scripts.py`:** subprocess `--record` parity for scheduled smoke artifacts
+
 ## Plan 070 validation (centralized admission audit payload)
 
 After Plan 070 on `main` (2026-05-27):

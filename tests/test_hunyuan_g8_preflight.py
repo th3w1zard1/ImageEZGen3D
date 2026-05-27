@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import unittest
 
+from imageezgen3d.hunyuan_admission import evaluate_admission_gates
+from imageezgen3d.hunyuan_admission_audit import build_admission_audit_payload
 from imageezgen3d.hunyuan_g8_preflight import (
     evaluate_g8_enablement_status,
+    g8_enablement_for_gates,
     g8_enablement_validation_passed,
     validate_g8_cpu_fallback_status,
 )
@@ -82,6 +85,14 @@ class HunyuanG8PreflightTests(unittest.TestCase):
         status = evaluate_g8_enablement_status(text, g8_gate_status="pass")
         self.assertTrue(status.documented)
         self.assertFalse(status.interim_open)
+
+    def test_g8_enablement_for_gates_matches_audit_payload(self) -> None:
+        gates = evaluate_admission_gates()
+        payload = build_admission_audit_payload(gates)
+        self.assertEqual(
+            g8_enablement_for_gates(gates).to_dict(),
+            payload["g8_enablement"],
+        )
 
 
 if __name__ == "__main__":
