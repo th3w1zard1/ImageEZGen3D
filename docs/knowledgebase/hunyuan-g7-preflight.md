@@ -31,7 +31,7 @@ PYTHONPATH=src python scripts/hunyuan_g7_preflight.py --live-probe
 3. Run Block or Vase `/generate` on live Space; status must pass `validate_g7_hosted_generate_status()`.
 4. Add a `## G7 validation` section to `hosted-validation-2026-05-23.md` with **`G7_STATUS: PASS`**, run id, and `hunyuan-zerogpu` — admission audit G7 then passes.
 
-**CI:** `hunyuan-admission-audit` and `hosted-golden-smoke` both run `hunyuan_g7_preflight.py` (G1–G6 readiness). Admission audit JSON includes `g7_readiness` and exits 1 if G1–G6 regress.
+**CI:** `hunyuan-admission-audit` and `hosted-golden-smoke` both run `hunyuan_g7_preflight.py` (G1–G6 readiness). Admission audit JSON is built by `imageezgen3d.hunyuan_admission_audit.build_admission_audit_payload()` and includes `g7_readiness` / `g8_enablement`; exits 1 if G1–G6 regress. Hosted doc path: `hosted_validation.HOSTED_VALIDATION_PATH`.
 
 ## Not claimed
 
