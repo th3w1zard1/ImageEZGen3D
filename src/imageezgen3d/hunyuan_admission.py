@@ -12,6 +12,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 _LICENSE_AUDIT = _REPO_ROOT / "docs/knowledgebase/license-audit.md"
 _WEIGHT_ACCESS = _REPO_ROOT / "docs/knowledgebase/hunyuan-weight-access.md"
 _DEPENDENCIES = _REPO_ROOT / "docs/knowledgebase/hunyuan-dependencies.md"
+_RESOURCE_FIT = _REPO_ROOT / "docs/knowledgebase/hunyuan-resource-fit.md"
 _HUNYUAN_PINS = _REPO_ROOT / "requirements/hunyuan-pins.txt"
 _ADMISSION_GATES = _REPO_ROOT / "docs/knowledgebase/hunyuan-admission-gates.md"
 _HOSTED_VALIDATION = (
@@ -85,7 +86,14 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
         if "@spaces.GPU" in hunyuan_source or "spaces.GPU" in hunyuan_source
         else "open"
     )
-    g5_status: GateStatus = "open"
+    resource_text = _read_text(_RESOURCE_FIT)
+    g5_status: GateStatus = (
+        "pass"
+        if "G5_STATUS: PASS" in resource_text
+        and "29" in resource_text
+        and "14.9" in resource_text
+        else "open"
+    )
     g6_status: GateStatus = (
         "pass"
         if "export_sidecar" in hosted_text and "manifest" in hosted_text
@@ -163,7 +171,12 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
             "G5",
             "Resource fit",
             g5_status,
-            ("Benchmark on target Space hardware class not recorded",),
+            (
+                f"hunyuan-resource-fit.md present: {_RESOURCE_FIT.is_file()}",
+                "G5_STATUS: PASS"
+                if g5_status == "pass"
+                else "G5 resource budget not documented",
+            ),
         ),
         GateResult(
             "G6",

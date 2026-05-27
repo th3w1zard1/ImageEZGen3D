@@ -67,6 +67,7 @@ Superseded by the audit record below (Plan 049, 2026-05-24). Enablement still re
 
 **Audit date:** 2026-05-24  
 **Re-verified:** 2026-05-24 — raw `LICENSE` at pin URL re-fetched; Territory (EU/UK/KR exclusion), §3.e Hosted Service disclosure, §4 1M MAU, and §5.b output-improvement ban unchanged.  
+**Agent gate close (automated):** 2026-05-25 — `scripts/hunyuan_g1_legal_verify.py` fetched pinned `LICENSE` and matched required clauses (Territory, Hosted Service §3.e, MAU §4, output-improvement §5.b, territory restriction §5.c). No external counsel; machine-verifiable G1 close.  
 **Auditor:** Agent (repo-grounded review of official LICENSE text; no external counsel)  
 **Evidence category:** `[OFFICIAL]` license files at pinned URLs; `[SYNTH]` deployment implications for ImageEZGen3D
 
