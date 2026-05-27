@@ -18,7 +18,7 @@
   - manifest, GLB, and OBJ artifacts are present and downloadable
 - Continue the fix, deploy, and retest loop until the requested validation path works or until the remaining blocker is a genuinely missing implementation.
 - Do not claim a runtime mode is validated unless you actually executed it. Call out unimplemented or untested modes explicitly.
-- Before enabling `hunyuan-zerogpu`, run `PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py` (G1–G6 readiness + G7–G9 blockers), then `hunyuan_admission_audit.py`, and close G1–G8 in `docs/knowledgebase/hunyuan-admission-gates.md`. Follow [docs/knowledgebase/hunyuan-g9-enablement-runbook.md](docs/knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR checklist. After both JSON records exist, run `PYTHONPATH=src python scripts/verify_hunyuan_ci_artifact_parity.py hunyuan-admission-audit.json hunyuan-enablement-preflight.json` (see [docs/solutions/best-practices/hunyuan-ci-artifact-parity-2026-05-27.md](docs/solutions/best-practices/hunyuan-ci-artifact-parity-2026-05-27.md)). CI and scheduled hosted smoke run the same verify step.
+- Before enabling `hunyuan-zerogpu`, run `python scripts/hunyuan_preflight_bundle.py` (admission audit + enablement preflight + artifact parity verify; sets `PYTHONPATH=src` automatically), or the three scripts in [docs/knowledgebase/hunyuan-g9-enablement-runbook.md](docs/knowledgebase/hunyuan-g9-enablement-runbook.md). Close G1–G8 in `docs/knowledgebase/hunyuan-admission-gates.md`. See [docs/solutions/best-practices/hunyuan-ci-artifact-parity-2026-05-27.md](docs/solutions/best-practices/hunyuan-ci-artifact-parity-2026-05-27.md). CI and scheduled hosted smoke use the same JSON + verify contract.
 
 ## Mode-Specific Reporting
 

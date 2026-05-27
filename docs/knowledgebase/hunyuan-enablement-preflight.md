@@ -5,6 +5,7 @@ Single snapshot before setting `HunyuanPlaceholderAdapter.configured = True`.
 ## Command
 
 ```bash
+python scripts/hunyuan_preflight_bundle.py
 PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py
 PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py --json --record hunyuan-enablement-preflight.json
 ```
