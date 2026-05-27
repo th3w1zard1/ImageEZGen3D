@@ -5,8 +5,8 @@ from typing import Any
 
 from .adapters.hunyuan import HunyuanPlaceholderAdapter
 from .hunyuan_admission import GateResult, evaluate_admission_gates
-from .hunyuan_g7_preflight import evaluate_g7_readiness
-from .hunyuan_g8_preflight import evaluate_g8_enablement_status
+from .hunyuan_g7_preflight import G7ReadinessResult, evaluate_g7_readiness
+from .hunyuan_g8_preflight import G8EnablementStatus, evaluate_g8_enablement_status
 
 _ENABLEMENT_CLOSE_GATES = ("G7", "G8", "G9")
 
@@ -16,6 +16,8 @@ class EnablementPreflightResult:
     """Snapshot before flipping Hunyuan adapter to configured=True."""
 
     adapter_configured: bool
+    g7_readiness: G7ReadinessResult
+    g8_enablement: G8EnablementStatus
     g7_readiness_ready: bool
     g8_enablement_documented: bool
     prerequisites_met: bool
@@ -27,6 +29,8 @@ class EnablementPreflightResult:
     def to_dict(self) -> dict[str, Any]:
         return {
             "adapter_configured": self.adapter_configured,
+            "g7_readiness": self.g7_readiness.to_dict(),
+            "g8_enablement": self.g8_enablement.to_dict(),
             "g7_readiness_ready": self.g7_readiness_ready,
             "g8_enablement_documented": self.g8_enablement_documented,
             "prerequisites_met": self.prerequisites_met,
@@ -79,6 +83,8 @@ def evaluate_enablement_preflight() -> EnablementPreflightResult:
 
     return EnablementPreflightResult(
         adapter_configured=configured,
+        g7_readiness=g7,
+        g8_enablement=g8_status,
         g7_readiness_ready=g7.ready,
         g8_enablement_documented=g8_doc,
         prerequisites_met=prerequisites_met,
@@ -107,6 +113,7 @@ def format_enablement_preflight_report(result: EnablementPreflightResult) -> str
         f"adapter_configured={result.adapter_configured}",
         f"g7_readiness_ready={result.g7_readiness_ready}",
         f"g8_enablement_documented={result.g8_enablement_documented}",
+        f"g8_interim_open={result.g8_enablement.interim_open}",
         f"prerequisites_met={result.prerequisites_met}",
         f"enablement_complete={result.enablement_complete}",
         "",

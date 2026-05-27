@@ -15,10 +15,12 @@ PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py --json --record hu
 | --- | --- |
 | `prerequisites_met` | G1–G6 pass (required before enablement) |
 | `g8_enablement_documented` | `G8_STATUS: PASS` in `## G8 validation` (post-enablement closure) |
+| `g7_readiness` | Nested object (same shape as admission audit `g7_readiness`) |
+| `g8_enablement` | Nested object (`section_present`, `documented`, `interim_open`, `gate_status`) |
 | `blocking_enablement` | Gates still open (typically G7 hosted E2E, G8 section) |
 | `enablement_complete` | Adapter on **and** all gates pass |
 
-Admission audit JSON also includes `g8_enablement` (`section_present`, `documented`, `interim_open`, `gate_status`) alongside `g7_readiness`.
+Admission audit JSON uses the same nested `g7_readiness` / `g8_enablement` blocks. Section parsing lives in `src/imageezgen3d/hosted_validation.py`.
 
 ## Related tools
 

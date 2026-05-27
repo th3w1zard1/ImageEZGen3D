@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 068 validation (enablement JSON parity + hosted section helper)
+
+After Plan 068 on `main` (2026-05-27):
+
+- **`hosted_validation.py`:** shared `hosted_validation_section()` for G7/G8 admission checks
+- **`hunyuan-enablement-preflight.json`:** nested `g7_readiness` and `g8_enablement` objects (booleans retained)
+
 ## Plan 067 validation (G8 artifact visibility)
 
 After Plan 067 on `main` (2026-05-27):
