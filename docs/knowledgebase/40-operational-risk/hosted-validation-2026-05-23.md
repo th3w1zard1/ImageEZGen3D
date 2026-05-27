@@ -50,6 +50,7 @@ After Plan 075 on `main` (2026-05-27):
 
 - **`ci.yml` / `hosted-golden-smoke`:** Hunyuan JSON + verify via `hunyuan_preflight_bundle.py` (scheduled smoke uses `--json`)
 - **G7 preflight** remains a separate step after the bundle
+- **Hosted golden smoke:** run `20260527-214055-500a0ffb` (cpu-demo / Local CPU Preview; balanced Block)
 
 ## Plan 074 validation (Hunyuan preflight bundle CLI)
 
