@@ -110,6 +110,8 @@ class HunyuanEnablementPreflightTests(unittest.TestCase):
             self.assertFalse(payload["adapter_configured"])
             self.assertTrue(payload["prerequisites_met"])
             self.assertFalse(payload["g8_enablement_documented"])
+            self.assertTrue(payload["g8_enablement"]["interim_open"])
+            self.assertTrue(payload["g7_readiness"]["ready"])
 
 
 if __name__ == "__main__":

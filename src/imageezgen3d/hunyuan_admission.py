@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
 from .adapters.hunyuan import HunyuanPlaceholderAdapter
+from .hosted_validation import hosted_validation_section
 from .hunyuan_g8_preflight import g8_enablement_validation_passed
 from .hunyuan_manifest_parity import (
     HUNYUAN_SAMPLE_MANIFEST,
@@ -45,15 +45,9 @@ def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def _hosted_validation_section(text: str, heading: str) -> str:
-    pattern = rf"## {re.escape(heading)}\s*\n(.*?)(?=\n## |\Z)"
-    match = re.search(pattern, text, re.DOTALL)
-    return match.group(1) if match else ""
-
-
 def _g7_hosted_validation_passed(hosted_text: str) -> bool:
     """True only when a dedicated ## G7 validation section records closure."""
-    section = _hosted_validation_section(hosted_text, "G7 validation")
+    section = hosted_validation_section(hosted_text, "G7 validation")
     if not section:
         return False
     if "G7_STATUS: OPEN" in section:

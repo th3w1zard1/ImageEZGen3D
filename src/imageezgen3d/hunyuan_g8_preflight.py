@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from typing import Any
+
+from .hosted_validation import hosted_validation_section
 
 _NEURAL_MARKERS = ("hosted zerogpu", "hunyuan-zerogpu", "neural reconstruction")
 
@@ -29,12 +30,6 @@ def validate_g8_cpu_fallback_status(status_markdown: str) -> list[str]:
             )
 
     return issues
-
-
-def _hosted_validation_section(text: str, heading: str) -> str:
-    pattern = rf"## {re.escape(heading)}\s*\n(.*?)(?=\n## |\Z)"
-    match = re.search(pattern, text, re.DOTALL)
-    return match.group(1) if match else ""
 
 
 def g8_enablement_validation_passed(hosted_text: str) -> bool:
@@ -66,7 +61,7 @@ def evaluate_g8_enablement_status(
     g8_gate_status: str | None = None,
 ) -> G8EnablementStatus:
     """Summarize ## G8 validation section and admission gate G8 status."""
-    section = _hosted_validation_section(hosted_text, "G8 validation")
+    section = hosted_validation_section(hosted_text, "G8 validation")
     section_present = bool(section)
     interim_open = section_present and "G8_STATUS: OPEN" in section
     documented = (
