@@ -78,8 +78,25 @@ def validate_hosted_generate_status(
     return (not issues, issues, run_id)
 
 
+def validate_backend_rail_html(html: str) -> list[str]:
+    """Validate Create Project Rail HTML includes Plan 055 backend chips (no network)."""
+    issues: list[str] = []
+    text = str(html or "").strip()
+    if not text:
+        issues.append("Project Rail HTML missing for backend chips")
+        return issues
+    if "What backend ran" not in text:
+        issues.append("Project Rail HTML missing 'What backend ran' eyebrow")
+    if 'aria-label="Active backend"' not in text:
+        issues.append("Project Rail HTML missing Active backend aria-label")
+    if "backend-chip" not in text and "run-status-chip" not in text:
+        issues.append("Project Rail HTML missing backend status chip")
+    return issues
+
+
 _GENERATE_MANIFEST_INDEX = 2
 _GENERATE_EXPORT_SIDECAR_INDEX = 7
+_GENERATE_BACKEND_RAIL_INDEX = 15
 
 
 def _validate_export_sidecar_decimation(
@@ -212,6 +229,15 @@ def run_hosted_golden_smoke(
 
     status = str(result[1] if isinstance(result, (list, tuple)) else result)
     ok, issues, run_id = validate_hosted_generate_status(status, quality=quality)
+
+    if isinstance(result, (list, tuple)) and len(result) > _GENERATE_BACKEND_RAIL_INDEX:
+        rail_value = result[_GENERATE_BACKEND_RAIL_INDEX]
+        if rail_value:
+            issues.extend(validate_backend_rail_html(str(rail_value)))
+        else:
+            issues.append(
+                "Generate response missing Create Project Rail HTML (backend chips)"
+            )
 
     if validate_manifest and isinstance(result, (list, tuple)) and len(result) > _GENERATE_MANIFEST_INDEX:
         manifest_value = result[_GENERATE_MANIFEST_INDEX]
