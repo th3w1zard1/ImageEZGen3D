@@ -84,6 +84,9 @@ class HunyuanAdmissionTests(unittest.TestCase):
             self.assertFalse(payload["adapter_configured"])
             self.assertEqual(len(payload["gates"]), 9)
             self.assertTrue(payload["g7_readiness"]["ready"])
+            self.assertIn("g8_enablement", payload)
+            self.assertFalse(payload["g8_enablement"]["documented"])
+            self.assertTrue(payload["g8_enablement"]["interim_open"])
 
     def test_g7_gate_open_until_hosted_validation_records_pass(self) -> None:
         gates = {gate.gate_id: gate for gate in evaluate_admission_gates()}

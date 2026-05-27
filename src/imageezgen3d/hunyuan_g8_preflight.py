@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from typing import Any
 
 _NEURAL_MARKERS = ("hosted zerogpu", "hunyuan-zerogpu", "neural reconstruction")
@@ -38,12 +39,48 @@ def _hosted_validation_section(text: str, heading: str) -> str:
 
 def g8_enablement_validation_passed(hosted_text: str) -> bool:
     """True when ## G8 validation records post-enablement UX re-verify."""
+    return evaluate_g8_enablement_status(hosted_text).documented
+
+
+@dataclass(frozen=True)
+class G8EnablementStatus:
+    """Structured G8 closure state for CI artifacts and enablement preflight."""
+
+    section_present: bool
+    documented: bool
+    interim_open: bool
+    gate_status: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "section_present": self.section_present,
+            "documented": self.documented,
+            "interim_open": self.interim_open,
+            "gate_status": self.gate_status,
+        }
+
+
+def evaluate_g8_enablement_status(
+    hosted_text: str,
+    *,
+    g8_gate_status: str | None = None,
+) -> G8EnablementStatus:
+    """Summarize ## G8 validation section and admission gate G8 status."""
     section = _hosted_validation_section(hosted_text, "G8 validation")
-    if not section:
-        return False
-    if "G8_STATUS: OPEN" in section:
-        return False
-    return "G8_STATUS: PASS" in section
+    section_present = bool(section)
+    interim_open = section_present and "G8_STATUS: OPEN" in section
+    documented = (
+        section_present
+        and not interim_open
+        and "G8_STATUS: PASS" in section
+    )
+    gate_status = g8_gate_status if g8_gate_status is not None else "unknown"
+    return G8EnablementStatus(
+        section_present=section_present,
+        documented=documented,
+        interim_open=interim_open,
+        gate_status=gate_status,
+    )
 
 
 def format_g8_issues(issues: list[str]) -> dict[str, Any]:

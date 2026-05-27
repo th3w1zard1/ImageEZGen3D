@@ -14,6 +14,7 @@ from imageezgen3d.hunyuan_enablement_preflight import (
     enablement_preflight_exit_code,
     evaluate_enablement_preflight,
 )
+from imageezgen3d.hunyuan_g8_preflight import G8EnablementStatus
 
 
 def _gates_g1_g6_pass() -> tuple[GateResult, ...]:
@@ -28,6 +29,15 @@ def _gates_g1_g6_pass() -> tuple[GateResult, ...]:
     )
 
 
+def _g8_not_documented() -> G8EnablementStatus:
+    return G8EnablementStatus(
+        section_present=True,
+        documented=False,
+        interim_open=True,
+        gate_status="open",
+    )
+
+
 class HunyuanEnablementPreflightTests(unittest.TestCase):
     def test_prerequisites_met_when_g1_through_g6_pass(self) -> None:
         with patch(
@@ -35,8 +45,8 @@ class HunyuanEnablementPreflightTests(unittest.TestCase):
             return_value=_gates_g1_g6_pass(),
         ):
             with patch(
-                "imageezgen3d.hunyuan_enablement_preflight.g8_enablement_validation_passed",
-                return_value=False,
+                "imageezgen3d.hunyuan_enablement_preflight.evaluate_g8_enablement_status",
+                return_value=_g8_not_documented(),
             ):
                 result = evaluate_enablement_preflight()
 
@@ -54,8 +64,8 @@ class HunyuanEnablementPreflightTests(unittest.TestCase):
             ) as adapter_cls:
                 adapter_cls.return_value.capabilities.configured = False
                 with patch(
-                    "imageezgen3d.hunyuan_enablement_preflight.g8_enablement_validation_passed",
-                    return_value=False,
+                    "imageezgen3d.hunyuan_enablement_preflight.evaluate_g8_enablement_status",
+                    return_value=_g8_not_documented(),
                 ):
                     result = evaluate_enablement_preflight()
 
@@ -76,8 +86,8 @@ class HunyuanEnablementPreflightTests(unittest.TestCase):
             return_value=gates,
         ):
             with patch(
-                "imageezgen3d.hunyuan_enablement_preflight.g8_enablement_validation_passed",
-                return_value=False,
+                "imageezgen3d.hunyuan_enablement_preflight.evaluate_g8_enablement_status",
+                return_value=_g8_not_documented(),
             ):
                 result = evaluate_enablement_preflight()
 
@@ -99,6 +109,7 @@ class HunyuanEnablementPreflightTests(unittest.TestCase):
             payload = json.loads(record_path.read_text(encoding="utf-8"))
             self.assertFalse(payload["adapter_configured"])
             self.assertTrue(payload["prerequisites_met"])
+            self.assertFalse(payload["g8_enablement_documented"])
 
 
 if __name__ == "__main__":

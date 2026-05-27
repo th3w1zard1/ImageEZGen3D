@@ -6,7 +6,7 @@ from typing import Any
 from .adapters.hunyuan import HunyuanPlaceholderAdapter
 from .hunyuan_admission import GateResult, evaluate_admission_gates
 from .hunyuan_g7_preflight import evaluate_g7_readiness
-from .hunyuan_g8_preflight import g8_enablement_validation_passed
+from .hunyuan_g8_preflight import evaluate_g8_enablement_status
 
 _ENABLEMENT_CLOSE_GATES = ("G7", "G8", "G9")
 
@@ -52,9 +52,13 @@ def evaluate_enablement_preflight() -> EnablementPreflightResult:
     from .hunyuan_admission import _HOSTED_VALIDATION, _read_text
 
     hosted_text = _read_text(_HOSTED_VALIDATION)
-    g8_doc = g8_enablement_validation_passed(hosted_text)
-
     by_id = {gate.gate_id: gate for gate in gates}
+    g8_gate = by_id.get("G8")
+    g8_status = evaluate_g8_enablement_status(
+        hosted_text,
+        g8_gate_status=g8_gate.status if g8_gate is not None else None,
+    )
+    g8_doc = g8_status.documented
     blocking: list[str] = []
     for gate_id in _ENABLEMENT_CLOSE_GATES:
         gate = by_id.get(gate_id)
@@ -102,6 +106,7 @@ def format_enablement_preflight_report(result: EnablementPreflightResult) -> str
         "Hunyuan enablement preflight (does not enable adapter)",
         f"adapter_configured={result.adapter_configured}",
         f"g7_readiness_ready={result.g7_readiness_ready}",
+        f"g8_enablement_documented={result.g8_enablement_documented}",
         f"prerequisites_met={result.prerequisites_met}",
         f"enablement_complete={result.enablement_complete}",
         "",
