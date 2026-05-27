@@ -26,6 +26,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 056 validation (PR #37 merge + Space deploy)
+
+After squash-merge PR #37 (`f41d22c` on `main`, 2026-05-27) and Hub deploy `9ad3eb7436901c5e11de4f57ed2c75aeca92d6d8`:
+
+- **UX:** Live Create tab shows **What backend ran** region (`aria-label="Active backend"`) in Project Rail
+- **Hosted golden smoke:** run `20260527-155624-a8e9d1a9` (cpu-demo / Local CPU Preview; balanced Block)
+- **Mode:** hosted CPU fallback; Hunyuan **not** enabled
+
 ## Plan 055 validation (backend rail chips + PR #36 on main)
 
 After PR #36 merge (`36c0215`) and Plan 055 UX slice (2026-05-27):
