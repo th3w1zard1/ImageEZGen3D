@@ -34,7 +34,7 @@ mode: repo-grounded
 
 **Delivered:** `backend_rail_chips_html` on live Space after deploy `9ad3eb74` (Plan 056 verified).
 
-**Follow-up:** Optional hosted smoke HTML assertion; History tab parity if needed.
+**Follow-up:** Hosted smoke rail assertion shipped (Plan 057 / PR #39); History tab idle rail parity shipped (Plan 058).
 
 ## Explicitly not next
 
