@@ -26,6 +26,15 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 064 validation (enablement preflight on scheduled smoke)
+
+After Plan 064 on `main` (2026-05-27):
+
+- **Scheduled smoke:** `hosted-golden-smoke` uploads `hunyuan-enablement-preflight.json`
+- **PR #45:** enablement preflight CLI merged (`5ca053f`)
+- **Hosted golden smoke:** run `20260527-163833-108886a7`
+- **G7:** still **OPEN**
+
 ## Plan 063 validation (unified enablement preflight)
 
 After Plan 063 on `main` (2026-05-27):

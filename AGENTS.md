@@ -18,7 +18,7 @@
   - manifest, GLB, and OBJ artifacts are present and downloadable
 - Continue the fix, deploy, and retest loop until the requested validation path works or until the remaining blocker is a genuinely missing implementation.
 - Do not claim a runtime mode is validated unless you actually executed it. Call out unimplemented or untested modes explicitly.
-- Before enabling `hunyuan-zerogpu`, run `PYTHONPATH=src python scripts/hunyuan_admission_audit.py` and close G1–G8 in `docs/knowledgebase/hunyuan-admission-gates.md`. CI runs the same audit via the `hunyuan-admission-audit` job; scheduled hosted smoke also records `hunyuan-admission-audit.json`.
+- Before enabling `hunyuan-zerogpu`, run `PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py` (G1–G6 readiness + G7–G9 blockers), then `hunyuan_admission_audit.py`, and close G1–G8 in `docs/knowledgebase/hunyuan-admission-gates.md`. CI runs both via `hunyuan-admission-audit`; scheduled hosted smoke records `hunyuan-admission-audit.json` and `hunyuan-enablement-preflight.json`.
 
 ## Mode-Specific Reporting
 
