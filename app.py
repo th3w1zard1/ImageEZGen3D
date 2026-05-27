@@ -1053,7 +1053,7 @@ def build_demo():
 
             with gr.Tab("History"):
                 history_summary = gr.HTML(
-                    _history_overview_html(history_runs),
+                    _history_overview_html(history_runs, resolution=resolution),
                     elem_classes="history-overview-shell",
                 )
                 with gr.Row(equal_height=False, elem_classes="history-layout"):

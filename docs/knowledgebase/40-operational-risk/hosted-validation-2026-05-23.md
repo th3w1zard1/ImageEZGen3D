@@ -26,6 +26,15 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 058 validation (History tab idle backend rail parity)
+
+After Plan 058 on `main` (2026-05-27):
+
+- **UX:** History tab Project Rail shows **What backend ran** chips before first run (same `resolution` path as Create tab)
+- **PR #39:** Plan 057 golden smoke rail assertion merged (`1bd46e1`)
+- **Hosted golden smoke:** run `20260527-160601-b822c87f` (rail HTML check ok)
+- **G7:** still OPEN; Hunyuan **not** enabled
+
 ## Plan 057 validation (hosted golden smoke backend rail assertion)
 
 After Plan 057 on `main` (2026-05-27):
