@@ -23,6 +23,8 @@ def _valid_status(run_id: str = "20260524-184255-f0ce0436") -> str:
             f"Run `{run_id}` complete.",
             "- **Export budget:** up to 25,000 faces (quality-tier preset)",
             "- **Backend used:** Local CPU Preview",
+            "- **Fallback:** ZeroGPU adapter is not enabled yet.",
+            "- **Preview disclaimer:** CPU preview fallback is active.",
             "Downloads: manifest, glb, obj",
         ]
     )

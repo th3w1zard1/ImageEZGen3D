@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .export_tiers import resolve_decimation_target
+from .hunyuan_g8_preflight import validate_g8_cpu_fallback_status
 
 DEFAULT_SPACE_URL = "https://th3w1zard1-imageezgen3d.hf.space/"
 DEFAULT_SAMPLE_PATH = Path("assets/examples/teal_block.png")
@@ -229,6 +230,7 @@ def run_hosted_golden_smoke(
 
     status = str(result[1] if isinstance(result, (list, tuple)) else result)
     ok, issues, run_id = validate_hosted_generate_status(status, quality=quality)
+    issues.extend(validate_g8_cpu_fallback_status(status))
 
     if isinstance(result, (list, tuple)) and len(result) > _GENERATE_BACKEND_RAIL_INDEX:
         rail_value = result[_GENERATE_BACKEND_RAIL_INDEX]

@@ -26,6 +26,15 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 062 validation (G8 fallback honesty in hosted golden smoke)
+
+After Plan 062 on `main` (2026-05-27):
+
+- **G8:** `validate_g8_cpu_fallback_status()` wired into `hosted_golden_smoke.py`
+- **PR #43:** G7 preflight CI merged (`bf8fa29`)
+- **Hosted golden smoke:** run `20260527-162855-2ad20d9d` (G8 honesty checks ok)
+- **Mode:** hosted CPU fallback; Hunyuan **not** enabled
+
 ## Plan 061 validation (G7 preflight in PR CI)
 
 After Plan 061 on `main` (2026-05-27):

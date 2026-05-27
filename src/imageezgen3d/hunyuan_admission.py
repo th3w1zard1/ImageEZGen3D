@@ -241,7 +241,8 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
             g8_status,
             (
                 "Hosted validation references fallback + preview disclaimer",
-                "Re-verify after any enablement flip",
+                "G8 preflight: hunyuan_g8_preflight + hosted golden smoke status checks",
+                "Post-enablement: ## G8 validation with G8_STATUS: PASS",
             ),
         ),
         GateResult(
