@@ -137,6 +137,9 @@ jobs:
       - name: Hunyuan G7 preflight readiness (G1-G6)
         run: PYTHONPATH=src python scripts/hunyuan_g7_preflight.py
 
+      - name: Hunyuan enablement preflight (G1-G9 snapshot)
+        run: PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py
+
   hunyuan-dependency-smoke:
     runs-on: ubuntu-latest
     steps:
