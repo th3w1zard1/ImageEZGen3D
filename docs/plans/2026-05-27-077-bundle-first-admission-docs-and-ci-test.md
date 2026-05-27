@@ -1,6 +1,6 @@
 ---
 title: Bundle-first admission docs and CI bundle test (Plan 077)
-status: active
+status: completed
 created: 2026-05-27
 ---
 

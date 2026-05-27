@@ -1,6 +1,6 @@
 ---
 title: Hunyuan preflight bundle CLI (Plan 074)
-status: active
+status: completed
 created: 2026-05-27
 ---
 

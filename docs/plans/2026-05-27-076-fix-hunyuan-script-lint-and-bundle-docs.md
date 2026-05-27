@@ -1,6 +1,6 @@
 ---
 title: Fix Hunyuan script lint and align bundle docs (Plan 076)
-status: active
+status: completed
 created: 2026-05-27
 ---
 
