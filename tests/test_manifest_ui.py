@@ -8,6 +8,17 @@ from imageezgen3d.orchestrator import PREVIEW_FALLBACK_DISCLAIMER
 
 
 class ManifestUiTests(unittest.TestCase):
+    def test_backend_rail_chips_show_adapter_and_fallback(self) -> None:
+        html = mu.backend_rail_chips_html(
+            adapter_key="cpu-demo",
+            fallback_reason="ZeroGPU adapter is not enabled yet.",
+        )
+
+        self.assertIn("What backend ran", html)
+        self.assertIn("Local CPU Preview", html)
+        self.assertIn("CPU fallback", html)
+        self.assertIn("ZeroGPU adapter is not enabled yet.", html)
+
     def test_fallback_banner_renders_for_cpu_fallback_parameters(self) -> None:
         html = mu.fallback_banner_html(
             {
