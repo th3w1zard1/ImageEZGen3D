@@ -65,6 +65,11 @@ jobs:
           PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py \
             --json --record hunyuan-enablement-preflight.json
 
+      - name: Verify Hunyuan CI artifact parity
+        run: |
+          PYTHONPATH=src python scripts/verify_hunyuan_ci_artifact_parity.py \
+            hunyuan-admission-audit.json hunyuan-enablement-preflight.json
+
       - name: Upload hosted golden smoke record
         if: always()
         uses: actions/upload-artifact@v4

@@ -32,6 +32,17 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("hunyuan_enablement_preflight.py", source)
         self.assertIn("hunyuan-enablement-preflight.json", source)
 
+    def test_hosted_golden_smoke_verifies_ci_artifact_parity(self) -> None:
+        source = Path(".github/workflows/hosted-golden-smoke.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("verify_hunyuan_ci_artifact_parity.py", source)
+
+    def test_ci_hunyuan_job_verifies_ci_artifact_parity(self) -> None:
+        source = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
+        self.assertIn("verify_hunyuan_ci_artifact_parity.py", source)
+        self.assertIn("--record hunyuan-admission-audit.json", source)
+
 
 if __name__ == "__main__":
     unittest.main()
