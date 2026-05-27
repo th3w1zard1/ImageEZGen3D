@@ -10,9 +10,11 @@ from imageezgen3d.hosted_golden_smoke import (
     HostedGoldenSmokeResult,
     parse_run_id,
     run_hosted_golden_smoke,
+    validate_backend_rail_html,
     validate_hosted_generate_status,
     write_hosted_golden_record,
 )
+from imageezgen3d.manifest_ui import backend_rail_chips_html
 
 
 def _valid_status(run_id: str = "20260524-184255-f0ce0436") -> str:
@@ -45,6 +47,17 @@ class HostedGoldenSmokeTests(unittest.TestCase):
         self.assertFalse(ok)
         self.assertTrue(any("Export budget" in issue for issue in issues))
 
+    def test_validate_backend_rail_html_accepts_chip_section(self) -> None:
+        html = backend_rail_chips_html(
+            adapter_key="cpu-demo",
+            fallback_reason="ZeroGPU adapter not enabled",
+        )
+        self.assertEqual(validate_backend_rail_html(html), [])
+
+    def test_validate_backend_rail_html_rejects_missing_marker(self) -> None:
+        issues = validate_backend_rail_html("<p>overview only</p>")
+        self.assertTrue(any("What backend ran" in issue for issue in issues))
+
     def test_write_hosted_golden_record_persists_json(self) -> None:
         result = HostedGoldenSmokeResult(
             ok=True,
@@ -66,7 +79,11 @@ class HostedGoldenSmokeTests(unittest.TestCase):
         self, client_cls: object,
     ) -> None:
         client = client_cls.return_value
-        client.predict.return_value = (None, _valid_status())
+        rail_html = backend_rail_chips_html(adapter_key="cpu-demo")
+        predict_outputs: list[object | None] = [None] * 16
+        predict_outputs[1] = _valid_status()
+        predict_outputs[15] = rail_html
+        client.predict.return_value = tuple(predict_outputs)
 
         with tempfile.TemporaryDirectory() as directory:
             sample = Path(directory) / "block.png"

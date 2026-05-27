@@ -26,6 +26,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 057 validation (hosted golden smoke backend rail assertion)
+
+After Plan 057 on `main` (2026-05-27):
+
+- **Automation:** `hosted_golden_smoke` validates `/generate` output index 15 (`create_history_summary`) for **What backend ran** chips
+- **Mode:** hosted CPU fallback; Hunyuan **not** enabled
+- **G7:** still OPEN (real Hunyuan hosted E2E deferred)
+
 ## Plan 056 validation (PR #37 merge + Space deploy)
 
 After squash-merge PR #37 (`f41d22c` on `main`, 2026-05-27) and Hub deploy `9ad3eb7436901c5e11de4f57ed2c75aeca92d6d8`:
