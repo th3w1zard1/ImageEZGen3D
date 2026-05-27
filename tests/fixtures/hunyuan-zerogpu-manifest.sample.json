@@ -1,0 +1,36 @@
+{
+  "run_id": "g6-sample-20260527-00000000",
+  "stage": "done",
+  "adapter": "hunyuan-zerogpu",
+  "parameters": {
+    "requested_adapter": "auto",
+    "selected_adapter": "hunyuan-zerogpu",
+    "quality": "balanced",
+    "decimation_target": 150000,
+    "seed": 42,
+    "runtime": {
+      "requested_mode": "auto",
+      "prefer_zerogpu": true,
+      "zerogpu_enabled": true,
+      "zerogpu_runtime_available": true,
+      "cpu_fallback_allowed": true,
+      "reason": "Hosted ZeroGPU path (sample manifest for G6 parity; adapter not enabled)"
+    },
+    "neural_backend": "hunyuan-zerogpu",
+    "decimation_applied": true,
+    "raw_exported": true
+  },
+  "artifacts": {
+    "manifest": "outputs/g6-sample/manifest.json",
+    "glb": "outputs/g6-sample/exports/mesh.glb",
+    "obj": "outputs/g6-sample/exports/mesh.obj",
+    "export_sidecar": "outputs/g6-sample/exports/export_sidecar.json",
+    "raw_glb": "outputs/g6-sample/exports/mesh.raw.glb"
+  },
+  "validation": {
+    "score": 90
+  },
+  "mesh_report": {
+    "watertight": true
+  }
+}

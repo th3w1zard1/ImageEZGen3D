@@ -5,6 +5,11 @@ from pathlib import Path
 from typing import Literal
 
 from .adapters.hunyuan import HunyuanPlaceholderAdapter
+from .hunyuan_manifest_parity import (
+    HUNYUAN_SAMPLE_MANIFEST,
+    load_hunyuan_sample_manifest,
+    validate_hunyuan_manifest_parity,
+)
 
 GateStatus = Literal["pass", "open", "fail"]
 
@@ -15,6 +20,7 @@ _DEPENDENCIES = _REPO_ROOT / "docs/knowledgebase/hunyuan-dependencies.md"
 _RESOURCE_FIT = _REPO_ROOT / "docs/knowledgebase/hunyuan-resource-fit.md"
 _HUNYUAN_PINS = _REPO_ROOT / "requirements/hunyuan-pins.txt"
 _ADMISSION_GATES = _REPO_ROOT / "docs/knowledgebase/hunyuan-admission-gates.md"
+_MANIFEST_PARITY = _REPO_ROOT / "docs/knowledgebase/hunyuan-manifest-parity.md"
 _HOSTED_VALIDATION = (
     _REPO_ROOT / "docs/knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md"
 )
@@ -39,6 +45,16 @@ def _read_text(path: Path) -> str:
 
 def _adapter_configured() -> bool:
     return HunyuanPlaceholderAdapter().capabilities.configured
+
+
+def _g6_sample_manifest_valid() -> bool:
+    if not HUNYUAN_SAMPLE_MANIFEST.is_file():
+        return False
+    try:
+        payload = load_hunyuan_sample_manifest()
+    except (OSError, ValueError):
+        return False
+    return not validate_hunyuan_manifest_parity(payload)
 
 
 def evaluate_admission_gates() -> tuple[GateResult, ...]:
@@ -94,9 +110,11 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
         and "14.9" in resource_text
         else "open"
     )
+    manifest_parity_text = _read_text(_MANIFEST_PARITY)
     g6_status: GateStatus = (
         "pass"
-        if "export_sidecar" in hosted_text and "manifest" in hosted_text
+        if "G6_STATUS: PASS" in manifest_parity_text
+        and _g6_sample_manifest_valid()
         else "open"
     )
     g7_status: GateStatus = "open"
@@ -183,8 +201,11 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
             "Manifest parity",
             g6_status,
             (
-                "CPU demo manifest/sidecar path validated in hosted-validation doc",
-                "Hunyuan sample manifest not attached",
+                f"hunyuan-manifest-parity.md present: {_MANIFEST_PARITY.is_file()}",
+                f"sample manifest present: {HUNYUAN_SAMPLE_MANIFEST.is_file()}",
+                "G6_STATUS: PASS (sample contract)"
+                if g6_status == "pass"
+                else "Hunyuan sample manifest missing or invalid",
             ),
         ),
         GateResult(
