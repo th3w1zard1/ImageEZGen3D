@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 074 validation (Hunyuan preflight bundle CLI)
+
+After Plan 074 on `main` (2026-05-27):
+
+- **Bundle CLI:** `scripts/hunyuan_preflight_bundle.py` — audit + enablement `--record` + verify in one step
+- **Agents:** `AGENTS.md` and G9 runbook prefer the bundle for pre-enablement checks
+
 ## Plan 073 validation (Hunyuan CI parity institutional learning)
 
 After Plan 073 on `main` (2026-05-27):

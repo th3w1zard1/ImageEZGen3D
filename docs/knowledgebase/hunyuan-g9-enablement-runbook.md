@@ -4,6 +4,16 @@ Gate **G9** closes when an explicit enablement PR merges with rollback steps doc
 
 ## Pre-flight (required)
 
+**One command (preferred):**
+
+```bash
+python scripts/hunyuan_preflight_bundle.py
+```
+
+Writes `hunyuan-admission-audit.json` and `hunyuan-enablement-preflight.json` in the current directory and runs parity verify.
+
+**Individual steps (same contract):**
+
 ```bash
 PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py \
   --record hunyuan-enablement-preflight.json

@@ -33,7 +33,13 @@ Operators may compare them to decide whether enablement is safe. If `g7_readines
 | CLI verify | `scripts/verify_hunyuan_ci_artifact_parity.py` |
 | Workflows | `ci.yml` and `hosted-golden-smoke.yml` run verify after both `--record` steps |
 
-**Local check:**
+**Local check (one command):**
+
+```bash
+python scripts/hunyuan_preflight_bundle.py --record-dir /tmp/hunyuan-preflight
+```
+
+**Individual steps:**
 
 ```bash
 PYTHONPATH=src python scripts/hunyuan_admission_audit.py --record /tmp/audit.json
