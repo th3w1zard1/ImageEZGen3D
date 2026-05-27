@@ -14,7 +14,7 @@ mode: repo-grounded
 - **G2 weight access** documented (Plan 050) — 14.9 GB dry-run + Space secrets plan; still **not enabled**.
 - **G4 ZeroGPU wiring** scaffold (Plan 051) — `spaces.GPU` shell in `hunyuan.py`; still **not enabled**.
 - **G3 dependency audit** (Plan 052) — `hunyuan-pins.txt`, `.[hunyuan-audit]`, CI smoke; still **not enabled**.
-- **G5 resource fit** (Plan 053) — VRAM/disk budget documented; automated G1 LICENSE verify; still **not enabled**.
+- **G5 resource fit** (Plan 053 / PR #35) — VRAM/disk budget + G1 LICENSE CI verify on `main`; still **not enabled**.
 
 ## Ranked next slices (product-driven)
 
