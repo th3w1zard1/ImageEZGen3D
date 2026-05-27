@@ -29,7 +29,9 @@ PYTHONPATH=src python scripts/hunyuan_g7_preflight.py --live-probe
 1. Set `HunyuanPlaceholderAdapter.configured = True` in the enablement PR.
 2. Deploy Space with weights/secrets per G2/G3/G5.
 3. Run Block or Vase `/generate` on live Space; status must pass `validate_g7_hosted_generate_status()`.
-4. Record run id + manifest/GLB/OBJ in `hosted-validation-2026-05-23.md` and set admission **G7** to **PASS**.
+4. Add a `## G7 validation` section to `hosted-validation-2026-05-23.md` with **`G7_STATUS: PASS`**, run id, and `hunyuan-zerogpu` — admission audit G7 then passes.
+
+**CI:** `hunyuan-admission-audit` and `hosted-golden-smoke` both run `hunyuan_g7_preflight.py` (G1–G6 readiness). Admission audit JSON includes `g7_readiness` and exits 1 if G1–G6 regress.
 
 ## Not claimed
 
