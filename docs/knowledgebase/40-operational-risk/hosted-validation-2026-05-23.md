@@ -44,6 +44,29 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 077 validation (bundle-first admission docs)
+
+After Plan 077 on branch `feat/075-ci-workflows-use-preflight-bundle` (2026-05-27):
+
+- **Admission gates doc:** bundle-first audit commands
+- **CI scripts test:** subprocess coverage for `hunyuan_preflight_bundle.py`
+- **Hosted golden smoke:** run `20260527-215147-a4d3b052` (cpu-demo / Local CPU Preview)
+
+## Plan 076 validation (lint + bundle docs)
+
+After Plan 076 on branch `feat/075-ci-workflows-use-preflight-bundle` (2026-05-27):
+
+- **Ruff:** removed unused `sys` from Hunyuan preflight scripts (unblocks PR #57 lint)
+- **Hosted golden smoke:** run `20260527-214844-3c7de80b` (cpu-demo / Local CPU Preview)
+
+## Plan 075 validation (CI workflows use preflight bundle)
+
+After Plan 075 on `main` (2026-05-27):
+
+- **`ci.yml` / `hosted-golden-smoke`:** Hunyuan JSON + verify via `hunyuan_preflight_bundle.py` (scheduled smoke uses `--json`)
+- **G7 preflight** remains a separate step after the bundle
+- **Hosted golden smoke:** run `20260527-214055-500a0ffb` (cpu-demo / Local CPU Preview; balanced Block)
+
 ## Plan 074 validation (Hunyuan preflight bundle CLI)
 
 After Plan 074 on `main` (2026-05-27):

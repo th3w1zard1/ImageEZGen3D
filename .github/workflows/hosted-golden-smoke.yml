@@ -52,23 +52,11 @@ jobs:
             --space-url "$IMAGEEZ_HF_SPACE_URL" \
             --record hosted-export-tier-smoke.json
 
-      - name: Run Hunyuan admission gate audit
-        run: |
-          PYTHONPATH=src python scripts/hunyuan_admission_audit.py \
-            --json --record hunyuan-admission-audit.json
+      - name: Hunyuan preflight bundle (audit + enablement + parity)
+        run: python scripts/hunyuan_preflight_bundle.py --json
 
       - name: Hunyuan G7 preflight readiness
         run: PYTHONPATH=src python scripts/hunyuan_g7_preflight.py
-
-      - name: Hunyuan enablement preflight snapshot
-        run: |
-          PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py \
-            --json --record hunyuan-enablement-preflight.json
-
-      - name: Verify Hunyuan CI artifact parity
-        run: |
-          PYTHONPATH=src python scripts/verify_hunyuan_ci_artifact_parity.py \
-            hunyuan-admission-audit.json hunyuan-enablement-preflight.json
 
       - name: Upload hosted golden smoke record
         if: always()

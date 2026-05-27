@@ -6,7 +6,12 @@ Single snapshot before setting `HunyuanPlaceholderAdapter.configured = True`.
 
 ```bash
 python scripts/hunyuan_preflight_bundle.py
-PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py
+python scripts/hunyuan_preflight_bundle.py --json --record-dir .
+```
+
+Individual CLIs (advanced / debugging):
+
+```bash
 PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py --json --record hunyuan-enablement-preflight.json
 ```
 
@@ -32,4 +37,4 @@ Admission audit JSON uses the same nested `g7_readiness` / `g8_enablement` block
 
 ## Scheduled CI
 
-The `hosted-golden-smoke` workflow uploads `hunyuan-enablement-preflight.json` alongside admission audit and golden smoke records, then runs `scripts/verify_hunyuan_ci_artifact_parity.py` so G7/G8 blocks cannot drift between files.
+`ci.yml` and `hosted-golden-smoke` run `scripts/hunyuan_preflight_bundle.py` (smoke uses `--json`), which writes `hunyuan-admission-audit.json` and `hunyuan-enablement-preflight.json` and verifies parity in one step. G7 preflight remains a separate workflow step.

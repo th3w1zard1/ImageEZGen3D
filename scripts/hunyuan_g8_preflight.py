@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 
 from imageezgen3d.hosted_golden_smoke import (
     DEFAULT_SPACE_URL,
