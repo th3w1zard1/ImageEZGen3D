@@ -22,11 +22,13 @@ mode: repo-grounded
 
 **Driver:** Prove real `hunyuan-zerogpu` generation on live Space (not cpu-demo fallback).
 
+**Preflight (Plan 060):** `hunyuan_g7_preflight.py` + CLI — G1–G6 readiness; `validate_g7_hosted_generate_status()` for post-enablement runs.
+
 **Deliverables:**
 
-- Block/Vase sample run with adapter enabled after G5 closes.
+- Block/Vase sample run with adapter enabled after enablement PR.
 - Entry in `hosted-validation-2026-05-23.md` with run id + manifest/GLB/OBJ.
-- Update admission G7 row.
+- Update admission G7 row to **PASS**.
 
 ### 2. **Creator UX — “What backend ran?” chip hardening** — **shipped (Plan 055 / PR #37)**
 

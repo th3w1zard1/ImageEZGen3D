@@ -26,6 +26,15 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 060 validation (G7 preflight harness + PR #41 merge)
+
+After Plan 060 on `main` (2026-05-27):
+
+- **G7 preflight:** `hunyuan-g7-preflight.md` — G1–G6 readiness CLI; G7 still **OPEN**
+- **PR #41:** G6 sample manifest merged (`25a5583`)
+- **CI:** `hosted-golden-smoke` workflow runs `hunyuan_g7_preflight.py`
+- **Adapter:** Hunyuan **not** enabled
+
 ## Plan 059 validation (G6 manifest sample + PR #40 deploy)
 
 After Plan 059 on `main` (2026-05-27):
