@@ -9,6 +9,7 @@ from imageezgen3d.hunyuan_admission import (
     evaluate_admission_gates,
     format_admission_report,
 )
+from imageezgen3d.hunyuan_g7_preflight import evaluate_g7_readiness
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -33,8 +34,10 @@ def main(argv: list[str] | None = None) -> int:
     gates = evaluate_admission_gates()
     from imageezgen3d.hunyuan_admission import _adapter_configured
 
+    readiness = evaluate_g7_readiness(gates)
     payload = {
         "adapter_configured": _adapter_configured(),
+        "g7_readiness": readiness.to_dict(),
         "gates": [
             {
                 "id": gate.gate_id,
@@ -56,7 +59,10 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print(format_admission_report(gates), end="")
 
-    return audit_exit_code(gates)
+    code = audit_exit_code(gates)
+    if not readiness.ready:
+        return 1 if code == 0 else code
+    return code
 
 
 if __name__ == "__main__":

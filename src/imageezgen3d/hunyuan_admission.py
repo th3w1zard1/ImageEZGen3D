@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -41,6 +42,20 @@ def _read_text(path: Path) -> str:
     if not path.is_file():
         return ""
     return path.read_text(encoding="utf-8")
+
+
+def _hosted_validation_section(text: str, heading: str) -> str:
+    pattern = rf"## {re.escape(heading)}\s*\n(.*?)(?=\n## |\Z)"
+    match = re.search(pattern, text, re.DOTALL)
+    return match.group(1) if match else ""
+
+
+def _g7_hosted_validation_passed(hosted_text: str) -> bool:
+    """True only when a dedicated ## G7 validation section records closure."""
+    section = _hosted_validation_section(hosted_text, "G7 validation")
+    if not section:
+        return False
+    return "G7_STATUS: PASS" in section and "hunyuan-zerogpu" in section.lower()
 
 
 def _adapter_configured() -> bool:
@@ -117,7 +132,7 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
         and _g6_sample_manifest_valid()
         else "open"
     )
-    g7_status: GateStatus = "open"
+    g7_status: GateStatus = "pass" if _g7_hosted_validation_passed(hosted_text) else "open"
     g8_status: GateStatus = (
         "pass"
         if "fallback" in hosted_text.lower()
@@ -213,9 +228,11 @@ def evaluate_admission_gates() -> tuple[GateResult, ...]:
             "Hosted E2E",
             g7_status,
             (
-                "No hosted run with real Hunyuan adapter in validation doc",
+                "G7_STATUS: PASS in hosted-validation doc with hunyuan-zerogpu run"
+                if g7_status == "pass"
+                else "No G7_STATUS: PASS in hosted-validation doc yet",
                 "cpu-demo fallback runs documented instead",
-                "G7 preflight: scripts/hunyuan_g7_preflight.py (readiness + optional live probe)",
+                "G7 preflight: scripts/hunyuan_g7_preflight.py (G1-G6 readiness + optional live probe)",
             ),
         ),
         GateResult(

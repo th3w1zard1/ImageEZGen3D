@@ -11,6 +11,7 @@ from unittest.mock import patch
 
 from imageezgen3d.adapters.hunyuan import HunyuanPlaceholderAdapter
 from imageezgen3d.hunyuan_admission import (
+    _g7_hosted_validation_passed,
     audit_exit_code,
     evaluate_admission_gates,
     format_admission_report,
@@ -82,6 +83,28 @@ class HunyuanAdmissionTests(unittest.TestCase):
             payload = json.loads(record_path.read_text(encoding="utf-8"))
             self.assertFalse(payload["adapter_configured"])
             self.assertEqual(len(payload["gates"]), 9)
+            self.assertTrue(payload["g7_readiness"]["ready"])
+
+    def test_g7_gate_open_until_hosted_validation_records_pass(self) -> None:
+        gates = {gate.gate_id: gate for gate in evaluate_admission_gates()}
+        self.assertEqual(gates["G7"].status, "open")
+
+    def test_g7_hosted_validation_ignores_prose_mentions(self) -> None:
+        prose = "## Plan 061\n\nMentions G7_STATUS: PASS and hunyuan-zerogpu in prose only.\n"
+        self.assertFalse(_g7_hosted_validation_passed(prose))
+
+    def test_g7_hosted_validation_passes_in_dedicated_section(self) -> None:
+        text = "\n".join(
+            [
+                "## G7 validation",
+                "",
+                "G7_STATUS: PASS",
+                "- **Adapter:** hunyuan-zerogpu",
+                "",
+                "## Plan 062",
+            ]
+        )
+        self.assertTrue(_g7_hosted_validation_passed(text))
 
 
 if __name__ == "__main__":
