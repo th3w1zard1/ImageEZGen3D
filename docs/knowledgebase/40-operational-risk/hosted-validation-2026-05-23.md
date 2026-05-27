@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 077 validation (bundle-first admission docs)
+
+After Plan 077 on branch `feat/075-ci-workflows-use-preflight-bundle` (2026-05-27):
+
+- **Admission gates doc:** bundle-first audit commands
+- **CI scripts test:** subprocess coverage for `hunyuan_preflight_bundle.py`
+- **Hosted golden smoke:** run `20260527-215147-a4d3b052` (cpu-demo / Local CPU Preview)
+
 ## Plan 076 validation (lint + bundle docs)
 
 After Plan 076 on branch `feat/075-ci-workflows-use-preflight-bundle` (2026-05-27):

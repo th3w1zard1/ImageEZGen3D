@@ -15,14 +15,20 @@ Legal and redistribution rules live in [license-audit.md](license-audit.md). Run
 Run from the repository root (does **not** enable the adapter):
 
 ```bash
-PYTHONPATH=src python scripts/hunyuan_admission_audit.py
+python scripts/hunyuan_preflight_bundle.py
+python scripts/hunyuan_preflight_bundle.py --json --record-dir .
 ```
 
-Machine-readable output: `PYTHONPATH=src python scripts/hunyuan_admission_audit.py --json`
+The bundle runs admission audit, enablement preflight, and artifact parity verify. It exits **0** while `configured=False`. Individual CLIs exit **1** if the adapter were enabled while gates remain open (safety guard for enablement PRs).
 
-The audit exits **0** while `configured=False`. It exits **1** if the adapter were enabled while gates remain open (safety guard for enablement PRs).
+**Advanced (audit only):**
 
-**Last audit:** 2026-05-27 — Plan 075; adapter `configured=False`; **G1–G6 PASS**; G7/G8/G9 **OPEN**; CI and smoke use `hunyuan_preflight_bundle.py`.
+```bash
+PYTHONPATH=src python scripts/hunyuan_admission_audit.py
+PYTHONPATH=src python scripts/hunyuan_admission_audit.py --json
+```
+
+**Last audit:** 2026-05-27 — Plan 077; adapter `configured=False`; **G1–G6 PASS**; G7/G8/G9 **OPEN**; CI and smoke use `hunyuan_preflight_bundle.py`.
 
 ## Completed prerequisites
 

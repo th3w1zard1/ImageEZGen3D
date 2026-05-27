@@ -10,6 +10,7 @@ class WorkflowContractTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("hunyuan_preflight_bundle.py", source)
+        self.assertIn("hunyuan_preflight_bundle.py --json", source)
         self.assertIn("hunyuan-admission-audit.json", source)
         self.assertIn("hunyuan-enablement-preflight.json", source)
 
