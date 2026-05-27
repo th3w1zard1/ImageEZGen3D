@@ -17,7 +17,7 @@ Status markdown from `/generate` must include:
 
 | Item | Purpose |
 | --- | --- |
-| `src/imageezgen3d/hunyuan_g8_preflight.py` | G8 validators; `evaluate_g8_enablement_status()` for CI JSON |
+| `src/imageezgen3d/hunyuan_g8_preflight.py` | G8 validators; `g8_enablement_for_gates()` for audit + enablement JSON |
 | `src/imageezgen3d/hosted_validation.py` | Shared `## … validation` section parser |
 | `scripts/hunyuan_g8_preflight.py` | `--live` (golden smoke) or `--status-file` |
 | `hosted_golden_smoke.py` | Calls G8 validator on each smoke run |

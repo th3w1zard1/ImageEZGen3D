@@ -6,7 +6,7 @@ from typing import Any
 from .adapters.hunyuan import HunyuanPlaceholderAdapter
 from .hunyuan_admission import GateResult, evaluate_admission_gates
 from .hunyuan_g7_preflight import G7ReadinessResult, evaluate_g7_readiness
-from .hunyuan_g8_preflight import G8EnablementStatus, evaluate_g8_enablement_status
+from .hunyuan_g8_preflight import G8EnablementStatus, g8_enablement_for_gates
 
 _ENABLEMENT_CLOSE_GATES = ("G7", "G8", "G9")
 
@@ -53,16 +53,9 @@ def evaluate_enablement_preflight() -> EnablementPreflightResult:
     configured = HunyuanPlaceholderAdapter().capabilities.configured
     g7 = evaluate_g7_readiness(gates)
 
-    from .hosted_validation import HOSTED_VALIDATION_PATH, read_repo_text
-
-    hosted_text = read_repo_text(HOSTED_VALIDATION_PATH)
-    by_id = {gate.gate_id: gate for gate in gates}
-    g8_gate = by_id.get("G8")
-    g8_status = evaluate_g8_enablement_status(
-        hosted_text,
-        g8_gate_status=g8_gate.status if g8_gate is not None else None,
-    )
+    g8_status = g8_enablement_for_gates(gates)
     g8_doc = g8_status.documented
+    by_id = {gate.gate_id: gate for gate in gates}
     blocking: list[str] = []
     for gate_id in _ENABLEMENT_CLOSE_GATES:
         gate = by_id.get(gate_id)

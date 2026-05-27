@@ -45,7 +45,7 @@ class HunyuanEnablementPreflightTests(unittest.TestCase):
             return_value=_gates_g1_g6_pass(),
         ):
             with patch(
-                "imageezgen3d.hunyuan_enablement_preflight.evaluate_g8_enablement_status",
+                "imageezgen3d.hunyuan_enablement_preflight.g8_enablement_for_gates",
                 return_value=_g8_not_documented(),
             ):
                 result = evaluate_enablement_preflight()
@@ -64,7 +64,7 @@ class HunyuanEnablementPreflightTests(unittest.TestCase):
             ) as adapter_cls:
                 adapter_cls.return_value.capabilities.configured = False
                 with patch(
-                    "imageezgen3d.hunyuan_enablement_preflight.evaluate_g8_enablement_status",
+                    "imageezgen3d.hunyuan_enablement_preflight.g8_enablement_for_gates",
                     return_value=_g8_not_documented(),
                 ):
                     result = evaluate_enablement_preflight()
@@ -86,7 +86,7 @@ class HunyuanEnablementPreflightTests(unittest.TestCase):
             return_value=gates,
         ):
             with patch(
-                "imageezgen3d.hunyuan_enablement_preflight.evaluate_g8_enablement_status",
+                "imageezgen3d.hunyuan_enablement_preflight.g8_enablement_for_gates",
                 return_value=_g8_not_documented(),
             ):
                 result = evaluate_enablement_preflight()
