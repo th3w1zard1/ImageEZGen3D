@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 070 validation (centralized admission audit payload)
+
+After Plan 070 on `main` (2026-05-27):
+
+- **`hunyuan_admission_audit.py`:** `build_admission_audit_payload()` — single source for `hunyuan-admission-audit.json`
+- **Parity tests** import the builder instead of duplicating G8 assembly logic
+
 ## Plan 069 validation (hosted doc paths + CI artifact parity)
 
 After Plan 069 on `main` (2026-05-27):

@@ -20,7 +20,7 @@ PYTHONPATH=src python scripts/hunyuan_enablement_preflight.py --json --record hu
 | `blocking_enablement` | Gates still open (typically G7 hosted E2E, G8 section) |
 | `enablement_complete` | Adapter on **and** all gates pass |
 
-Admission audit JSON uses the same nested `g7_readiness` / `g8_enablement` blocks. Paths and section parsing live in `src/imageezgen3d/hosted_validation.py` (`HOSTED_VALIDATION_PATH`, `read_repo_text`, `hosted_validation_section`). Parity is enforced by `tests/test_hunyuan_ci_artifact_parity.py`.
+Admission audit JSON uses the same nested `g7_readiness` / `g8_enablement` blocks. Paths and section parsing live in `src/imageezgen3d/hosted_validation.py` (`HOSTED_VALIDATION_PATH`, `read_repo_text`, `hosted_validation_section`). Parity is enforced by `tests/test_hunyuan_ci_artifact_parity.py` against `build_admission_audit_payload()`.
 
 ## Related tools
 

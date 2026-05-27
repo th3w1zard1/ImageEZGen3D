@@ -4,14 +4,9 @@ import argparse
 import json
 from pathlib import Path
 
-from imageezgen3d.hunyuan_admission import (
-    audit_exit_code,
-    evaluate_admission_gates,
-    format_admission_report,
-)
-from imageezgen3d.hosted_validation import HOSTED_VALIDATION_PATH, read_repo_text
+from imageezgen3d.hunyuan_admission import audit_exit_code, evaluate_admission_gates, format_admission_report
+from imageezgen3d.hunyuan_admission_audit import build_admission_audit_payload
 from imageezgen3d.hunyuan_g7_preflight import evaluate_g7_readiness
-from imageezgen3d.hunyuan_g8_preflight import evaluate_g8_enablement_status
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -34,28 +29,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     gates = evaluate_admission_gates()
-    from imageezgen3d.hunyuan_admission import _adapter_configured
-
+    payload = build_admission_audit_payload(gates)
     readiness = evaluate_g7_readiness(gates)
-    g8_gate = next((gate for gate in gates if gate.gate_id == "G8"), None)
-    g8_enablement = evaluate_g8_enablement_status(
-        read_repo_text(HOSTED_VALIDATION_PATH),
-        g8_gate_status=g8_gate.status if g8_gate is not None else None,
-    )
-    payload = {
-        "adapter_configured": _adapter_configured(),
-        "g7_readiness": readiness.to_dict(),
-        "g8_enablement": g8_enablement.to_dict(),
-        "gates": [
-            {
-                "id": gate.gate_id,
-                "title": gate.title,
-                "status": gate.status,
-                "evidence": list(gate.evidence),
-            }
-            for gate in gates
-        ],
-    }
 
     if args.json or args.record is not None:
         rendered = json.dumps(payload, indent=2, sort_keys=True) + "\n"

@@ -16,6 +16,7 @@ from imageezgen3d.hunyuan_admission import (
     evaluate_admission_gates,
     format_admission_report,
 )
+from imageezgen3d.hunyuan_admission_audit import build_admission_audit_payload
 
 
 class HunyuanAdmissionTests(unittest.TestCase):
@@ -66,6 +67,12 @@ class HunyuanAdmissionTests(unittest.TestCase):
         report = format_admission_report(evaluate_admission_gates())
         self.assertIn("adapter_configured=False", report)
         self.assertIn("G9", report)
+
+    def test_build_admission_audit_payload_matches_script_record_shape(self) -> None:
+        payload = build_admission_audit_payload()
+        self.assertIn("g7_readiness", payload)
+        self.assertIn("g8_enablement", payload)
+        self.assertEqual(len(payload["gates"]), 9)
 
     def test_audit_script_writes_record_file(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
