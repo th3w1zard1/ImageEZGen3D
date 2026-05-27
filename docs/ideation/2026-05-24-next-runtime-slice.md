@@ -28,13 +28,13 @@ mode: repo-grounded
 - Entry in `hosted-validation-2026-05-23.md` with run id + manifest/GLB/OBJ.
 - Update admission G7 row.
 
-### 2. **Creator UX — “What backend ran?” chip hardening** — **landed (Plan 055)**
+### 2. **Creator UX — “What backend ran?” chip hardening** — **shipped (Plan 055 / PR #37)**
 
 **Driver:** Trust metric — users must see cpu-demo vs neural without reading manifest JSON.
 
-**Delivered:** `backend_rail_chips_html` in Create Project Rail (latest run + idle resolution path).
+**Delivered:** `backend_rail_chips_html` on live Space after deploy `9ad3eb74` (Plan 056 verified).
 
-**Follow-up:** Hosted smoke HTML assertion (optional); History tab parity if needed.
+**Follow-up:** Optional hosted smoke HTML assertion; History tab parity if needed.
 
 ## Explicitly not next
 
