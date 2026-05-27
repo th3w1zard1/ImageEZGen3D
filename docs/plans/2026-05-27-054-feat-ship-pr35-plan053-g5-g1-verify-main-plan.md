@@ -1,7 +1,7 @@
 ---
 title: "feat: Ship PR #35 Plan 053 G5 + G1 verify to main"
 type: feat
-status: active
+status: completed
 date: 2026-05-27
 origin: docs/plans/2026-05-24-053-feat-hunyuan-g5-resource-fit-plan.md
 ---
@@ -38,3 +38,8 @@ Fix CI lint on PR #35, squash-merge to `main`, verify admission audit + hosted g
 - `PYTHONPATH=src python -m unittest discover -s tests`
 - `PYTHONPATH=src python scripts/hunyuan_admission_audit.py`
 - `PYTHONPATH=src python scripts/hosted_golden_smoke.py`
+
+## Completion notes
+
+- PR #35 merged at `0037bb3`; lint fix (`unused sys`) pushed before merge.
+- G7 real Hunyuan E2E remains next per `next-runtime-slice.md`.

@@ -44,7 +44,8 @@ Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and H
 - **Hunyuan G1 legal audit** — Plan 049; `G1_STATUS: PASS` in license-audit (adapter still disabled).
 - **Hunyuan G2 weight access** — Plan 050; `G2_STATUS: PASS` in hunyuan-weight-access (adapter still disabled).
 - **Hunyuan G3 dependency audit** — Plan 052; pins + CI smoke (adapter still disabled).
-- **Hunyuan G5 resource fit** — Plan 053; VRAM/disk budget + `hunyuan_g1_legal_verify.py` (adapter still disabled).
+- **Hunyuan G5 resource fit** — Plan 053 / PR #35; VRAM/disk budget + `hunyuan_g1_legal_verify.py` (adapter still disabled).
+- **Plan 053 ship** — PR #35 merged on `main` (Plan 054).
 - **Hunyuan G4 ZeroGPU wiring** — Plan 051; GPU scaffold (adapter still disabled).
 
 ## Explicitly defer

@@ -26,6 +26,15 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 054 validation (PR #35 merge to main)
+
+After squash-merge PR #35 (`0037bb3` on `main`, 2026-05-27):
+
+- **Merge:** Plan 053 G5 resource fit + G1 `hunyuan_g1_legal_verify.py` in CI; lint fix included
+- **Admission audit:** G1–G5 PASS; G7 OPEN; `adapter_configured=False`
+- **Hosted golden smoke:** run `20260527-154451-fb0a5893` (cpu-demo / Local CPU Preview; balanced Block)
+- **Mode:** hosted CPU fallback; Hunyuan **not** enabled
+
 ## Plan 053 validation (Hunyuan G5 resource fit)
 
 After Plan 053 on `main` (2026-05-25):
