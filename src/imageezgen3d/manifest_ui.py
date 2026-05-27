@@ -61,6 +61,34 @@ def draft_quality_badge_html(quality_name: str | None) -> str:
     )
 
 
+def backend_rail_chips_html(
+    *,
+    adapter_key: str | None,
+    fallback_reason: str | None = None,
+) -> str:
+    """Visible backend + fallback chips for Project Rail (no manifest JSON required)."""
+    adapter = backend_display_label(adapter_key)
+    chips = [
+        f'<span class="run-status-chip backend-chip">{escape(adapter)}</span>',
+    ]
+    if fallback_reason:
+        chips.append('<span class="run-status-chip fallback">CPU fallback</span>')
+    reason_html = ""
+    if fallback_reason:
+        reason_html = (
+            f'<p class="backend-rail-reason">{escape(str(fallback_reason))}</p>'
+        )
+    return "\n".join(
+        [
+            '<section class="backend-rail-chips" aria-label="Active backend">',
+            '<p class="surface-eyebrow">What backend ran</p>',
+            f'<div class="run-status-chips">{"".join(chips)}</div>',
+            reason_html,
+            "</section>",
+        ]
+    )
+
+
 def fallback_banner_html(parameters: Mapping[str, Any]) -> str:
     if not is_preview_fallback(parameters):
         return ""

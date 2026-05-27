@@ -480,7 +480,11 @@ def _prompt_template_card_html(template: dict[str, Any]) -> str:
     )
 
 
-def _history_overview_html(items: list[dict[str, Any]]) -> str:
+def _history_overview_html(
+    items: list[dict[str, Any]],
+    *,
+    resolution: AdapterResolution | None = None,
+) -> str:
     latest = items[0] if items else {}
     latest_run = str(latest.get("run_id", "No runs yet"))
     latest_backend = _backend_display_label(
@@ -488,6 +492,18 @@ def _history_overview_html(items: list[dict[str, Any]]) -> str:
     )
     latest_flow = str(latest.get("starter_flow") or "Starter flow pending")
     fallback_count = sum(1 for item in items if item.get("fallback_reason"))
+    if items:
+        backend_chips = _manifest_ui.backend_rail_chips_html(
+            adapter_key=str(latest.get("adapter") or "unknown"),
+            fallback_reason=latest.get("fallback_reason"),
+        )
+    elif resolution is not None:
+        backend_chips = _manifest_ui.backend_rail_chips_html(
+            adapter_key=resolution.selected,
+            fallback_reason=resolution.fallback_reason,
+        )
+    else:
+        backend_chips = ""
     cards = [
         ("Local runs", str(len(items))),
         ("Fallbacks logged", str(fallback_count)),
@@ -520,6 +536,7 @@ def _history_overview_html(items: list[dict[str, Any]]) -> str:
             f'<p class="history-overview-latest">{escape(latest_flow)}</p>',
             "</div>",
             f'<div class="history-stat-grid">{card_html}</div>',
+            backend_chips,
             "</section>",
         ]
     )
@@ -938,7 +955,9 @@ def build_demo():
                                 )
                             )
                             create_history_summary = gr.HTML(
-                                _history_overview_html(history_runs),
+                                _history_overview_html(
+                                    history_runs, resolution=resolution
+                                ),
                                 elem_classes="history-overview-shell",
                             )
                             gr.HTML(
@@ -1172,7 +1191,7 @@ def build_demo():
                 cast(Any, gr).Radio(choices=labels, value=compare_value),
                 _history_notice_text(runs),
                 _history_overview_html(runs),
-                _history_overview_html(runs),
+                _history_overview_html(runs, resolution=resolution),
             )
 
         def preview_primary(primary_image, starter_key, quality_name):

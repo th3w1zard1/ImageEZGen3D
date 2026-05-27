@@ -66,6 +66,30 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         self.assertIn("run-123", overview)
         self.assertIn("Local CPU Preview", overview)
         self.assertIn("Fallbacks logged", overview)
+        self.assertIn("What backend ran", overview)
+        self.assertIn("CPU fallback", overview)
+
+    def test_history_overview_shows_idle_backend_chips_from_resolution(self) -> None:
+        resolution = AdapterResolution(
+            requested="auto",
+            selected="cpu-demo",
+            runtime=RuntimeStatus(
+                requested_mode="auto",
+                prefer_zerogpu=True,
+                zerogpu_enabled=False,
+                zerogpu_runtime_available=True,
+                cpu_fallback_allowed=True,
+                reason="adapter disabled",
+            ),
+            zerogpu_runnable=False,
+            fallback_reason="ZeroGPU adapter is not enabled yet.",
+            message="Using CPU preview fallback.",
+        )
+        overview = app._history_overview_html([], resolution=resolution)
+
+        self.assertIn("What backend ran", overview)
+        self.assertIn("Local CPU Preview", overview)
+        self.assertIn("CPU fallback", overview)
 
     def test_history_choice_label_uses_normalized_backend_name(self) -> None:
         label = app._history_choice_label(
