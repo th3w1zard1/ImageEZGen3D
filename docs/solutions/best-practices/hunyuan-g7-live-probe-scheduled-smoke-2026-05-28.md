@@ -32,8 +32,15 @@ G1–G6 can pass in-repo while G7 remains **OPEN**. Golden smoke enforces cpu-de
 
 **Not G7 closure:** Passing the live probe does **not** set `G7_STATUS: PASS` — that requires a real neural Hunyuan run after enablement.
 
+## Agent checks
+
+- Unit + subprocess: `tests/test_hunyuan_g7_preflight.py` (`test_verify_hunyuan_g7_live_probe_record_cli_subprocess`).
+- Invalid records must exit 1 with `hosted_probe` mentioned on stderr.
+
 ## Related
 
 - [g7-false-neural-golden-smoke-guard-2026-05-28.md](g7-false-neural-golden-smoke-guard-2026-05-28.md)
 - [hosted-golden-smoke-record-verify-2026-05-28.md](hosted-golden-smoke-record-verify-2026-05-28.md)
+- [hosted-export-tier-smoke-record-verify-2026-05-28.md](hosted-export-tier-smoke-record-verify-2026-05-28.md)
 - Plan 095 — `docs/plans/2026-05-28-095-g7-live-probe-scheduled-smoke.md`
+- Plan 097 — `docs/plans/2026-05-28-097-g7-live-probe-learning-and-verify.md`

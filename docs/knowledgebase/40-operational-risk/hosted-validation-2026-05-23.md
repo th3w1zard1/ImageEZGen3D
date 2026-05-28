@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 099 validation (G7 live probe verify learning)
+
+After Plan 099 (2026-05-28):
+
+- **Subprocess contract:** `tests/test_hunyuan_g7_preflight.py` exercises `verify_hunyuan_g7_live_probe_record.py` exit 0/1.
+- **Runbook:** `hunyuan-g9-enablement-runbook.md` lists G7 live-probe verify with golden/export-tier smoke verifiers.
+
 ## Plan 098 validation (PR #65 merged to main)
 
 After Plan 098 (2026-05-28):
