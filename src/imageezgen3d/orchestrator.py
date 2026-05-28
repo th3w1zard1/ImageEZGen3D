@@ -40,7 +40,9 @@ class ImageEZOrchestrator:
         )
         self.adapters: dict[str, ModelAdapter] = {
             "cpu-demo": CpuDemoAdapter(),
-            "hunyuan-zerogpu": HunyuanPlaceholderAdapter(),
+            "hunyuan-zerogpu": HunyuanPlaceholderAdapter(
+                configured=config.hunyuan.configured
+            ),
         }
 
     def adapter_choices(self) -> list[str]:

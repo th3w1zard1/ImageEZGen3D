@@ -27,7 +27,7 @@ PYTHONPATH=src python scripts/verify_hunyuan_g7_live_probe_record.py hunyuan-g7-
 
 ## Closing G7 (enablement PR)
 
-1. Set `HunyuanPlaceholderAdapter.configured = True` in the enablement PR.
+1. Set `IMAGEEZ_HUNYUAN_CONFIGURED=true` on the Space (or pass `configured=True` to `HunyuanPlaceholderAdapter`) in the enablement PR **only** with G7 evidence — inference must be wired, not `NotImplementedError`.
 2. Deploy Space with weights/secrets per G2/G3/G5.
 3. Run Block or Vase `/generate` on live Space; status must pass `validate_g7_hosted_generate_status()`.
 4. Add a `## G7 validation` section to `hosted-validation-2026-05-23.md` with **`G7_STATUS: PASS`**, run id, and `hunyuan-zerogpu` — admission audit G7 then passes.

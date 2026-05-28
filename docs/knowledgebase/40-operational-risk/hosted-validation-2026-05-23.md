@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 115 validation (Hunyuan configured env gate)
+
+After Plan 115 (2026-05-28):
+
+- **Config:** `IMAGEEZ_HUNYUAN_CONFIGURED` / `[tool.imageezgen3d.hunyuan] configured` (default false)
+- **Behavior:** configured true → `NotImplementedError` from GPU shell (inference not wired)
+- **G7 gate:** still **OPEN** — no Space env flip in this plan
+
 ## Plan 114 validation (PR #73 merged to main)
 
 After Plan 114 (2026-05-28):

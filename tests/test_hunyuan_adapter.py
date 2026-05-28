@@ -24,8 +24,11 @@ def _sample_request(tmp: Path) -> GenerationRequest:
 
 
 class HunyuanAdapterTests(unittest.TestCase):
-    def test_adapter_remains_disabled(self) -> None:
+    def test_adapter_defaults_to_disabled(self) -> None:
         self.assertFalse(HunyuanPlaceholderAdapter().capabilities.configured)
+
+    def test_adapter_honors_configured_constructor_flag(self) -> None:
+        self.assertTrue(HunyuanPlaceholderAdapter(configured=True).capabilities.configured)
 
     def test_generate_raises_while_disabled(self) -> None:
         adapter = HunyuanPlaceholderAdapter()
@@ -34,6 +37,13 @@ class HunyuanAdapterTests(unittest.TestCase):
             with self.assertRaises(RuntimeError) as context:
                 adapter.generate(request)
         self.assertIn("intentionally disabled", str(context.exception))
+
+    def test_generate_raises_not_implemented_when_configured(self) -> None:
+        adapter = HunyuanPlaceholderAdapter(configured=True)
+        with tempfile.TemporaryDirectory() as directory:
+            request = _sample_request(Path(directory))
+            with self.assertRaises(NotImplementedError):
+                adapter.generate(request)
 
     def test_gpu_inference_shell_raises_not_implemented(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

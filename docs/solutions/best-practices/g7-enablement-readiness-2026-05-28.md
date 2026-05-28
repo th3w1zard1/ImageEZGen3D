@@ -20,12 +20,19 @@
 | **G8** | Post-enablement UX honesty section (interim golden-smoke checks active today) |
 | **G9** | Explicit enablement PR per [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) |
 
+## Enablement config seam (Plan 115)
+
+- **`IMAGEEZ_HUNYUAN_CONFIGURED`** (default `false`) sets `HunyuanPlaceholderAdapter.configured` via `AppConfig.hunyuan`.
+- When `true`, `generate()` calls the GPU shell and raises **`NotImplementedError`** until inference is wired — not a G7 PASS.
+- Do **not** set this on the live Space until weights, tier-C deps, and hosted neural E2E are ready.
+
 ## Recommended next execution slice
 
 1. Run `python scripts/hunyuan_preflight_bundle.py` locally (do not commit output JSON).
-2. Follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR.
-3. Deploy Space; run Block/Vase; update `hosted-validation-2026-05-23.md` with `## G7 validation` only after real neural path is proven.
-4. Re-run scheduled smoke; confirm manifests and downloads.
+2. Wire Hunyuan GPU inference in `_run_hunyuan_inference_on_gpu` (separate plan/PR).
+3. Follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR (`IMAGEEZ_HUNYUAN_CONFIGURED=true` on Space only with G7 evidence).
+4. Deploy Space; run Block/Vase; update `hosted-validation-2026-05-23.md` with `## G7 validation` only after real neural path is proven.
+5. Re-run scheduled smoke; confirm manifests and downloads.
 
 ## Mode reporting (honesty)
 

@@ -196,6 +196,13 @@ class ZeroGPUSettings:
 
 
 @dataclass(frozen=True)
+class HunyuanSettings:
+    """Admission-controlled enablement flag. Default off; inference may still be unwired."""
+
+    configured: bool = False
+
+
+@dataclass(frozen=True)
 class ExportSettings:
     default_format: str = "glb"
     formats: tuple[str, ...] = ("glb", "obj", "ply", "stl")
@@ -210,6 +217,7 @@ class AppConfig:
     preprocessing: PreprocessingSettings = field(default_factory=PreprocessingSettings)
     runtime: RuntimeSettings = field(default_factory=RuntimeSettings)
     zerogpu: ZeroGPUSettings = field(default_factory=ZeroGPUSettings)
+    hunyuan: HunyuanSettings = field(default_factory=HunyuanSettings)
     exports: ExportSettings = field(default_factory=ExportSettings)
 
 
@@ -245,6 +253,7 @@ def load_config(path: str | Path | None = None) -> AppConfig:
     preprocessing_raw = _section(raw, "preprocessing")
     runtime_raw = _section(raw, "runtime")
     zerogpu_raw = _section(raw, "zerogpu")
+    hunyuan_raw = _section(raw, "hunyuan")
     exports_raw = _section(raw, "exports")
 
     formats = _str_tuple_value(exports_raw, "formats", ExportSettings.formats)
@@ -402,6 +411,14 @@ def load_config(path: str | Path | None = None) -> AppConfig:
                     zerogpu_raw,
                     "require_spaces_runtime",
                     ZeroGPUSettings.require_spaces_runtime,
+                ),
+            ),
+        ),
+        hunyuan=HunyuanSettings(
+            configured=_env_bool(
+                "IMAGEEZ_HUNYUAN_CONFIGURED",
+                _bool_value(
+                    hunyuan_raw, "configured", HunyuanSettings.configured
                 ),
             ),
         ),
