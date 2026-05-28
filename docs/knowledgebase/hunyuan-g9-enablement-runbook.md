@@ -25,6 +25,13 @@ PYTHONPATH=src python scripts/verify_hunyuan_ci_artifact_parity.py \
 
 Expect `prerequisites_met=True` and `blocking_enablement` listing **G7** (and **G8** post-enablement section) until hosted validation sections are updated. The verify script must exit 0 before enablement work proceeds.
 
+After hosted smoke on Space, verify scheduled-style artifacts locally when debugging:
+
+```bash
+PYTHONPATH=src python scripts/verify_hosted_golden_smoke_record.py hosted-golden-smoke.json
+PYTHONPATH=src python scripts/verify_hosted_export_tier_smoke_record.py hosted-export-tier-smoke.json
+```
+
 ## Enablement PR checklist
 
 1. Set `HunyuanPlaceholderAdapter.capabilities.configured = True` in the same PR that closes G7–G8 with evidence.

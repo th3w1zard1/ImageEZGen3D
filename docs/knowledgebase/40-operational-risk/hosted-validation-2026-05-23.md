@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 093 validation (export-tier verify learning)
+
+After Plan 093 (2026-05-28):
+
+- **Solutions:** [hosted-export-tier-smoke-record-verify-2026-05-28.md](../../solutions/best-practices/hosted-export-tier-smoke-record-verify-2026-05-28.md)
+- **AGENTS.md** + G9 runbook reference both smoke verify CLIs
+
 ## Plan 092 validation (PR #62 merged to main)
 
 After Plan 092 (2026-05-28):

@@ -48,6 +48,7 @@ When a solution and KB doc overlap, prefer KB for procedure and solutions for th
 | [best-practices/hunyuan-ci-artifact-parity-2026-05-27.md](best-practices/hunyuan-ci-artifact-parity-2026-05-27.md) | Knowledge | Hunyuan audit vs preflight JSON parity; use `hunyuan_preflight_bundle.py` in CI |
 | [best-practices/g7-false-neural-golden-smoke-guard-2026-05-28.md](best-practices/g7-false-neural-golden-smoke-guard-2026-05-28.md) | Knowledge | Golden smoke fails false G7 neural status while adapter disabled |
 | [best-practices/hosted-golden-smoke-record-verify-2026-05-28.md](best-practices/hosted-golden-smoke-record-verify-2026-05-28.md) | Knowledge | CI verifies `hosted-golden-smoke.json` schema including `g7_false_neural_guard_ok` |
+| [best-practices/hosted-export-tier-smoke-record-verify-2026-05-28.md](best-practices/hosted-export-tier-smoke-record-verify-2026-05-28.md) | Knowledge | CI verifies `hosted-export-tier-smoke.json` draft+balanced checks |
 
 ## Related
 

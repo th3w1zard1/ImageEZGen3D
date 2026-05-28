@@ -37,6 +37,7 @@ Scheduled `hosted-golden-smoke` writes `hosted-golden-smoke.json` with `--json -
 
 ## Related
 
+- [hosted-export-tier-smoke-record-verify-2026-05-28.md](hosted-export-tier-smoke-record-verify-2026-05-28.md)
 - [g7-false-neural-golden-smoke-guard-2026-05-28.md](g7-false-neural-golden-smoke-guard-2026-05-28.md)
 - [hunyuan-ci-artifact-parity-2026-05-27.md](hunyuan-ci-artifact-parity-2026-05-27.md)
 - Plan 087 — `docs/plans/2026-05-28-087-verify-hosted-golden-smoke-record.md`

@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -79,6 +82,77 @@ class HostedExportTierSmokeTests(unittest.TestCase):
         self.assertTrue(
             any("g7_false_neural_guard_ok" in issue for issue in issues),
         )
+
+    def test_verify_export_tier_smoke_record_cli_subprocess(self) -> None:
+        draft = HostedGoldenSmokeResult(
+            ok=True,
+            run_id="20260524-000000-00000001",
+            space_url="https://example.hf.space/",
+            adapter_hint="cpu-demo",
+            quality="draft",
+            issues=(),
+            g7_false_neural_guard_ok=True,
+        )
+        balanced = HostedGoldenSmokeResult(
+            ok=True,
+            run_id="20260524-000000-00000002",
+            space_url="https://example.hf.space/",
+            adapter_hint="cpu-demo",
+            quality="balanced",
+            issues=(),
+            g7_false_neural_guard_ok=True,
+        )
+        env = {**os.environ, "PYTHONPATH": "src"}
+        with tempfile.TemporaryDirectory() as directory:
+            valid_path = Path(directory) / "valid.json"
+            valid_path.write_text(
+                json.dumps({"checks": [draft.to_dict(), balanced.to_dict()]}),
+                encoding="utf-8",
+            )
+            invalid_path = Path(directory) / "invalid.json"
+            invalid_path.write_text(
+                json.dumps(
+                    {
+                        "checks": [
+                            draft.to_dict(),
+                            {
+                                "ok": True,
+                                "run_id": None,
+                                "space_url": "https://example.hf.space/",
+                                "adapter_hint": None,
+                                "quality": "balanced",
+                                "issues": [],
+                            },
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            ok_proc = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/verify_hosted_export_tier_smoke_record.py",
+                    str(valid_path),
+                ],
+                check=False,
+                env=env,
+                capture_output=True,
+                text=True,
+            )
+            bad_proc = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/verify_hosted_export_tier_smoke_record.py",
+                    str(invalid_path),
+                ],
+                check=False,
+                env=env,
+                capture_output=True,
+                text=True,
+            )
+        self.assertEqual(ok_proc.returncode, 0, msg=ok_proc.stderr or ok_proc.stdout)
+        self.assertEqual(bad_proc.returncode, 1, msg=bad_proc.stderr or bad_proc.stdout)
+        self.assertIn("g7_false_neural_guard_ok", bad_proc.stderr)
 
     def test_validate_status_accepts_balanced_budget(self) -> None:
         ok, issues, _ = validate_hosted_generate_status(
