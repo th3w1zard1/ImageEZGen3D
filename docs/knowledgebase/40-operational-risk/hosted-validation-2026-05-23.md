@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 111 validation (hosted live attestation closure)
+
+After Plan 111 (2026-05-28):
+
+- **Solutions:** [hosted-live-attestation-2026-05-28.md](../../solutions/best-practices/hosted-live-attestation-2026-05-28.md) indexes Plans 107–110 run ids and mode labels.
+- **STRATEGY/roadmap:** guard stack + live attestation on `main`; G7 neural E2E still **OPEN**.
+
 ## Plan 110 validation (PR #71 merged to main)
 
 After Plan 110 (2026-05-28):

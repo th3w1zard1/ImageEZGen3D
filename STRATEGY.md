@@ -1,6 +1,6 @@
 ---
 name: ImageEZGen3D
-last_updated: 2026-05-23
+last_updated: 2026-05-28
 ---
 
 # ImageEZGen3D Strategy
@@ -34,9 +34,9 @@ _Why it serves the approach:_ Trust is the product until real reconstruction ada
 
 ### Hosted validation loop
 
-Deploy via HF CLI, verify on live Space, record evidence in the mode-validation matrix.
+Deploy via HF CLI, verify on live Space, record evidence in the mode-validation matrix. Scheduled smoke guard stack (Plans 078–106) and live attestation trilogy (Plans 107–110) are on `main` for CPU-fallback honesty; G7 neural E2E remains gated.
 
-_Why it serves the approach:_ Source and docs are worthless without executed hosted parity.
+_Why it serves the approach:_ Source and docs are worthless without executed hosted parity — and honesty checks must not be mistaken for Hunyuan enablement.
 
 ### Creator UI fidelity
 
