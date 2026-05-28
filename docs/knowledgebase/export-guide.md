@@ -33,6 +33,25 @@ Recommended staged outputs:
 
 Advanced glTF material extensions such as clearcoat, transmission, sheen, specular, anisotropy, iridescence, volume, and IOR should only be exposed when the backend can infer them with real signal. Do not pretend to support physically based materials if the output is only stylized color.
 
+## Export sidecar `pbr_delivery`
+
+Each run writes `export_sidecar.json` beside tier exports. Besides decimation and topology, the sidecar includes a **`pbr_delivery`** block aligned with glTF 2.0 metallic-roughness:
+
+| Field | Meaning |
+| --- | --- |
+| `workflow` | Always `metallic-roughness` today |
+| `pbr_available` | `true` only when separate map files were exported |
+| `material_model` | `metallic-roughness` |
+| `maps.base_color` | Path to base-color map, or `null` |
+| `maps.normal` | Path to normal map, or `null` |
+| `maps.metallic_roughness` | Path to combined metallic-roughness map, or `null` |
+| `maps.ao` | Path to ambient-occlusion map, or `null` |
+| `notes` | Human-readable delivery explanation |
+
+`[REPO]` cpu-demo and text-demo set `pbr_available: false` with factor-only GLB materials; map slots are reserved but `null`. The manifest `generation.pipeline_stages` entry for **`pbr`** is updated from this block after export validation — `succeeded` only when maps are present, otherwise `skipped` with an explicit note.
+
+Future paint-capable adapters should populate map paths and set `pbr_available: true` when files exist on disk.
+
 ## Mesh First, Splat Optional
 
 Recent research strongly favors hybrid workflows. Gaussian splats and radiance-style outputs are excellent for preview fidelity and scene viewing, but they are still weak as the primary editable creator asset.
