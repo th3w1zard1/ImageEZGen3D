@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 116 validation (PR #74 merged to main)
+
+After Plan 116 (2026-05-28):
+
+- **Merge:** squash `0ad5fc7` on `main` — PR #74 (Plan 115 Hunyuan configured env gate)
+- **On main:** `IMAGEEZ_HUNYUAN_CONFIGURED` seam; inference still unwired; G7 **OPEN**
+
 ## Plan 115 validation (Hunyuan configured env gate)
 
 After Plan 115 (2026-05-28):
