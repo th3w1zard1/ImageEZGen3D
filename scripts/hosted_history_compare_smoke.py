@@ -51,6 +51,11 @@ def _run_generate(client: Client, *, sample: Path, seed: int) -> str:
             "auto",
             "draft",
             seed,
+            "image",
+            "",
+            "draft",
+            False,
+            {},
             api_name="/generate",
         )
     finally:

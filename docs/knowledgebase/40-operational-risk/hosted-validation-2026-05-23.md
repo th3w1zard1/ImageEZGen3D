@@ -51,6 +51,25 @@ After Plan 118 (2026-05-28):
 - **Merge:** squash `3027343` on `main` — PR #75 (Plan 117 admission configured parity)
 - **On main:** audit/preflight honor `IMAGEEZ_HUNYUAN_CONFIGURED`; G7 **OPEN**
 
+## Plan 127 validation (Meshy-class stack A–I on main)
+
+After squash-merge PRs #76–#84 (2026-05-28):
+
+- **Merge tip:** `389c63a` on `main` — Phases A–I (platform, Hunyuan staged seam, PBR sidecar, text-neural, async jobs, HTTP API, UI chips, Gradio queue toggle, stack verify)
+- **Hub deploy:** `PYTHONPATH=src python scripts/hf_space_sync.py --execute` → commit `8335d62`
+- **Sync path (hosted CPU fallback):** Block sample via `hosted_golden_smoke.py`
+  - **Run id:** `20260528-195912-2352d9ac`
+  - **Adapter:** Local CPU Preview (`cpu-demo`)
+  - **Artifacts:** manifest ☑ GLB ☑ OBJ ☑ export_sidecar ☑
+  - **G7 false-neural guard:** ok (adapter disabled honesty preserved)
+- **Async queue path:** Gradio `/generate` with `queue_as_job=True`
+  - **Run id:** `20260528-200004-c888ef0c`
+  - **Job id:** `fdb708f3ecf645bfb9612011e44767ad`
+  - **`async_capable`:** true in manifest; **Async queue** chip in status
+  - **Artifacts:** manifest ☑ GLB ☑ OBJ ☑ export_sidecar ☑
+- **Smoke client parity:** `/generate` API now requires modality/lane/queue/state args (Phases A/H); fixed in `hosted_golden_smoke.py`, `hunyuan_g7_preflight.py`, `hosted_history_compare_smoke.py`
+- **G7–G9:** still **OPEN** — no `IMAGEEZ_HUNYUAN_CONFIGURED=true` on Space; not hosted ZeroGPU neural validation
+
 ## Plan 117 validation (Hunyuan configured admission parity)
 
 After Plan 117 (2026-05-28):

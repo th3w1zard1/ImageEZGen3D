@@ -1,6 +1,6 @@
 ---
 title: Ship Meshy-class stack PRs 76–83 (Plans A–H)
-status: active
+status: completed
 created: 2026-05-28
 origin: docs/plans/2026-05-28-119-feat-meshy-class-platform-foundation-plan.md
 ---

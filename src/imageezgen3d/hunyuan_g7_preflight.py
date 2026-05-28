@@ -138,6 +138,11 @@ def probe_hosted_hunyuan_not_enabled(
             _HUNYUAN_ADAPTER,
             "draft",
             42,
+            "image",
+            "",
+            "draft",
+            False,
+            {},
             api_name="/generate",
         )
     except Exception as exc:

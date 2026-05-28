@@ -239,6 +239,11 @@ def run_hosted_golden_smoke(
             adapter,
             quality,
             seed,
+            "image",
+            "",
+            "draft",
+            False,
+            {},
             api_name="/generate",
         )
     finally:
