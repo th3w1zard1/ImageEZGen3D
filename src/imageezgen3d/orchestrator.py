@@ -333,10 +333,14 @@ class ImageEZOrchestrator:
                 )
             )
 
-            stage_tracker.mark_shape_succeeded(
-                adapter_key,
-                notes=str(result.metadata.get("adapter_note", "")),
-            )
+            reported_stages = result.metadata.get("pipeline_stages")
+            if isinstance(reported_stages, list) and reported_stages:
+                stage_tracker.apply_stage_snapshot(reported_stages)
+            else:
+                stage_tracker.mark_shape_succeeded(
+                    adapter_key,
+                    notes=str(result.metadata.get("adapter_note", "")),
+                )
             for key, path in result.artifacts.items():
                 self.store.record_artifact(manifest, key, path)
             health = inspect_artifacts(result.artifacts)

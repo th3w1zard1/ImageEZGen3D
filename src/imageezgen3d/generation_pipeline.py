@@ -134,6 +134,27 @@ class PipelineStageTracker:
                 notes="Not executed in this release; reserved for staged adapters.",
             )
 
+    def mark_shape_succeeded_staged(self, adapter: str, *, notes: str = "") -> None:
+        """Mark shape complete without skipping texture (Hunyuan-style adapters)."""
+        self.set_stage("shape", "succeeded", adapter=adapter, notes=notes)
+
+    def mark_texture_running(self, adapter: str) -> None:
+        self.set_stage("texture", "running", adapter=adapter)
+
+    def mark_texture_succeeded(self, adapter: str, *, notes: str = "") -> None:
+        self.set_stage("texture", "succeeded", adapter=adapter, notes=notes)
+        self.set_stage(
+            "pbr",
+            "skipped",
+            notes="PBR map sidecar export deferred to Phase C.",
+        )
+
+    def mark_texture_failed(self, adapter: str, *, notes: str) -> None:
+        self.set_stage("texture", "failed", adapter=adapter, notes=notes)
+
+    def apply_stage_snapshot(self, stages: list[dict[str, Any]]) -> None:
+        self.stages = [dict(stage) for stage in stages]
+
     def mark_shape_failed(self, adapter: str, *, notes: str) -> None:
         self.set_stage("shape", "failed", adapter=adapter, notes=notes)
 

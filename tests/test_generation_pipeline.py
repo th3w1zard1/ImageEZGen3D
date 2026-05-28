@@ -34,7 +34,31 @@ class GenerationPipelineTests(unittest.TestCase):
                 prompt_text="",
             )
 
-    def test_pipeline_stages_mark_shape_and_skip_texture(self) -> None:
+    def test_staged_shape_texture_progression(self) -> None:
+        tracker = PipelineStageTracker()
+        tracker.mark_shape_running("hunyuan-zerogpu")
+        tracker.mark_shape_succeeded_staged("hunyuan-zerogpu")
+        tracker.mark_texture_running("hunyuan-zerogpu")
+        tracker.mark_texture_succeeded("hunyuan-zerogpu")
+        tracker.mark_export_succeeded()
+        stages = {item["name"]: item["status"] for item in tracker.to_list()}
+        self.assertEqual(stages["shape"], "succeeded")
+        self.assertEqual(stages["texture"], "succeeded")
+        self.assertEqual(stages["pbr"], "skipped")
+        self.assertEqual(stages["export"], "succeeded")
+
+    def test_apply_stage_snapshot_replaces_tracker_state(self) -> None:
+        tracker = PipelineStageTracker()
+        snapshot = [
+            {"name": "shape", "status": "succeeded", "adapter": "hunyuan-zerogpu", "notes": ""},
+            {"name": "texture", "status": "succeeded", "adapter": "hunyuan-zerogpu", "notes": ""},
+            {"name": "pbr", "status": "skipped", "adapter": None, "notes": "deferred"},
+            {"name": "export", "status": "pending", "adapter": None, "notes": ""},
+        ]
+        tracker.apply_stage_snapshot(snapshot)
+        self.assertEqual(tracker.stages[1]["status"], "succeeded")
+
+    def test_single_stage_adapter_skips_texture(self) -> None:
         tracker = PipelineStageTracker()
         tracker.mark_shape_running("text-demo")
         tracker.mark_shape_succeeded("text-demo", notes="ok")

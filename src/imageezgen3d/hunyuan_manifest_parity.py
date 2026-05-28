@@ -53,6 +53,24 @@ def validate_hunyuan_manifest_parity(payload: Mapping[str, Any]) -> list[str]:
     if parameters.get("preview_disclaimer"):
         issues.append("Hunyuan sample manifest must not record preview_disclaimer")
 
+    generation = parameters.get("generation")
+    if not isinstance(generation, dict):
+        issues.append("Manifest parameters missing generation object")
+    else:
+        stages = generation.get("pipeline_stages")
+        if not isinstance(stages, list) or len(stages) < 4:
+            issues.append("Manifest generation.pipeline_stages must list four stages")
+        else:
+            by_name = {
+                str(item.get("name")): str(item.get("status"))
+                for item in stages
+                if isinstance(item, dict)
+            }
+            if by_name.get("shape") != "succeeded":
+                issues.append("Hunyuan sample expects shape stage succeeded")
+            if by_name.get("texture") != "succeeded":
+                issues.append("Hunyuan sample expects texture stage succeeded")
+
     runtime = parameters.get("runtime")
     if runtime is not None and not isinstance(runtime, dict):
         issues.append("Manifest parameters.runtime must be an object")
