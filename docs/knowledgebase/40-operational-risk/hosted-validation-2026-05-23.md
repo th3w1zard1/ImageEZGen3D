@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 092 validation (PR #62 merged to main)
+
+After Plan 092 (2026-05-28):
+
+- **Merge:** squash `bc869c8` on `main` — PR #62 (Plan 091 export-tier record verifier)
+- **Verify CLI:** `verify_hosted_export_tier_smoke_record.py` exits 0 on valid draft+balanced `checks[]`
+- **G7 gate:** still **OPEN** for real Hunyuan path
+
 ## Plan 091 validation (export tier smoke record verify)
 
 After Plan 091 (2026-05-28):
