@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 102 validation (PR #67 merged to main)
+
+After Plan 102 (2026-05-28):
+
+- **Merge:** squash `6dc3730` on `main` — PR #67 (Plan 101 hosted smoke guard stack closure)
+- **On main:** [hosted-smoke-guard-stack-2026-05-28.md](../../solutions/best-practices/hosted-smoke-guard-stack-2026-05-28.md) indexes Plans 078–100 verify chain
+- **G7 gate:** still **OPEN** for real neural path
+
 ## Plan 101 validation (hosted smoke guard stack closure)
 
 After Plan 101 (2026-05-28):
