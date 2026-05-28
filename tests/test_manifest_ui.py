@@ -20,6 +20,20 @@ class ManifestUiTests(unittest.TestCase):
         self.assertIn("Text prompt", html)
         self.assertIn("Production lane", html)
 
+    def test_generation_summary_chips_show_async_job_metadata(self) -> None:
+        html = mu.generation_summary_chips_html(
+            {
+                "job_id": "abc1234567890deadbeefcafebabe",
+                "generation": {
+                    "input_modality": "text",
+                    "lane": "draft",
+                    "async_capable": True,
+                },
+            }
+        )
+        self.assertIn("Job abc12345", html)
+        self.assertIn("Async queue", html)
+
     def test_backend_label_for_text_demo(self) -> None:
         self.assertEqual(mu.backend_display_label("text-demo"), "Text-to-3D Stub")
 

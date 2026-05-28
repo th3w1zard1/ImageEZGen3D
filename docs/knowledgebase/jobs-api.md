@@ -74,6 +74,14 @@ PYTHONPATH=src python scripts/jobs_api_server.py --host 127.0.0.1 --port 8765
 
 Poll responses include `poll_url` when served over HTTP. Implementation: `src/imageezgen3d/jobs/http_api.py`.
 
+**Poll CLI:**
+
+```bash
+PYTHONPATH=src python scripts/poll_job.py --job-id <id> --wait --result --json
+```
+
+Job metadata (`job_id`, async queue chip) appears in Gradio run status cards when a run completes via the job queue.
+
 ## Scope boundaries
 
 - Stdlib `ThreadingHTTPServer` only — not deployed on Hugging Face Space by default.
