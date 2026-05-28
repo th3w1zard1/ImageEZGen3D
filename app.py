@@ -194,6 +194,30 @@ _PROMPT_TEMPLATES = (
     },
 )
 _PROMPT_TEMPLATE_BY_KEY = {item["key"]: item for item in _PROMPT_TEMPLATES}
+_TEXT_PROMPT_TEMPLATES = (
+    {
+        "key": "text-prop",
+        "title": "Simple prop",
+        "prompt": "A small wooden treasure chest with metal hinges and a rounded lid.",
+        "lane": "draft",
+    },
+    {
+        "key": "text-character",
+        "title": "Character bust",
+        "prompt": "Stylized fantasy character bust with braided hair and a calm expression.",
+        "lane": "production",
+    },
+    {
+        "key": "text-product",
+        "title": "Product bottle",
+        "prompt": "Sleek cosmetic bottle with a matte ceramic body and a narrow neck.",
+        "lane": "production",
+    },
+)
+_LANE_GUIDANCE = {
+    "draft": "Fast preview lane for first-pass geometry and workflow validation.",
+    "production": "Higher-fidelity lane with more decimation budget when adapters support it.",
+}
 
 
 def _example_path(spec: dict[str, Any]) -> Path:
@@ -800,6 +824,25 @@ def build_demo():
                                         placeholder="Subject, must-keep details, and target export quality.",
                                         elem_classes="brief-field composer-brief",
                                     )
+                                    input_modality = gr.Radio(
+                                        label="Input type",
+                                        choices=["image", "text"],
+                                        value="image",
+                                        elem_classes="composer-control input-modality",
+                                    )
+                                    text_prompt = gr.Textbox(
+                                        label="Text-to-3D prompt",
+                                        lines=3,
+                                        placeholder="Describe the object to generate in 3D (stub path until neural text adapters ship).",
+                                        elem_classes="composer-control text-prompt-field",
+                                    )
+                                    generation_lane = gr.Radio(
+                                        label="Generation lane",
+                                        choices=["draft", "production"],
+                                        value="draft",
+                                        info="Draft is fastest; production maps to a higher export tier.",
+                                        elem_classes="composer-control generation-lane",
+                                    )
                                     primary = gr.Image(
                                         label="Primary image",
                                         type="pil",
@@ -943,6 +986,36 @@ def build_demo():
                                             )
                                             template_buttons.append(
                                                 (template_button, str(template["key"]))
+                                            )
+                            with gr.Row(
+                                equal_height=False,
+                                elem_classes="text-prompt-template-row",
+                            ):
+                                for template in _TEXT_PROMPT_TEMPLATES:
+                                    with gr.Column(scale=1, min_width=210):
+                                        with gr.Group(
+                                            elem_classes="template-card text-template-card"
+                                        ):
+                                            gr.Markdown(
+                                                f"**{escape(template['title'])}**\n\n"
+                                                f"{escape(str(template['prompt'])[:120])}…"
+                                            )
+                                            text_template_button = gr.Button(
+                                                f"Use {template['title']}",
+                                                variant="secondary",
+                                                elem_classes="text-template-apply",
+                                            )
+                                            text_template_button.click(
+                                                lambda p=template["prompt"], lane=template["lane"]: (
+                                                    "text",
+                                                    p,
+                                                    lane,
+                                                ),
+                                                outputs=[
+                                                    input_modality,
+                                                    text_prompt,
+                                                    generation_lane,
+                                                ],
                                             )
 
                     with gr.Column(scale=4, min_width=340, elem_classes="rail-column"):
@@ -1377,6 +1450,9 @@ def build_demo():
             adapter_name,
             quality_name,
             seed_value,
+            input_modality_name,
+            text_prompt_value,
+            generation_lane_name,
             state,
         ):
             state = dict(state or {})
@@ -1398,6 +1474,9 @@ def build_demo():
                     starter_flow=starter_flow,
                     starter_flow_label=_starter_spec(starter_flow)["label"],
                     reference_brief=reference_brief_file,
+                    input_modality=input_modality_name,
+                    prompt_text=text_prompt_value,
+                    lane=generation_lane_name,
                 )
             except ValueError as exc:
                 (
@@ -1550,6 +1629,9 @@ def build_demo():
                 adapter,
                 quality,
                 seed,
+                input_modality,
+                text_prompt,
+                generation_lane,
                 session_state,
             ],
             outputs=[

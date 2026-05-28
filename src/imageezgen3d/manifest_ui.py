@@ -15,8 +15,14 @@ QUALITY_GUIDANCE: dict[str, str] = {
 
 _BACKEND_LABELS: dict[str, str] = {
     "cpu-demo": "Local CPU Preview",
+    "text-demo": "Text-to-3D Stub",
     "hunyuan-zerogpu": "Hosted ZeroGPU",
     "auto": "Auto",
+}
+
+_LANE_GUIDANCE: dict[str, str] = {
+    "draft": "Fast preview lane — concept geometry and capture validation.",
+    "production": "Higher-fidelity lane — more detail and decimation budget when supported.",
 }
 
 
@@ -41,6 +47,34 @@ def quality_tier_label(quality_name: str | None) -> str:
     if quality_name in QUALITY_GUIDANCE:
         return quality_name.title()
     return "Draft"
+
+
+def lane_label(lane_name: str | None) -> str:
+    normalized = (lane_name or "draft").strip().lower()
+    if normalized in _LANE_GUIDANCE:
+        return normalized.title()
+    return "Draft"
+
+
+def modality_label(modality: str | None) -> str:
+    if (modality or "").strip().lower() == "text":
+        return "Text prompt"
+    return "Image"
+
+
+def generation_summary_chips_html(parameters: Mapping[str, Any]) -> str:
+    generation = parameters.get("generation")
+    if not isinstance(generation, dict):
+        lane = parameters.get("lane")
+        modality = parameters.get("input_modality")
+    else:
+        lane = generation.get("lane", parameters.get("lane"))
+        modality = generation.get("input_modality", parameters.get("input_modality"))
+    chips = [
+        f'<span class="run-status-chip">{escape(modality_label(str(modality)))}</span>',
+        f'<span class="run-status-chip">{escape(lane_label(str(lane)))} lane</span>',
+    ]
+    return f'<div class="run-status-chips">{"".join(chips)}</div>'
 
 
 def is_preview_fallback(parameters: Mapping[str, Any]) -> bool:

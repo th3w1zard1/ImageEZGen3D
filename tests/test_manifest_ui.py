@@ -8,6 +8,21 @@ from imageezgen3d.orchestrator import PREVIEW_FALLBACK_DISCLAIMER
 
 
 class ManifestUiTests(unittest.TestCase):
+    def test_generation_summary_chips_show_modality_and_lane(self) -> None:
+        html = mu.generation_summary_chips_html(
+            {
+                "generation": {
+                    "input_modality": "text",
+                    "lane": "production",
+                }
+            }
+        )
+        self.assertIn("Text prompt", html)
+        self.assertIn("Production lane", html)
+
+    def test_backend_label_for_text_demo(self) -> None:
+        self.assertEqual(mu.backend_display_label("text-demo"), "Text-to-3D Stub")
+
     def test_backend_rail_chips_show_adapter_and_fallback(self) -> None:
         html = mu.backend_rail_chips_html(
             adapter_key="cpu-demo",
