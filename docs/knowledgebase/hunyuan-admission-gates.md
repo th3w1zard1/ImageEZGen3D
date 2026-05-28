@@ -28,7 +28,7 @@ PYTHONPATH=src python scripts/hunyuan_admission_audit.py
 PYTHONPATH=src python scripts/hunyuan_admission_audit.py --json
 ```
 
-**Last audit:** 2026-05-27 — Plan 077; adapter `configured=False`; **G1–G6 PASS**; G7/G8/G9 **OPEN**; CI and smoke use `hunyuan_preflight_bundle.py`.
+**Last audit:** 2026-05-27 — PR #57 on `main` (Plans 074–077); adapter `configured=False`; **G1–G6 PASS**; G7/G8/G9 **OPEN**; CI and smoke use `hunyuan_preflight_bundle.py`.
 
 ## Completed prerequisites
 

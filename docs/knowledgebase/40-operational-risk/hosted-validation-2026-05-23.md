@@ -44,6 +44,64 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 085 validation (close PR 58, ship via PR 59)
+
+After Plan 085 (2026-05-28):
+
+- **PR #58** closed as superseded by **PR #59** (stacked branch includes Plans 078–084)
+- **CLI test:** `hosted_golden_smoke.py --json` emits `g7_false_neural_guard_ok`
+
+## Plan 084 validation (stack PR 59 on PR 58)
+
+After Plan 084 (2026-05-28):
+
+- **`feat/080-g7-golden-smoke-guard`** rebased onto `feat/078-ship-pr57-kb-closure` — unified hosted-validation (Plans 078–082)
+- Merge **PR #59** only after closing or superseding **PR #58** (same commits now stacked)
+
+## Plan 083 validation (PR #58 rebase readiness)
+
+After Plan 083 (2026-05-28):
+
+- **`feat/078-ship-pr57-kb-closure`** rebased cleanly on `origin/main` (Plans 078–079 only)
+- **`tests.test_workflows`** pass on rebased branch
+
+## Plan 082 validation (G7 guard field in smoke JSON)
+
+After Plan 082 (2026-05-28):
+
+- **`hosted-golden-smoke.json`:** includes `g7_false_neural_guard_ok` for scheduled artifact review
+- **Hosted golden smoke:** run `20260528-002617-1204154d` (cpu-demo; `g7_false_neural_guard_ok=True`)
+
+## Plan 081 validation (G7 guard institutional learning)
+
+After Plan 081 (2026-05-28):
+
+- **Solutions:** [g7-false-neural-golden-smoke-guard-2026-05-28.md](../../solutions/best-practices/g7-false-neural-golden-smoke-guard-2026-05-28.md)
+- **AGENTS.md** points agents to the learning before changing smoke/G7 validators
+- **Hosted golden smoke:** run `20260528-001645-8268f2b3` (cpu-demo / Local CPU Preview)
+
+## Plan 080 validation (G7 false-neural golden smoke guard)
+
+After Plan 080 (2026-05-28):
+
+- **`validate_g7_not_false_neural_claim`** in `hosted_golden_smoke.py` — fails smoke when status looks like G7 neural success while adapter disabled
+- **Hosted golden smoke:** run `20260528-001022-151788f4` (cpu-demo / Local CPU Preview)
+
+## Plan 079 validation (CI vs smoke bundle flags)
+
+After Plan 079 (2026-05-27):
+
+- **`test_workflows`:** `ci.yml` bundle without `--json`; hosted-golden-smoke with `--json`
+- **Hosted golden smoke:** run `20260528-000007-f209b6bc` (cpu-demo / Local CPU Preview)
+
+## Plan 078 validation (PR #57 ship closure)
+
+After PR #57 merge to `main` (2026-05-27, commit `5a7483b`):
+
+- **Shipped:** Plans 074–077 — `hunyuan_preflight_bundle.py` in `ci.yml` and `hosted-golden-smoke.yml`, lint fixes, bundle-first docs, CI bundle subprocess test
+- **Current workflow contract:** one bundle step (+ separate G7 preflight); verify runs inside the bundle
+- **Hosted golden smoke:** run `20260527-235413-d8839ca1` (cpu-demo / Local CPU Preview; post-merge `main`)
+
 ## Plan 077 validation (bundle-first admission docs)
 
 After Plan 077 on branch `feat/075-ci-workflows-use-preflight-bundle` (2026-05-27):
@@ -79,15 +137,15 @@ After Plan 074 on `main` (2026-05-27):
 After Plan 073 on `main` (2026-05-27):
 
 - **Solutions:** [hunyuan-ci-artifact-parity-2026-05-27.md](../../solutions/best-practices/hunyuan-ci-artifact-parity-2026-05-27.md)
-- **G9 runbook:** preflight includes `verify_hunyuan_ci_artifact_parity.py`
-- **Tests:** `test_hunyuan_ci_scripts` invokes verify CLI after `--record`
+- **G9 runbook:** preflight includes parity verify (via bundle since PR #57)
+- **Tests:** `test_hunyuan_ci_scripts` covers legacy three-step and bundle subprocess paths
 
 ## Plan 072 validation (CI artifact verify script)
 
 After Plan 072 on `main` (2026-05-27):
 
-- **Verify script:** `scripts/verify_hunyuan_ci_artifact_parity.py` in `ci.yml` and scheduled `hosted-golden-smoke`
-- **Fails CI** when uploaded `hunyuan-admission-audit.json` and `hunyuan-enablement-preflight.json` disagree on G7/G8
+- **Verify script:** `scripts/verify_hunyuan_ci_artifact_parity.py` (invoked by `hunyuan_preflight_bundle.py` in CI since PR #57)
+- **Fails CI** when `hunyuan-admission-audit.json` and `hunyuan-enablement-preflight.json` disagree on G7/G8
 
 ## Plan 071 validation (G8 gates helper + CI scripts contract)
 

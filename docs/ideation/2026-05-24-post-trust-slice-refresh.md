@@ -13,7 +13,7 @@ Trust slice (Plans 012–022) is landed on `main`: fallback honesty, Phase 1 UX,
 
 ## Guardrail track (complete)
 
-Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and Hunyuan admission audit (CLI + CI + scheduled workflow) are landed on `main` through PR #28 (Plan 045 docs closure). No further guardrail slices are queued unless product adds a new runtime or UX driver.
+Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and Hunyuan admission audit (CLI + CI + scheduled workflow) are landed on `main` through PR #28 (Plan 045 docs closure). **Preflight bundle in CI** landed via PR #57 (Plans 074–077, 2026-05-27): `ci.yml` and `hosted-golden-smoke` use `hunyuan_preflight_bundle.py` instead of three separate JSON/verify steps. No further guardrail slices are queued unless product adds a new runtime or UX driver.
 
 ## Recommended next slices (ranked)
 
@@ -47,6 +47,7 @@ Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and H
 - **Hunyuan G5 resource fit** — Plan 053 / PR #35; VRAM/disk budget + `hunyuan_g1_legal_verify.py` (adapter still disabled).
 - **Plan 053 ship** — PR #35 merged on `main` (Plan 054).
 - **Hunyuan G4 ZeroGPU wiring** — Plan 051; GPU scaffold (adapter still disabled).
+- **Hunyuan preflight bundle CI** — PR #57 merged (Plans 074–077); `hunyuan_preflight_bundle.py` in `ci.yml` and scheduled smoke.
 
 ## Explicitly defer
 

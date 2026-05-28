@@ -1,6 +1,6 @@
 ---
 title: CI workflows use Hunyuan preflight bundle (Plan 075)
-status: active
+status: completed
 created: 2026-05-27
 ---
 

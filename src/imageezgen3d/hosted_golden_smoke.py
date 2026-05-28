@@ -32,6 +32,7 @@ class HostedGoldenSmokeResult:
     adapter_hint: str | None
     quality: str
     issues: tuple[str, ...]
+    g7_false_neural_guard_ok: bool
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -41,6 +42,7 @@ class HostedGoldenSmokeResult:
             "adapter_hint": self.adapter_hint,
             "quality": self.quality,
             "issues": list(self.issues),
+            "g7_false_neural_guard_ok": self.g7_false_neural_guard_ok,
         }
 
 
@@ -77,6 +79,19 @@ def validate_hosted_generate_status(
     if "manifest" not in status_markdown.lower() and "glb" not in status_markdown.lower():
         issues.append("Status markdown missing manifest or GLB artifact hint")
     return (not issues, issues, run_id)
+
+
+def validate_g7_not_false_neural_claim(status_markdown: str) -> list[str]:
+    """Fail when disabled Space status would satisfy G7 neural closure validators."""
+    from .hunyuan_g7_preflight import validate_g7_hosted_generate_status
+
+    g7_ok, _, _ = validate_g7_hosted_generate_status(status_markdown)
+    if g7_ok:
+        return [
+            "Hosted status matches G7 neural success criteria while Hunyuan "
+            "adapter should remain disabled"
+        ]
+    return []
 
 
 def validate_backend_rail_html(html: str) -> list[str]:
@@ -204,6 +219,7 @@ def run_hosted_golden_smoke(
             adapter_hint=None,
             quality=quality,
             issues=(f"Golden sample image not found: {sample}",),
+            g7_false_neural_guard_ok=False,
         )
 
     client = Client(space_url)
@@ -231,6 +247,9 @@ def run_hosted_golden_smoke(
     status = str(result[1] if isinstance(result, (list, tuple)) else result)
     ok, issues, run_id = validate_hosted_generate_status(status, quality=quality)
     issues.extend(validate_g8_cpu_fallback_status(status))
+    g7_guard_issues = validate_g7_not_false_neural_claim(status)
+    issues.extend(g7_guard_issues)
+    g7_false_neural_guard_ok = not g7_guard_issues
 
     if isinstance(result, (list, tuple)) and len(result) > _GENERATE_BACKEND_RAIL_INDEX:
         rail_value = result[_GENERATE_BACKEND_RAIL_INDEX]
@@ -277,6 +296,7 @@ def run_hosted_golden_smoke(
         adapter_hint=adapter_hint,
         quality=quality,
         issues=tuple(issues),
+        g7_false_neural_guard_ok=g7_false_neural_guard_ok,
     )
 
 
@@ -287,6 +307,7 @@ def format_hosted_golden_report(result: HostedGoldenSmokeResult) -> str:
         f"space_url={result.space_url}",
         f"adapter_hint={result.adapter_hint or ''}",
         f"quality={result.quality}",
+        f"g7_false_neural_guard_ok={result.g7_false_neural_guard_ok}",
     ]
     for issue in result.issues:
         lines.append(f"issue={issue}")

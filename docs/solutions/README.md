@@ -45,7 +45,8 @@ When a solution and KB doc overlap, prefer KB for procedure and solutions for th
 | [tooling-decisions/gradio-port-env-precedence-2026-05-23.md](tooling-decisions/gradio-port-env-precedence-2026-05-23.md) | Knowledge | PORT / GRADIO_SERVER_PORT chain |
 | [tooling-decisions/hf-space-demo-port-binding-2026-05-24.md](tooling-decisions/hf-space-demo-port-binding-2026-05-24.md) | Knowledge | Module-level demo + Space port 7860 |
 | [architecture-patterns/trust-slice-completion-2026-05-24.md](architecture-patterns/trust-slice-completion-2026-05-24.md) | Knowledge | Trust slice landed — golden CI vs hosted E2E |
-| [best-practices/hunyuan-ci-artifact-parity-2026-05-27.md](best-practices/hunyuan-ci-artifact-parity-2026-05-27.md) | Knowledge | Hunyuan audit vs preflight JSON must match |
+| [best-practices/hunyuan-ci-artifact-parity-2026-05-27.md](best-practices/hunyuan-ci-artifact-parity-2026-05-27.md) | Knowledge | Hunyuan audit vs preflight JSON parity; use `hunyuan_preflight_bundle.py` in CI |
+| [best-practices/g7-false-neural-golden-smoke-guard-2026-05-28.md](best-practices/g7-false-neural-golden-smoke-guard-2026-05-28.md) | Knowledge | Golden smoke fails false G7 neural status while adapter disabled |
 
 ## Related
 
