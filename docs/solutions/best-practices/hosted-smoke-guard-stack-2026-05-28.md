@@ -49,8 +49,13 @@ PYTHONPATH=src python scripts/verify_hunyuan_g7_live_probe_record.py hunyuan-g7-
 
 Passing this stack does **not** set `G7_STATUS: PASS` in hosted-validation — that requires a real neural Hunyuan run after enablement per [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md).
 
+## Live attestation (Plans 107–110)
+
+After guard-stack landings, re-run smokes on the live Space and record run ids in hosted-validation. See [hosted-live-attestation-2026-05-28.md](hosted-live-attestation-2026-05-28.md).
+
 ## Related learnings
 
+- [hosted-live-attestation-2026-05-28.md](hosted-live-attestation-2026-05-28.md)
 - [hosted-golden-smoke-record-verify-2026-05-28.md](hosted-golden-smoke-record-verify-2026-05-28.md)
 - [hosted-export-tier-smoke-record-verify-2026-05-28.md](hosted-export-tier-smoke-record-verify-2026-05-28.md)
 - [g7-false-neural-golden-smoke-guard-2026-05-28.md](g7-false-neural-golden-smoke-guard-2026-05-28.md)

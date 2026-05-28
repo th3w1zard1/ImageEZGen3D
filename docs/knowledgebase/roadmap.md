@@ -37,9 +37,9 @@ Goal:
 
 Near-term priorities:
 
-- verify ZeroGPU behavior on a real target Space;
+- **G7 hosted E2E** — real Hunyuan neural path on live Space (top priority; gate still OPEN);
+- scheduled smoke guard stack + live attestation (Plans 078–110) landed 2026-05-28 — CPU-fallback honesty only;
 - keep CPU-safe work outside GPU-decorated sections;
-- make hosted runtime limits and fallback reasons visible;
 - prevent source-versus-runtime drift across config, requirements, docs, and deployed behavior.
 
 ### Track 3: Adapter Admission
