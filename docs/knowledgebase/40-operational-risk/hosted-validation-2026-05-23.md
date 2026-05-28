@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 114 validation (PR #73 merged to main)
+
+After Plan 114 (2026-05-28):
+
+- **Merge:** squash `2c425d1` on `main` — PR #73 (Plan 113 G7 readiness handoff)
+- **On main:** G7 entry doc + admission sync; G7 neural E2E still **OPEN**
+
 ## Plan 113 validation (G7 enablement readiness handoff)
 
 After Plan 113 (2026-05-28):
