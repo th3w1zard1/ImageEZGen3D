@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .models import JobPollResponse, JobRequest, JobStatus
+from .models import JobRequest
 from .service import JobService
 
 

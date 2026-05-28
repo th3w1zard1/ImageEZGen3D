@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-"""Submit batch generation jobs from JSONL and poll until complete."""
-
 import argparse
 import json
 import sys
