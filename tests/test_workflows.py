@@ -34,6 +34,7 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("hosted_golden_smoke.py", source)
         self.assertIn("--json", source)
         self.assertIn("hosted-golden-smoke.json", source)
+        self.assertIn("verify_hosted_golden_smoke_record.py", source)
 
 
 if __name__ == "__main__":

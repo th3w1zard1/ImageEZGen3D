@@ -1,6 +1,6 @@
 ---
 title: Centralized admission audit JSON payload (Plan 070)
-status: active
+status: completed
 created: 2026-05-27
 ---
 

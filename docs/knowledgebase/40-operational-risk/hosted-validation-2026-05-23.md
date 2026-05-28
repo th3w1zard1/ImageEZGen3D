@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 087 validation (hosted golden smoke record verify)
+
+After Plan 087 (2026-05-28):
+
+- **`verify_hosted_golden_smoke_record.py`:** fails scheduled smoke when `hosted-golden-smoke.json` lacks `g7_false_neural_guard_ok` or has wrong types
+- **Plans 070–073** frontmatter marked `completed` (KB validation already on `main`)
+
 ## Plan 086 validation (PR #59 merged to main)
 
 After Plan 086 (2026-05-28):

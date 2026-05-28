@@ -1,6 +1,6 @@
 ---
 title: Hunyuan CI artifact parity institutional learning (Plan 073)
-status: active
+status: completed
 created: 2026-05-27
 ---
 
