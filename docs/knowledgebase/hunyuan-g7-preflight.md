@@ -21,7 +21,8 @@ G1–G6 are closed in-repo. The adapter is still **`configured=False`**. This do
 PYTHONPATH=src python scripts/hunyuan_g7_preflight.py
 
 # Optional live probe (network): must NOT report false G7 success while disabled
-PYTHONPATH=src python scripts/hunyuan_g7_preflight.py --live-probe
+PYTHONPATH=src python scripts/hunyuan_g7_preflight.py --live-probe --json --record hunyuan-g7-live-probe.json
+PYTHONPATH=src python scripts/verify_hunyuan_g7_live_probe_record.py hunyuan-g7-live-probe.json
 ```
 
 ## Closing G7 (enablement PR)

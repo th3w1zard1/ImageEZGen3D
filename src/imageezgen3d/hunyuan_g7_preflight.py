@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -168,6 +169,46 @@ def probe_hosted_hunyuan_not_enabled(
         space_url=space_url,
         probe_note="Hosted probe did not report false G7 success (adapter still disabled)",
     )
+
+
+def validate_hunyuan_g7_live_probe_record(
+    data: Any,
+    *,
+    require_hosted_probe: bool = True,
+) -> list[str]:
+    issues: list[str] = []
+    if not isinstance(data, dict):
+        return ["payload must be a JSON object"]
+    for key in ("ok", "issues", "readiness"):
+        if key not in data:
+            issues.append(f"missing key: {key}")
+    if "ok" in data and not isinstance(data["ok"], bool):
+        issues.append("ok must be boolean")
+    if "issues" in data:
+        if not isinstance(data["issues"], list):
+            issues.append("issues must be a list")
+        elif not all(isinstance(item, str) for item in data["issues"]):
+            issues.append("issues must contain only strings")
+    readiness = data.get("readiness")
+    if readiness is not None:
+        if not isinstance(readiness, dict):
+            issues.append("readiness must be an object")
+        elif "ready" in readiness and not isinstance(readiness["ready"], bool):
+            issues.append("readiness.ready must be boolean")
+    if require_hosted_probe and "hosted_probe" not in data:
+        issues.append("missing key: hosted_probe (expected from --live-probe)")
+    hosted_probe = data.get("hosted_probe")
+    if hosted_probe is not None:
+        if not isinstance(hosted_probe, dict):
+            issues.append("hosted_probe must be an object")
+        elif "ok" in hosted_probe and not isinstance(hosted_probe["ok"], bool):
+            issues.append("hosted_probe.ok must be boolean")
+    return issues
+
+
+def verify_hunyuan_g7_live_probe_record_file(path: Path) -> list[str]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return validate_hunyuan_g7_live_probe_record(payload)
 
 
 def format_g7_readiness_report(result: G7ReadinessResult) -> str:

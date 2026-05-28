@@ -50,6 +50,7 @@ Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and H
 - **Hunyuan preflight bundle CI** — PR #57 merged (Plans 074–077); `hunyuan_preflight_bundle.py` in `ci.yml` and scheduled smoke.
 - **G7 false-neural golden smoke guard** — PR #59 merged (Plans 078–086); `g7_false_neural_guard_ok` + `validate_g7_not_false_neural_claim`.
 - **Smoke JSON artifact verify** — PR #60–#62 merged (Plans 087–092); `verify_hosted_golden_smoke_record.py` and `verify_hosted_export_tier_smoke_record.py` in scheduled workflow.
+- **G7 scheduled live probe** — PR #64 merged (Plans 095–096); `--live-probe` + `hunyuan-g7-live-probe.json` artifact on scheduled smoke.
 
 ## Explicitly defer
 

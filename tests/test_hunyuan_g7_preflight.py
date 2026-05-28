@@ -9,10 +9,13 @@ from unittest.mock import patch
 
 from imageezgen3d.hunyuan_admission import GateResult
 from imageezgen3d.hunyuan_g7_preflight import (
+    G7HostedProbeResult,
     G7ReadinessResult,
     evaluate_g7_readiness,
     probe_hosted_hunyuan_not_enabled,
     validate_g7_hosted_generate_status,
+    validate_hunyuan_g7_live_probe_record,
+    verify_hunyuan_g7_live_probe_record_file,
 )
 
 
@@ -166,6 +169,48 @@ class HunyuanG7PreflightTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertTrue(payload["ok"])
         self.assertIn("hosted_probe", payload)
+
+    def test_validate_hunyuan_g7_live_probe_record_accepts_live_probe_payload(
+        self,
+    ) -> None:
+        payload = {
+            "ok": True,
+            "issues": [],
+            "readiness": G7ReadinessResult(
+                ready=True,
+                issues=(),
+                gates=_gates_g1_g6_pass_g7_open(),
+            ).to_dict(),
+            "hosted_probe": G7HostedProbeResult(
+                ok=True,
+                issues=(),
+                space_url="https://example.hf.space/",
+                probe_note="ok",
+            ).to_dict(),
+        }
+        self.assertEqual(validate_hunyuan_g7_live_probe_record(payload), [])
+
+    def test_validate_hunyuan_g7_live_probe_record_requires_hosted_probe(self) -> None:
+        payload = {"ok": True, "issues": [], "readiness": {"ready": True, "issues": []}}
+        issues = validate_hunyuan_g7_live_probe_record(payload)
+        self.assertTrue(any("hosted_probe" in issue for issue in issues))
+
+    def test_verify_hunyuan_g7_live_probe_record_file_round_trip(self) -> None:
+        payload = {
+            "ok": True,
+            "issues": [],
+            "readiness": {"ready": True, "issues": [], "gates": []},
+            "hosted_probe": {
+                "ok": True,
+                "issues": [],
+                "space_url": "https://example.hf.space/",
+                "probe_note": "ok",
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "hunyuan-g7-live-probe.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertEqual(verify_hunyuan_g7_live_probe_record_file(path), [])
 
 
 if __name__ == "__main__":
