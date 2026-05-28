@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 083 validation (PR #58 rebase readiness)
+
+After Plan 083 (2026-05-28):
+
+- **`feat/078-ship-pr57-kb-closure`** rebased cleanly on `origin/main` (Plans 078–079 only)
+- **`tests.test_workflows`** pass on rebased branch
+
 ## Plan 079 validation (CI vs smoke bundle flags)
 
 After Plan 079 (2026-05-27):
