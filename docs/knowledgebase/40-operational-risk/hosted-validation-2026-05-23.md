@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 104 validation (PR #68 merged to main)
+
+After Plan 104 (2026-05-28):
+
+- **Merge:** squash `e84fdb5` on `main` — PR #68 (Plan 103 admission + parity sync)
+- **On main:** admission gates through Plan 102; parity **P14** hosted smoke guard stack
+- **G7 gate:** still **OPEN** for real neural path
+
 ## Plan 103 validation (admission + parity sync)
 
 After Plan 103 (2026-05-28):
