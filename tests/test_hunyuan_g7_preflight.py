@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import importlib.util
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -117,6 +119,53 @@ class HunyuanG7PreflightTests(unittest.TestCase):
                 )
 
         self.assertTrue(result.ok, result.issues)
+
+    @patch(
+        "imageezgen3d.hunyuan_g7_preflight.probe_hosted_hunyuan_not_enabled",
+    )
+    @patch("imageezgen3d.hunyuan_g7_preflight.evaluate_g7_readiness")
+    def test_g7_preflight_cli_record_writes_json(
+        self,
+        evaluate_mock: object,
+        probe_mock: object,
+    ) -> None:
+        from imageezgen3d.hunyuan_g7_preflight import G7HostedProbeResult
+
+        evaluate_mock.return_value = G7ReadinessResult(
+            ready=True,
+            issues=(),
+            gates=_gates_g1_g6_pass_g7_open(),
+        )
+        probe_mock.return_value = G7HostedProbeResult(
+            ok=True,
+            issues=(),
+            space_url="https://test.hf.space/",
+            probe_note="ok",
+        )
+        repo_root = Path(__file__).resolve().parents[1]
+        script_path = repo_root / "scripts" / "hunyuan_g7_preflight.py"
+        spec = importlib.util.spec_from_file_location("hunyuan_g7_preflight_cli", script_path)
+        assert spec is not None and spec.loader is not None
+        cli_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cli_module)
+
+        with tempfile.TemporaryDirectory() as directory:
+            record_path = Path(directory) / "hunyuan-g7-live-probe.json"
+            exit_code = cli_module.main(
+                [
+                    "--live-probe",
+                    "--json",
+                    "--record",
+                    str(record_path),
+                    "--space-url",
+                    "https://test.hf.space/",
+                ],
+            )
+            payload = json.loads(record_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(payload["ok"])
+        self.assertIn("hosted_probe", payload)
 
 
 if __name__ == "__main__":

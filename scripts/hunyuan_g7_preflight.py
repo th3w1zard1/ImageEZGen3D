@@ -26,6 +26,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--space-url", default=None)
     parser.add_argument("--sample", type=Path, default=None)
+    parser.add_argument(
+        "--record",
+        type=Path,
+        default=None,
+        help="Write JSON payload to this path",
+    )
     args = parser.parse_args(argv)
 
     readiness = evaluate_g7_readiness()
@@ -46,6 +52,13 @@ def main(argv: list[str] | None = None) -> int:
     ok = not issues
     payload["ok"] = ok
     payload["issues"] = issues
+
+    if args.record is not None:
+        args.record.parent.mkdir(parents=True, exist_ok=True)
+        args.record.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
 
     if args.as_json:
         print(json.dumps(payload, indent=2, sort_keys=True))

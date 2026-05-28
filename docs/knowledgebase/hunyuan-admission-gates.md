@@ -28,7 +28,7 @@ PYTHONPATH=src python scripts/hunyuan_admission_audit.py
 PYTHONPATH=src python scripts/hunyuan_admission_audit.py --json
 ```
 
-**Last audit:** 2026-05-28 — `main` through Plan 090 (PR #61); adapter `configured=False`; **G1–G6 PASS**; G7/G8/G9 **OPEN**; CI and scheduled smoke use `hunyuan_preflight_bundle.py` plus `verify_hosted_golden_smoke_record.py` on golden smoke JSON.
+**Last audit:** 2026-05-28 — `main` through Plan 094; adapter `configured=False`; **G1–G6 PASS**; G7/G8/G9 **OPEN**; scheduled smoke verifies golden + export-tier JSON and runs G7 `--live-probe` while disabled (Plan 095).
 
 ## Completed prerequisites
 
