@@ -1,6 +1,6 @@
 ---
 title: G8 gates helper and CI scripts subprocess contract (Plan 071)
-status: active
+status: completed
 created: 2026-05-27
 ---
 

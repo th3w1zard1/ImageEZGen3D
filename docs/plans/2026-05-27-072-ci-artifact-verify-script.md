@@ -1,6 +1,6 @@
 ---
 title: CI artifact parity verify script (Plan 072)
-status: active
+status: completed
 created: 2026-05-27
 ---
 

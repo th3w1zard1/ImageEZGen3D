@@ -318,6 +318,57 @@ def hosted_golden_json(result: HostedGoldenSmokeResult) -> str:
     return json.dumps(result.to_dict(), indent=2, sort_keys=True) + "\n"
 
 
+_REQUIRED_HOSTED_GOLDEN_SMOKE_KEYS = frozenset(
+    {
+        "ok",
+        "run_id",
+        "space_url",
+        "adapter_hint",
+        "quality",
+        "issues",
+        "g7_false_neural_guard_ok",
+    }
+)
+
+
+def validate_hosted_golden_smoke_record(data: Any) -> list[str]:
+    issues: list[str] = []
+    if not isinstance(data, dict):
+        return ["payload must be a JSON object"]
+    missing = sorted(_REQUIRED_HOSTED_GOLDEN_SMOKE_KEYS - data.keys())
+    for key in missing:
+        issues.append(f"missing key: {key}")
+    if "ok" in data and not isinstance(data["ok"], bool):
+        issues.append("ok must be boolean")
+    if "run_id" in data and data["run_id"] is not None and not isinstance(
+        data["run_id"], str,
+    ):
+        issues.append("run_id must be a string or null")
+    if "space_url" in data and not isinstance(data["space_url"], str):
+        issues.append("space_url must be a string")
+    if "adapter_hint" in data and data["adapter_hint"] is not None and not isinstance(
+        data["adapter_hint"], str,
+    ):
+        issues.append("adapter_hint must be a string or null")
+    if "quality" in data and not isinstance(data["quality"], str):
+        issues.append("quality must be a string")
+    if "issues" in data:
+        if not isinstance(data["issues"], list):
+            issues.append("issues must be a list")
+        elif not all(isinstance(item, str) for item in data["issues"]):
+            issues.append("issues must contain only strings")
+    if "g7_false_neural_guard_ok" in data and not isinstance(
+        data["g7_false_neural_guard_ok"], bool,
+    ):
+        issues.append("g7_false_neural_guard_ok must be boolean")
+    return issues
+
+
+def verify_hosted_golden_smoke_record_file(path: Path) -> list[str]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return validate_hosted_golden_smoke_record(payload)
+
+
 def write_hosted_golden_record(path: Path, result: HostedGoldenSmokeResult) -> Path:
     destination = path.resolve()
     destination.parent.mkdir(parents=True, exist_ok=True)

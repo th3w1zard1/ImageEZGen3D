@@ -16,6 +16,8 @@ from imageezgen3d.hosted_golden_smoke import (
     validate_backend_rail_html,
     validate_g7_not_false_neural_claim,
     validate_hosted_generate_status,
+    validate_hosted_golden_smoke_record,
+    verify_hosted_golden_smoke_record_file,
     write_hosted_golden_record,
 )
 from imageezgen3d.manifest_ui import backend_rail_chips_html
@@ -79,6 +81,47 @@ class HostedGoldenSmokeTests(unittest.TestCase):
         issues = validate_g7_not_false_neural_claim(neural_status)
         self.assertEqual(len(issues), 1)
         self.assertIn("G7 neural", issues[0])
+
+    def test_validate_hosted_golden_smoke_record_accepts_result_dict(self) -> None:
+        result = HostedGoldenSmokeResult(
+            ok=True,
+            run_id="20260524-000000-00000000",
+            space_url="https://example.hf.space/",
+            adapter_hint="cpu-demo",
+            quality="draft",
+            issues=(),
+            g7_false_neural_guard_ok=True,
+        )
+        self.assertEqual(validate_hosted_golden_smoke_record(result.to_dict()), [])
+
+    def test_validate_hosted_golden_smoke_record_rejects_missing_g7_field(
+        self,
+    ) -> None:
+        payload = {
+            "ok": True,
+            "run_id": None,
+            "space_url": "https://example.hf.space/",
+            "adapter_hint": None,
+            "quality": "draft",
+            "issues": [],
+        }
+        issues = validate_hosted_golden_smoke_record(payload)
+        self.assertTrue(any("g7_false_neural_guard_ok" in issue for issue in issues))
+
+    def test_verify_hosted_golden_smoke_record_file_round_trip(self) -> None:
+        result = HostedGoldenSmokeResult(
+            ok=True,
+            run_id="20260524-000000-00000000",
+            space_url="https://example.hf.space/",
+            adapter_hint="cpu-demo",
+            quality="draft",
+            issues=(),
+            g7_false_neural_guard_ok=True,
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "hosted-golden-smoke.json"
+            write_hosted_golden_record(path, result)
+            self.assertEqual(verify_hosted_golden_smoke_record_file(path), [])
 
     def test_write_hosted_golden_record_persists_json(self) -> None:
         result = HostedGoldenSmokeResult(

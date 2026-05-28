@@ -44,6 +44,9 @@ jobs:
             --space-url "$IMAGEEZ_HF_SPACE_URL" \
             --json --record hosted-golden-smoke.json
 
+      - name: Verify hosted golden smoke record
+        run: PYTHONPATH=src python scripts/verify_hosted_golden_smoke_record.py hosted-golden-smoke.json
+
       - name: Run hosted export tier smoke
         env:
           IMAGEEZ_HF_SPACE_URL: ${{ github.event.inputs.space_url || 'https://th3w1zard1-imageezgen3d.hf.space/' }}
