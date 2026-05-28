@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 100 validation (PR #66 merged to main)
+
+After Plan 100 (2026-05-28):
+
+- **Merge:** squash `b34dec8` on `main` — PR #66 (Plan 099 G7 live-probe verify learning)
+- **On main:** subprocess verify test + enablement runbook lists all smoke JSON verify CLIs
+- **G7 gate:** still **OPEN** for real neural path
+
 ## Plan 099 validation (G7 live probe verify learning)
 
 After Plan 099 (2026-05-28):
