@@ -59,8 +59,23 @@ PYTHONPATH=src python scripts/batch_generate.py --input batch.jsonl --json
 
 Use `--no-wait` to submit and receive poll handles immediately.
 
+## HTTP API (stdlib server)
+
+```bash
+PYTHONPATH=src python scripts/jobs_api_server.py --host 127.0.0.1 --port 8765
+```
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/health` | Liveness probe |
+| `POST` | `/v1/jobs` | Submit job (JSON body = job request); returns `202` + poll payload |
+| `GET` | `/v1/jobs/{job_id}` | Poll status |
+| `GET` | `/v1/jobs/{job_id}/result` | Completed manifest (`409` if not ready) |
+
+Poll responses include `poll_url` when served over HTTP. Implementation: `src/imageezgen3d/jobs/http_api.py`.
+
 ## Scope boundaries
 
-- No public HTTP server in this slice (poll functions are ready for a future FastAPI/Gradio mount).
+- Stdlib `ThreadingHTTPServer` only — not deployed on Hugging Face Space by default.
 - Webhooks use best-effort POST; failures are recorded on the job record (`webhook_delivered`, `webhook_error`).
 - In-process `ThreadPoolExecutor` only — not distributed queue infrastructure.
