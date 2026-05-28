@@ -84,6 +84,9 @@ require_spaces_runtime = true
 
 [tool.imageezgen3d.hunyuan]
 configured = false
+model_repo = "tencent/Hunyuan3D-2.1"
+model_revision = "0b94677654c57bb9a6b6845cd7b704ccf551d327"
+cache_dir = ""
 
 [tool.imageezgen3d.text_neural]
 configured = false

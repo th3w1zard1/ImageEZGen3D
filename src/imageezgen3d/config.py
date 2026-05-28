@@ -200,6 +200,9 @@ class HunyuanSettings:
     """Admission-controlled enablement flag. Default off; inference may still be unwired."""
 
     configured: bool = False
+    model_repo: str = "tencent/Hunyuan3D-2.1"
+    model_revision: str = "0b94677654c57bb9a6b6845cd7b704ccf551d327"
+    cache_dir: str = ""
 
 
 @dataclass(frozen=True)
@@ -429,6 +432,22 @@ def load_config(path: str | Path | None = None) -> AppConfig:
                 _bool_value(
                     hunyuan_raw, "configured", HunyuanSettings.configured
                 ),
+            ),
+            model_repo=_env_str(
+                "IMAGEEZ_HUNYUAN_MODEL_REPO",
+                str(hunyuan_raw.get("model_repo", HunyuanSettings.model_repo)),
+            ),
+            model_revision=_env_str(
+                "IMAGEEZ_HUNYUAN_MODEL_REVISION",
+                str(
+                    hunyuan_raw.get(
+                        "model_revision", HunyuanSettings.model_revision
+                    )
+                ),
+            ),
+            cache_dir=_env_str(
+                "IMAGEEZ_HUNYUAN_CACHE_DIR",
+                str(hunyuan_raw.get("cache_dir", HunyuanSettings.cache_dir)),
             ),
         ),
         text_neural=TextNeuralSettings(
