@@ -8,18 +8,13 @@ from .adapters.base import GenerationRequest, GenerationResult
 from .export_tiers import build_export_sidecar
 from .exporters import SimpleMesh, export_all, mesh_topology
 from .generation_pipeline import PipelineStageTracker
-from .mesh_decimation import decimate_mesh, subdivide_mesh
+from .mesh_decimation import decimate_mesh
 
 HUNYUAN_ADAPTER = "hunyuan-zerogpu"
 _NOT_IMPLEMENTED_MESSAGE = (
     "Hunyuan GPU inference is not wired yet. Complete weight cache, tier-C "
     "dependencies, and hosted E2E (G7) before enablement."
 )
-_SUBDIVIDE_LEVELS_BY_QUALITY: dict[str, int] = {
-    "draft": 0,
-    "balanced": 7,
-    "high": 8,
-}
 
 
 @dataclass(frozen=True)
