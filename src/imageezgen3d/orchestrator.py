@@ -8,7 +8,7 @@ from typing import Any
 
 from PIL import Image
 
-from .adapters import CpuDemoAdapter, HunyuanPlaceholderAdapter, TextDemoAdapter
+from .adapters import CpuDemoAdapter, HunyuanPlaceholderAdapter, TextDemoAdapter, TextNeuralPlaceholderAdapter
 from .adapters.base import GenerationRequest, ModelAdapter
 from .config import AppConfig
 from .export_tiers import apply_pbr_stage_from_sidecar
@@ -26,6 +26,10 @@ from .storage import RunStore
 PREVIEW_FALLBACK_DISCLAIMER = (
     "Preview mesh only — this run uses the CPU demo adapter and does not perform "
     "neural 3D reconstruction."
+)
+
+TEXT_NEURAL_FALLBACK_REASON = (
+    "Neural text-to-3D adapter is not enabled; using text-demo stub."
 )
 
 
@@ -48,6 +52,9 @@ class ImageEZOrchestrator:
         self.adapters: dict[str, ModelAdapter] = {
             "cpu-demo": CpuDemoAdapter(),
             "text-demo": TextDemoAdapter(),
+            "text-neural": TextNeuralPlaceholderAdapter(
+                configured=config.text_neural.configured
+            ),
             "hunyuan-zerogpu": HunyuanPlaceholderAdapter(
                 configured=config.hunyuan.configured
             ),
@@ -164,17 +171,34 @@ class ImageEZOrchestrator:
         self, adapter_name: str | None, *, input_modality: str = "image"
     ) -> tuple[str, ModelAdapter, str | None]:
         if input_modality == "text":
-            text_adapter = self.adapters.get("text-demo")
-            if text_adapter is None or not text_adapter.capabilities.configured:
+            requested = (adapter_name or "auto").strip().lower()
+            neural = self.adapters.get("text-neural")
+            stub = self.adapters.get("text-demo")
+            if stub is None or not stub.capabilities.configured:
                 raise ValueError(
                     "Text-to-3D is not available. The text-demo adapter is not configured."
                 )
-            if adapter_name not in (None, "", "auto", "text-demo"):
+
+            if requested == "text-neural":
+                if neural is None or not neural.capabilities.configured:
+                    raise ValueError(
+                        "Adapter 'text-neural' is not enabled yet. "
+                        f"Choose one of: {', '.join(self.adapter_choices())}"
+                    )
+                return "text-neural", neural, None
+
+            if requested == "text-demo":
+                return "text-demo", stub, None
+
+            if requested not in ("auto", "", "none"):
                 raise ValueError(
                     f"Adapter '{adapter_name}' does not support text-to-3D. "
-                    "Use auto or text-demo."
+                    "Use auto, text-demo, or text-neural."
                 )
-            return "text-demo", text_adapter, None
+
+            if neural is not None and neural.capabilities.configured:
+                return "text-neural", neural, None
+            return "text-demo", stub, TEXT_NEURAL_FALLBACK_REASON
 
         resolution = self.resolve_adapter(adapter_name)
         if resolution.selected is None:
@@ -253,6 +277,8 @@ class ImageEZOrchestrator:
             manifest.parameters["preview_disclaimer"] = PREVIEW_FALLBACK_DISCLAIMER
         if adapter_key == "text-demo":
             manifest.parameters["preview_disclaimer"] = TEXT_STUB_DISCLAIMER
+            if fallback_reason:
+                manifest.parameters["fallback_reason"] = fallback_reason
         self.store.save_manifest(run_dir, manifest)
 
         try:

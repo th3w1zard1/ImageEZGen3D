@@ -203,6 +203,13 @@ class HunyuanSettings:
 
 
 @dataclass(frozen=True)
+class TextNeuralSettings:
+    """Admission-controlled text-to-3D neural enablement. Default off."""
+
+    configured: bool = False
+
+
+@dataclass(frozen=True)
 class ExportSettings:
     default_format: str = "glb"
     formats: tuple[str, ...] = ("glb", "obj", "ply", "stl")
@@ -218,6 +225,7 @@ class AppConfig:
     runtime: RuntimeSettings = field(default_factory=RuntimeSettings)
     zerogpu: ZeroGPUSettings = field(default_factory=ZeroGPUSettings)
     hunyuan: HunyuanSettings = field(default_factory=HunyuanSettings)
+    text_neural: TextNeuralSettings = field(default_factory=TextNeuralSettings)
     exports: ExportSettings = field(default_factory=ExportSettings)
 
 
@@ -254,6 +262,7 @@ def load_config(path: str | Path | None = None) -> AppConfig:
     runtime_raw = _section(raw, "runtime")
     zerogpu_raw = _section(raw, "zerogpu")
     hunyuan_raw = _section(raw, "hunyuan")
+    text_neural_raw = _section(raw, "text_neural")
     exports_raw = _section(raw, "exports")
 
     formats = _str_tuple_value(exports_raw, "formats", ExportSettings.formats)
@@ -419,6 +428,16 @@ def load_config(path: str | Path | None = None) -> AppConfig:
                 "IMAGEEZ_HUNYUAN_CONFIGURED",
                 _bool_value(
                     hunyuan_raw, "configured", HunyuanSettings.configured
+                ),
+            ),
+        ),
+        text_neural=TextNeuralSettings(
+            configured=_env_bool(
+                "IMAGEEZ_TEXT_NEURAL_CONFIGURED",
+                _bool_value(
+                    text_neural_raw,
+                    "configured",
+                    TextNeuralSettings.configured,
                 ),
             ),
         ),

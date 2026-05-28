@@ -4,6 +4,7 @@ from .base import AdapterCapabilities, GenerationRequest, GenerationResult, Mode
 from .cpu_demo import CpuDemoAdapter
 from .hunyuan import HunyuanPlaceholderAdapter
 from .text_demo import TextDemoAdapter
+from .text_neural import TextNeuralPlaceholderAdapter
 
 __all__ = [
     "AdapterCapabilities",
@@ -13,4 +14,5 @@ __all__ = [
     "CpuDemoAdapter",
     "HunyuanPlaceholderAdapter",
     "TextDemoAdapter",
+    "TextNeuralPlaceholderAdapter",
 ]

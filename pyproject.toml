@@ -85,6 +85,9 @@ require_spaces_runtime = true
 [tool.imageezgen3d.hunyuan]
 configured = false
 
+[tool.imageezgen3d.text_neural]
+configured = false
+
 [tool.imageezgen3d.exports]
 default_format = "glb"
 formats = ["glb", "obj", "ply", "stl"]
