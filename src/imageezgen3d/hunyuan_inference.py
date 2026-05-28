@@ -7,6 +7,7 @@ from typing import Any, Protocol
 from .adapters.base import GenerationRequest, GenerationResult
 from .export_tiers import build_export_sidecar
 from .exporters import SimpleMesh, export_all, mesh_topology
+from .config import load_config
 from .generation_pipeline import PipelineStageTracker
 from .mesh_decimation import decimate_mesh
 
@@ -77,27 +78,43 @@ def finalize_hunyuan_exports(
     return paths, metadata
 
 
+def resolve_default_hunyuan_backend(
+    backend: HunyuanInferenceBackend | None,
+) -> HunyuanInferenceBackend | None:
+    if backend is not None:
+        return backend
+    from .hunyuan_backend import resolve_hunyuan_dev_backend
+
+    config = load_config()
+    return resolve_hunyuan_dev_backend(dev_enabled=config.hunyuan.dev_backend)
+
+
 def run_hunyuan_shape_texture(
     request: GenerationRequest,
     *,
     backend: HunyuanInferenceBackend | None = None,
 ) -> HunyuanInferenceResult:
     """Shape then texture towers for Hunyuan3D (two-stage neural path)."""
+    from .hunyuan_backend import DevPreviewHunyuanBackend, adapter_note_for_backend
+
     tracker = PipelineStageTracker()
     tracker.mark_shape_running(HUNYUAN_ADAPTER)
-    if backend is not None:
-        mesh_result = backend.run_shape_texture(request, tracker=tracker)
+    resolved_backend = resolve_default_hunyuan_backend(backend)
+    if resolved_backend is not None:
+        mesh_result = resolved_backend.run_shape_texture(request, tracker=tracker)
         artifacts, export_metadata = finalize_hunyuan_exports(
             mesh_result.mesh,
             request,
             raw_mesh=mesh_result.raw_mesh,
         )
+        adapter_note = adapter_note_for_backend(resolved_backend)
         metadata = {
             **export_metadata,
-            "adapter_note": (
-                "Hunyuan shape+texture inference (mock backend in tests only)."
-            ),
+            "adapter_note": adapter_note,
         }
+        if isinstance(resolved_backend, DevPreviewHunyuanBackend):
+            metadata["dev_preview"] = True
+            metadata["preview_disclaimer"] = adapter_note
         return HunyuanInferenceResult(
             artifacts=artifacts,
             metadata=metadata,

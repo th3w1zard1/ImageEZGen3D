@@ -203,6 +203,7 @@ class HunyuanSettings:
     model_repo: str = "tencent/Hunyuan3D-2.1"
     model_revision: str = "0b94677654c57bb9a6b6845cd7b704ccf551d327"
     cache_dir: str = ""
+    dev_backend: bool = False
 
 
 @dataclass(frozen=True)
@@ -448,6 +449,12 @@ def load_config(path: str | Path | None = None) -> AppConfig:
             cache_dir=_env_str(
                 "IMAGEEZ_HUNYUAN_CACHE_DIR",
                 str(hunyuan_raw.get("cache_dir", HunyuanSettings.cache_dir)),
+            ),
+            dev_backend=_env_bool(
+                "IMAGEEZ_HUNYUAN_DEV_BACKEND",
+                _bool_value(
+                    hunyuan_raw, "dev_backend", HunyuanSettings.dev_backend
+                ),
             ),
         ),
         text_neural=TextNeuralSettings(
