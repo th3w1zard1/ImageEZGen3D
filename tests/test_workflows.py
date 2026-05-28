@@ -27,6 +27,14 @@ class WorkflowContractTests(unittest.TestCase):
         )
         self.assertIn("hunyuan_g7_preflight.py", source)
 
+    def test_hosted_golden_smoke_workflow_records_json_artifact(self) -> None:
+        source = Path(".github/workflows/hosted-golden-smoke.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("hosted_golden_smoke.py", source)
+        self.assertIn("--json", source)
+        self.assertIn("hosted-golden-smoke.json", source)
+
 
 if __name__ == "__main__":
     unittest.main()
