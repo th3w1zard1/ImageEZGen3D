@@ -44,6 +44,18 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 107 validation (live hosted golden smoke attestation)
+
+After Plan 107 (2026-05-28):
+
+- **Mode:** hosted CPU fallback (`Local CPU Preview` / cpu-demo path)
+- **Run id:** `20260528-024123-5bf694b9`
+- **Sample:** Block (`assets/examples/teal_block.png`)
+- **Space:** https://th3w1zard1-imageezgen3d.hf.space/
+- **Smoke:** `hosted_golden_smoke.py` exit 0; `verify_hosted_golden_smoke_record.py` exit 0
+- **`g7_false_neural_guard_ok`:** true (no false G7 neural claim while adapter disabled)
+- **G7 gate:** still **OPEN** for real Hunyuan neural path — this attestation is fallback honesty only
+
 ## Plan 106 validation (PR #69 merged to main)
 
 After Plan 106 (2026-05-28):
