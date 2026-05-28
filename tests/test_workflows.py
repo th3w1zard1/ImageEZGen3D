@@ -36,6 +36,14 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("hosted-golden-smoke.json", source)
         self.assertIn("verify_hosted_golden_smoke_record.py", source)
 
+    def test_hosted_golden_smoke_workflow_verifies_export_tier_record(self) -> None:
+        source = Path(".github/workflows/hosted-golden-smoke.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("hosted_export_tier_smoke.py", source)
+        self.assertIn("hosted-export-tier-smoke.json", source)
+        self.assertIn("verify_hosted_export_tier_smoke_record.py", source)
+
 
 if __name__ == "__main__":
     unittest.main()

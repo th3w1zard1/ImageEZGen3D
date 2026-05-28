@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 
 from imageezgen3d.hosted_golden_smoke import (
+    HostedGoldenSmokeResult,
+    validate_hosted_export_tier_smoke_record,
     validate_hosted_generate_status,
     validate_run_manifest,
 )
@@ -28,6 +30,56 @@ def _status_for_quality(quality: str, run_id: str = "20260524-000000-00000000") 
 
 
 class HostedExportTierSmokeTests(unittest.TestCase):
+    def test_validate_export_tier_smoke_record_accepts_two_checks(self) -> None:
+        draft = HostedGoldenSmokeResult(
+            ok=True,
+            run_id="20260524-000000-00000001",
+            space_url="https://example.hf.space/",
+            adapter_hint="cpu-demo",
+            quality="draft",
+            issues=(),
+            g7_false_neural_guard_ok=True,
+        )
+        balanced = HostedGoldenSmokeResult(
+            ok=True,
+            run_id="20260524-000000-00000002",
+            space_url="https://example.hf.space/",
+            adapter_hint="cpu-demo",
+            quality="balanced",
+            issues=(),
+            g7_false_neural_guard_ok=True,
+        )
+        payload = {"checks": [draft.to_dict(), balanced.to_dict()]}
+        self.assertEqual(validate_hosted_export_tier_smoke_record(payload), [])
+
+    def test_validate_export_tier_smoke_record_rejects_missing_g7_field(
+        self,
+    ) -> None:
+        payload = {
+            "checks": [
+                {
+                    "ok": True,
+                    "run_id": None,
+                    "space_url": "https://example.hf.space/",
+                    "adapter_hint": None,
+                    "quality": "draft",
+                    "issues": [],
+                },
+                {
+                    "ok": True,
+                    "run_id": None,
+                    "space_url": "https://example.hf.space/",
+                    "adapter_hint": None,
+                    "quality": "balanced",
+                    "issues": [],
+                },
+            ]
+        }
+        issues = validate_hosted_export_tier_smoke_record(payload)
+        self.assertTrue(
+            any("g7_false_neural_guard_ok" in issue for issue in issues),
+        )
+
     def test_validate_status_accepts_balanced_budget(self) -> None:
         ok, issues, _ = validate_hosted_generate_status(
             _status_for_quality("balanced"),

@@ -1,6 +1,6 @@
 ---
 title: G8 preflight and audit artifact visibility (Plan 067)
-status: active
+status: completed
 created: 2026-05-27
 ---
 

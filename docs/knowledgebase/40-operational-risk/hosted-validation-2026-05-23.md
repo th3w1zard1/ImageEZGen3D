@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 091 validation (export tier smoke record verify)
+
+After Plan 091 (2026-05-28):
+
+- **`verify_hosted_export_tier_smoke_record.py`:** validates `checks[]` (draft + balanced) including `g7_false_neural_guard_ok` per entry
+- **Plans 066–069** frontmatter marked `completed`
+
 ## Plan 090 validation (PR #61 merged to main)
 
 After Plan 090 (2026-05-28):
