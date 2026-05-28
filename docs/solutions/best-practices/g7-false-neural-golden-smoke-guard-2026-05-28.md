@@ -28,6 +28,8 @@ While `HunyuanPlaceholderAdapter` remains disabled, hosted generation should use
 
 `run_hosted_golden_smoke` calls both. The G7 helper **lazy-imports** `validate_g7_hosted_generate_status` to avoid a circular import with `hunyuan_g7_preflight` (which imports smoke constants).
 
+Scheduled smoke JSON (`hosted-golden-smoke.json`) includes **`g7_false_neural_guard_ok`** so artifact review does not require parsing `issues` strings.
+
 ## When changing validators
 
 - If you tighten G7 neural criteria, ensure golden smoke fixtures in `tests/test_hosted_golden_smoke.py` still use cpu-demo-shaped status for the happy path.

@@ -51,6 +51,13 @@ After Plan 083 (2026-05-28):
 - **`feat/078-ship-pr57-kb-closure`** rebased cleanly on `origin/main` (Plans 078–079 only)
 - **`tests.test_workflows`** pass on rebased branch
 
+## Plan 082 validation (G7 guard field in smoke JSON)
+
+After Plan 082 (2026-05-28):
+
+- **`hosted-golden-smoke.json`:** includes `g7_false_neural_guard_ok` for scheduled artifact review
+- **Hosted golden smoke:** run `20260528-002617-1204154d` (cpu-demo; `g7_false_neural_guard_ok=True`)
+
 ## Plan 081 validation (G7 guard institutional learning)
 
 After Plan 081 (2026-05-28):

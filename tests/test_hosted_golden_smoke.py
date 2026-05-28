@@ -85,6 +85,7 @@ class HostedGoldenSmokeTests(unittest.TestCase):
             adapter_hint="cpu-demo",
             quality="draft",
             issues=(),
+            g7_false_neural_guard_ok=True,
         )
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "hosted-golden.json"
@@ -115,6 +116,7 @@ class HostedGoldenSmokeTests(unittest.TestCase):
         self.assertTrue(result.ok, result.issues)
         self.assertEqual(result.run_id, "20260524-184255-f0ce0436")
         self.assertEqual(result.adapter_hint, "Local CPU Preview")
+        self.assertTrue(result.g7_false_neural_guard_ok)
 
     @patch("gradio_client.Client")
     def test_run_hosted_golden_smoke_rejects_false_g7_neural_status(
@@ -142,6 +144,7 @@ class HostedGoldenSmokeTests(unittest.TestCase):
             )
 
         self.assertFalse(result.ok)
+        self.assertFalse(result.g7_false_neural_guard_ok)
         self.assertTrue(
             any("G7 neural" in issue for issue in result.issues),
             result.issues,
