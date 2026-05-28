@@ -50,6 +50,7 @@ When a solution and KB doc overlap, prefer KB for procedure and solutions for th
 | [best-practices/hosted-golden-smoke-record-verify-2026-05-28.md](best-practices/hosted-golden-smoke-record-verify-2026-05-28.md) | Knowledge | CI verifies `hosted-golden-smoke.json` schema including `g7_false_neural_guard_ok` |
 | [best-practices/hosted-export-tier-smoke-record-verify-2026-05-28.md](best-practices/hosted-export-tier-smoke-record-verify-2026-05-28.md) | Knowledge | CI verifies `hosted-export-tier-smoke.json` draft+balanced checks |
 | [best-practices/hunyuan-g7-live-probe-scheduled-smoke-2026-05-28.md](best-practices/hunyuan-g7-live-probe-scheduled-smoke-2026-05-28.md) | Knowledge | Scheduled G7 live probe rejects false neural success while adapter disabled |
+| [best-practices/hosted-smoke-guard-stack-2026-05-28.md](best-practices/hosted-smoke-guard-stack-2026-05-28.md) | Knowledge | Index: golden + export-tier + bundle + G7 live-probe scheduled smoke guards |
 
 ## Related
 
