@@ -28,7 +28,7 @@ PYTHONPATH=src python scripts/hunyuan_admission_audit.py
 PYTHONPATH=src python scripts/hunyuan_admission_audit.py --json
 ```
 
-**Last audit:** 2026-05-28 — `main` through Plan 102; adapter `configured=False`; **G1–G6 PASS**; G7/G8/G9 **OPEN**; scheduled smoke runs the full guard stack (golden + export-tier JSON verify, bundle verify, G7 `--live-probe` + record verify) while disabled — see [hosted-smoke-guard-stack-2026-05-28.md](../solutions/best-practices/hosted-smoke-guard-stack-2026-05-28.md) (Plans 078–102).
+**Last audit:** 2026-05-28 — `main` through Plan 112; adapter `configured=False`; **G1–G6 PASS**; G7/G8/G9 **OPEN**; scheduled smoke runs the full guard stack while disabled — see [hosted-smoke-guard-stack-2026-05-28.md](../solutions/best-practices/hosted-smoke-guard-stack-2026-05-28.md) (Plans 078–106) and live attestation index [hosted-live-attestation-2026-05-28.md](../solutions/best-practices/hosted-live-attestation-2026-05-28.md) (Plans 107–111). G7 entry point: [g7-enablement-readiness-2026-05-28.md](../solutions/best-practices/g7-enablement-readiness-2026-05-28.md).
 
 ## Completed prerequisites
 

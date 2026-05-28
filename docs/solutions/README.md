@@ -52,6 +52,7 @@ When a solution and KB doc overlap, prefer KB for procedure and solutions for th
 | [best-practices/hunyuan-g7-live-probe-scheduled-smoke-2026-05-28.md](best-practices/hunyuan-g7-live-probe-scheduled-smoke-2026-05-28.md) | Knowledge | Scheduled G7 live probe rejects false neural success while adapter disabled |
 | [best-practices/hosted-smoke-guard-stack-2026-05-28.md](best-practices/hosted-smoke-guard-stack-2026-05-28.md) | Knowledge | Index: golden + export-tier + bundle + G7 live-probe scheduled smoke guards |
 | [best-practices/hosted-live-attestation-2026-05-28.md](best-practices/hosted-live-attestation-2026-05-28.md) | Knowledge | Live Space attestation run ids and mode labels (Plans 107–110) |
+| [best-practices/g7-enablement-readiness-2026-05-28.md](best-practices/g7-enablement-readiness-2026-05-28.md) | Knowledge | Post-attestation G7 handoff — prerequisites vs OPEN gates |
 
 ## Related
 
