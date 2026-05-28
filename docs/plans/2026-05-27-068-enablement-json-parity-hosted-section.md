@@ -1,6 +1,6 @@
 ---
 title: Enablement JSON parity and hosted validation helper (Plan 068)
-status: active
+status: completed
 created: 2026-05-27
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: Hosted doc paths and CI artifact parity (Plan 069)
-status: active
+status: completed
 created: 2026-05-27
 ---
 

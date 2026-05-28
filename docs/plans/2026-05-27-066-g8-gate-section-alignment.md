@@ -1,6 +1,6 @@
 ---
 title: G8 admission gate section alignment (Plan 066)
-status: active
+status: completed
 created: 2026-05-27
 ---
 

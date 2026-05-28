@@ -55,6 +55,11 @@ jobs:
             --space-url "$IMAGEEZ_HF_SPACE_URL" \
             --record hosted-export-tier-smoke.json
 
+      - name: Verify hosted export tier smoke record
+        run: >-
+          PYTHONPATH=src python scripts/verify_hosted_export_tier_smoke_record.py
+          hosted-export-tier-smoke.json
+
       - name: Hunyuan preflight bundle (audit + enablement + parity)
         run: python scripts/hunyuan_preflight_bundle.py --json
 

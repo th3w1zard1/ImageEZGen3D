@@ -369,6 +369,39 @@ def verify_hosted_golden_smoke_record_file(path: Path) -> list[str]:
     return validate_hosted_golden_smoke_record(payload)
 
 
+_EXPORT_TIER_QUALITIES = frozenset({"draft", "balanced"})
+
+
+def validate_hosted_export_tier_smoke_record(data: Any) -> list[str]:
+    issues: list[str] = []
+    if not isinstance(data, dict):
+        return ["payload must be a JSON object"]
+    if "checks" not in data:
+        issues.append("missing key: checks")
+        return issues
+    checks = data["checks"]
+    if not isinstance(checks, list):
+        issues.append("checks must be a list")
+        return issues
+    if len(checks) != 2:
+        issues.append(f"checks must have 2 entries, got {len(checks)}")
+    seen_qualities: set[str] = set()
+    for index, entry in enumerate(checks):
+        for issue in validate_hosted_golden_smoke_record(entry):
+            issues.append(f"checks[{index}]: {issue}")
+        if isinstance(entry, dict) and isinstance(entry.get("quality"), str):
+            seen_qualities.add(entry["quality"])
+    missing_qualities = sorted(_EXPORT_TIER_QUALITIES - seen_qualities)
+    if missing_qualities:
+        issues.append(f"checks missing qualities: {missing_qualities}")
+    return issues
+
+
+def verify_hosted_export_tier_smoke_record_file(path: Path) -> list[str]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return validate_hosted_export_tier_smoke_record(payload)
+
+
 def write_hosted_golden_record(path: Path, result: HostedGoldenSmokeResult) -> Path:
     destination = path.resolve()
     destination.parent.mkdir(parents=True, exist_ok=True)
