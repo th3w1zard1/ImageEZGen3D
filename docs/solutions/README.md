@@ -54,6 +54,7 @@ When a solution and KB doc overlap, prefer KB for procedure and solutions for th
 | [best-practices/hosted-live-attestation-2026-05-28.md](best-practices/hosted-live-attestation-2026-05-28.md) | Knowledge | Live Space attestation run ids and mode labels (Plans 107–110) |
 | [best-practices/g7-enablement-readiness-2026-05-28.md](best-practices/g7-enablement-readiness-2026-05-28.md) | Knowledge | Post-attestation G7 handoff — prerequisites vs OPEN gates |
 | [best-practices/meshy-class-automation-stack-2026-05-28.md](best-practices/meshy-class-automation-stack-2026-05-28.md) | Knowledge | Jobs stack E–H: queue, HTTP API, Gradio toggle, verify script |
+| [best-practices/hunyuan-pre-g7-stack-2026-05-28.md](best-practices/hunyuan-pre-g7-stack-2026-05-28.md) | Knowledge | Hunyuan pre-G7 slices J–M: export parity, weights, dev backend, runtime probe |
 
 ## Related
 
