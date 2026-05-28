@@ -51,6 +51,7 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("--live-probe", source)
         self.assertIn("hunyuan-g7-live-probe.json", source)
         self.assertIn("verify_hosted_smoke_artifacts.py", source)
+        self.assertIn("verify_hunyuan_g7_live_probe_record.py", source)
 
 
 if __name__ == "__main__":

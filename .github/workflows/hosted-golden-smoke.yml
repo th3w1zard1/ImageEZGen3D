@@ -71,6 +71,11 @@ jobs:
             --live-probe --json --record hunyuan-g7-live-probe.json \
             --space-url "$IMAGEEZ_HF_SPACE_URL"
 
+      - name: Verify Hunyuan G7 live probe record
+        run: >-
+          PYTHONPATH=src python scripts/verify_hunyuan_g7_live_probe_record.py
+          hunyuan-g7-live-probe.json
+
       - name: Hunyuan preflight bundle (audit + enablement + parity)
         run: python scripts/hunyuan_preflight_bundle.py --json
 
