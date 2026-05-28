@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 113 validation (G7 enablement readiness handoff)
+
+After Plan 113 (2026-05-28):
+
+- **Solutions:** [g7-enablement-readiness-2026-05-28.md](../../solutions/best-practices/g7-enablement-readiness-2026-05-28.md) — indexes guard stack + live attestation complete; G7/G8/G9 still **OPEN**
+- **Hygiene:** `.gitignore` excludes local `hunyuan-*-preflight.json` / audit JSON from accidental commits
+- **G7 gate:** still **OPEN** — no `configured=True`, no neural E2E claim
+
 ## Plan 112 validation (PR #72 merged to main)
 
 After Plan 112 (2026-05-28):

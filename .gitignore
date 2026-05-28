@@ -16,6 +16,8 @@ build/
 .env
 .env.*
 !.env.example
+hunyuan-admission-audit.json
+hunyuan-enablement-preflight.json
 *.glb
 *.obj
 *.ply
