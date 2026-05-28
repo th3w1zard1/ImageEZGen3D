@@ -134,6 +134,7 @@ class PipelineStageTracker:
                 notes="Not executed in this release; reserved for staged adapters.",
             )
 
+
     def mark_shape_succeeded_staged(self, adapter: str, *, notes: str = "") -> None:
         """Mark shape complete without skipping texture (Hunyuan-style adapters)."""
         self.set_stage("shape", "succeeded", adapter=adapter, notes=notes)
