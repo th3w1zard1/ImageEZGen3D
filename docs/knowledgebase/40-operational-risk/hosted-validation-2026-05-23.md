@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 088 validation (PR #60 merged to main)
+
+After Plan 088 (2026-05-28):
+
+- **Merge:** squash `54840ea` on `main` — PR #60 (Plan 087 smoke record verifier)
+- **Verify CLI:** `verify_hosted_golden_smoke_record.py` exits 0 on live `--record` output
+- **G7 gate:** still **OPEN** for real Hunyuan path; cpu-demo smoke keeps `g7_false_neural_guard_ok=true`
+
 ## Plan 087 validation (hosted golden smoke record verify)
 
 After Plan 087 (2026-05-28):
