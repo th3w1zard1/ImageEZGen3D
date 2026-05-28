@@ -30,6 +30,8 @@ After hosted smoke on Space, verify scheduled-style artifacts locally when debug
 ```bash
 PYTHONPATH=src python scripts/verify_hosted_golden_smoke_record.py hosted-golden-smoke.json
 PYTHONPATH=src python scripts/verify_hosted_export_tier_smoke_record.py hosted-export-tier-smoke.json
+PYTHONPATH=src python scripts/verify_hunyuan_g7_live_probe_record.py hunyuan-g7-live-probe.json
+PYTHONPATH=src python scripts/verify_hosted_smoke_artifacts.py
 ```
 
 ## Enablement PR checklist

@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -211,6 +214,53 @@ class HunyuanG7PreflightTests(unittest.TestCase):
             path = Path(directory) / "hunyuan-g7-live-probe.json"
             path.write_text(json.dumps(payload), encoding="utf-8")
             self.assertEqual(verify_hunyuan_g7_live_probe_record_file(path), [])
+
+    def test_verify_hunyuan_g7_live_probe_record_cli_subprocess(self) -> None:
+        valid_payload = {
+            "ok": True,
+            "issues": [],
+            "readiness": {"ready": True, "issues": [], "gates": []},
+            "hosted_probe": {
+                "ok": True,
+                "issues": [],
+                "space_url": "https://example.hf.space/",
+                "probe_note": "ok",
+            },
+        }
+        env = {**os.environ, "PYTHONPATH": "src"}
+        with tempfile.TemporaryDirectory() as directory:
+            valid_path = Path(directory) / "valid.json"
+            valid_path.write_text(json.dumps(valid_payload), encoding="utf-8")
+            invalid_path = Path(directory) / "invalid.json"
+            invalid_path.write_text(
+                json.dumps({"ok": True, "issues": [], "readiness": {"ready": True}}),
+                encoding="utf-8",
+            )
+            ok_proc = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/verify_hunyuan_g7_live_probe_record.py",
+                    str(valid_path),
+                ],
+                check=False,
+                env=env,
+                capture_output=True,
+                text=True,
+            )
+            bad_proc = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/verify_hunyuan_g7_live_probe_record.py",
+                    str(invalid_path),
+                ],
+                check=False,
+                env=env,
+                capture_output=True,
+                text=True,
+            )
+        self.assertEqual(ok_proc.returncode, 0, msg=ok_proc.stderr or ok_proc.stdout)
+        self.assertEqual(bad_proc.returncode, 1, msg=bad_proc.stderr or bad_proc.stdout)
+        self.assertIn("hosted_probe", bad_proc.stderr)
 
 
 if __name__ == "__main__":
