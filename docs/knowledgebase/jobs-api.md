@@ -82,6 +82,8 @@ PYTHONPATH=src python scripts/poll_job.py --job-id <id> --wait --result --json
 
 Job metadata (`job_id`, async queue chip) appears in Gradio run status cards when a run completes via the job queue.
 
+**Gradio:** Advanced run controls include **Queue as background job** (default off). When enabled, Create submits through `JobService` and polls until complete before updating downloads.
+
 ## Scope boundaries
 
 - Stdlib `ThreadingHTTPServer` only — not deployed on Hugging Face Space by default.

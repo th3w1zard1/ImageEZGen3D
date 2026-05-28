@@ -28,6 +28,11 @@ from imageezgen3d.orchestrator import (  # noqa: E402
     AdapterResolution,
     ImageEZOrchestrator,
 )
+from imageezgen3d.jobs import JobService  # noqa: E402
+from imageezgen3d.jobs.gradio_bridge import (  # noqa: E402
+    build_job_request_from_gradio,
+    run_via_job_queue,
+)
 from imageezgen3d.preprocess import normalize_image, validate_image  # noqa: E402
 from imageezgen3d.runtime import running_on_hugging_face_space  # noqa: E402
 from imageezgen3d.storage import RunStore  # noqa: E402
@@ -782,6 +787,7 @@ def build_demo():
 
     config = load_config()
     orchestrator = ImageEZOrchestrator(config)
+    job_service = JobService(config)
     backend_choices = orchestrator.adapter_choices()
     backend_value = (
         config.app.adapter if config.app.adapter in backend_choices else "auto"
@@ -966,6 +972,16 @@ def build_demo():
                                             label="Optional reference brief",
                                             type="filepath",
                                             elem_classes="reference-brief",
+                                        )
+                                        queue_as_job = gr.Checkbox(
+                                            label="Queue as background job",
+                                            value=False,
+                                            info=(
+                                                "Submit through the async job queue "
+                                                "and poll until complete. Manifest "
+                                                "records job_id and async_capable."
+                                            ),
+                                            elem_classes="composer-control",
                                         )
                             with gr.Row(
                                 equal_height=False,
@@ -1453,6 +1469,7 @@ def build_demo():
             input_modality_name,
             text_prompt_value,
             generation_lane_name,
+            queue_as_job_enabled,
             state,
         ):
             state = dict(state or {})
@@ -1464,21 +1481,39 @@ def build_demo():
             }
             fallback_model = state.get("model")
             try:
-                result = orchestrator.generate(
-                    primary_image=primary_image,
-                    view_images=views,
-                    adapter_name=adapter_name,
-                    quality=quality_name,
-                    seed=int(seed_value or 0),
-                    project_brief=project_brief_text,
-                    starter_flow=starter_flow,
-                    starter_flow_label=_starter_spec(starter_flow)["label"],
-                    reference_brief=reference_brief_file,
-                    input_modality=input_modality_name,
-                    prompt_text=text_prompt_value,
-                    lane=generation_lane_name,
-                )
-            except ValueError as exc:
+                if queue_as_job_enabled:
+                    job_request = build_job_request_from_gradio(
+                        intake_root=config.app.output_dir / "jobs" / "intake",
+                        primary_image=primary_image,
+                        view_images=views,
+                        adapter_name=adapter_name,
+                        quality_name=quality_name,
+                        seed_value=int(seed_value or 0),
+                        project_brief_text=project_brief_text,
+                        starter_flow=starter_flow,
+                        starter_flow_label=_starter_spec(starter_flow)["label"],
+                        reference_brief_file=reference_brief_file,
+                        input_modality_name=input_modality_name,
+                        text_prompt_value=text_prompt_value,
+                        generation_lane_name=generation_lane_name,
+                    )
+                    result = run_via_job_queue(job_service, job_request)
+                else:
+                    result = orchestrator.generate(
+                        primary_image=primary_image,
+                        view_images=views,
+                        adapter_name=adapter_name,
+                        quality=quality_name,
+                        seed=int(seed_value or 0),
+                        project_brief=project_brief_text,
+                        starter_flow=starter_flow,
+                        starter_flow_label=_starter_spec(starter_flow)["label"],
+                        reference_brief=reference_brief_file,
+                        input_modality=input_modality_name,
+                        prompt_text=text_prompt_value,
+                        lane=generation_lane_name,
+                    )
+            except (ValueError, RuntimeError) as exc:
                 (
                     history_dropdown,
                     history_compare_dropdown,
@@ -1632,6 +1667,7 @@ def build_demo():
                 input_modality,
                 text_prompt,
                 generation_lane,
+                queue_as_job,
                 session_state,
             ],
             outputs=[

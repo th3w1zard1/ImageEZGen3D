@@ -18,10 +18,14 @@ class JobRequest:
     lane: str | None = None
     seed: int | None = None
     project_brief: str | None = None
+    starter_flow: str | None = None
+    starter_flow_label: str | None = None
+    reference_brief: str | None = None
+    view_image_paths: dict[str, str] | None = None
     webhook_url: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload: dict[str, Any] = {
             "input_modality": self.input_modality,
             "prompt_text": self.prompt_text,
             "image_path": self.image_path,
@@ -30,8 +34,14 @@ class JobRequest:
             "lane": self.lane,
             "seed": self.seed,
             "project_brief": self.project_brief,
+            "starter_flow": self.starter_flow,
+            "starter_flow_label": self.starter_flow_label,
+            "reference_brief": self.reference_brief,
             "webhook_url": self.webhook_url,
         }
+        if self.view_image_paths:
+            payload["view_image_paths"] = dict(self.view_image_paths)
+        return payload
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> JobRequest:
@@ -44,6 +54,10 @@ class JobRequest:
             lane=_optional_str(payload.get("lane")),
             seed=_optional_int(payload.get("seed")),
             project_brief=_optional_str(payload.get("project_brief")),
+            starter_flow=_optional_str(payload.get("starter_flow")),
+            starter_flow_label=_optional_str(payload.get("starter_flow_label")),
+            reference_brief=_optional_str(payload.get("reference_brief")),
+            view_image_paths=_optional_view_paths(payload.get("view_image_paths")),
             webhook_url=_optional_str(payload.get("webhook_url")),
         )
 
@@ -136,6 +150,17 @@ def _optional_int(value: object) -> int | None:
     if isinstance(value, float):
         return int(value)
     return int(str(value))
+
+
+def _optional_view_paths(value: object) -> dict[str, str] | None:
+    if not isinstance(value, dict):
+        return None
+    paths: dict[str, str] = {}
+    for key, item in value.items():
+        text = _optional_str(item)
+        if text:
+            paths[str(key)] = text
+    return paths or None
 
 
 def _coerce_status(value: object) -> JobStatus:
