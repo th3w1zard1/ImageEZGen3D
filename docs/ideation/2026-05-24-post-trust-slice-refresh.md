@@ -13,7 +13,7 @@ Trust slice (Plans 012–022) is landed on `main`: fallback honesty, Phase 1 UX,
 
 ## Guardrail track (complete)
 
-Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and Hunyuan admission audit (CLI + CI + scheduled workflow) are landed on `main` through PR #28 (Plan 045 docs closure). **Preflight bundle in CI** landed via PR #57 (Plans 074–077, 2026-05-27): `ci.yml` and `hosted-golden-smoke` use `hunyuan_preflight_bundle.py` instead of three separate JSON/verify steps. No further guardrail slices are queued unless product adds a new runtime or UX driver.
+Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and Hunyuan admission audit (CLI + CI + scheduled workflow) are landed on `main` through PR #28 (Plan 045 docs closure). **Preflight bundle in CI** landed via PR #57 (Plans 074–077, 2026-05-27). **G7 hosted smoke guard stack** (Plans 078–100, PRs #59–#66) is complete on `main`: false-neural guard, per-artifact JSON verify, bundle verify, and G7 live-probe verify. Further guardrail work waits on Hunyuan enablement (G7 hosted E2E) or a new runtime/UX driver.
 
 ## Recommended next slices (ranked)
 
@@ -52,6 +52,7 @@ Export tiers, hosted golden CI, quadric decimation, Gradio tier downloads, and H
 - **Smoke JSON artifact verify** — PR #60–#62 merged (Plans 087–092); `verify_hosted_golden_smoke_record.py` and `verify_hosted_export_tier_smoke_record.py` in scheduled workflow.
 - **G7 scheduled live probe** — PR #64 merged (Plans 095–096); `--live-probe` + `hunyuan-g7-live-probe.json` artifact on scheduled smoke.
 - **G7 live-probe record verify** — PR #65 merged (Plans 097–098); `verify_hunyuan_g7_live_probe_record.py` in scheduled workflow.
+- **G7 live-probe verify learning** — PR #66 merged (Plans 099–100); subprocess contract test + runbook pointers.
 
 ## Explicitly defer
 
