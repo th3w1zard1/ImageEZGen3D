@@ -58,7 +58,7 @@ class GenerationPipelineTests(unittest.TestCase):
         tracker.apply_stage_snapshot(snapshot)
         self.assertEqual(tracker.stages[1]["status"], "succeeded")
 
-    def test_single_stage_adapter_skips_texture(self) -> None:
+    def test_pipeline_stages_mark_shape_and_skip_texture(self) -> None:
         tracker = PipelineStageTracker()
         tracker.mark_shape_running("text-demo")
         tracker.mark_shape_succeeded("text-demo", notes="ok")
