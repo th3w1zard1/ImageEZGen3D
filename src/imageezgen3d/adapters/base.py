@@ -19,11 +19,14 @@ class AdapterCapabilities:
 @dataclass(frozen=True)
 class GenerationRequest:
     run_dir: Path
-    processed_image: Path
+    processed_image: Path | None
     view_images: dict[str, Path]
     quality: str
     seed: int
     decimation_target: int = 500_000
+    input_modality: str = "image"
+    lane: str = "draft"
+    prompt_text: str = ""
 
 
 @dataclass

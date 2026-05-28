@@ -307,3 +307,47 @@ ImageEZGen3D should aim for:
 - Pippit-style multimodal evidence conditioning in a single stable composer.
 
 It should not try to become a clone of any one of them. The right synthesis for this repo is a trust-first image-to-3D workspace with mesh-first outputs, strong evidence handling, staged generation, and serious creator workflow continuity.
+
+## Meshy-Class 3D Generator Benchmark (May 2026)
+
+This section tracks **3D-native** competitors (not 2D image apps above). Evidence mixes [OFFICIAL] vendor docs, [UI] product pages, and [SYNTH] synthesis from May 2026 research.
+
+### Feature matrix (condensed)
+
+| Capability | Meshy | Tripo | Rodin / Hyper3D | Hunyuan3D OSS | ImageEZGen3D |
+|------------|:-----:|:-----:|:-----------------:|:-------------:|:------------:|
+| Image-to-3D | Yes | Yes | Yes | Yes | Workflow + cpu-demo; neural gated |
+| Text-to-3D | Yes | Yes | Yes | Yes | Stub (`text-demo`) + contract |
+| Multi-view | Yes | Yes | Yes | Yes | Labeled intake; fusion deferred |
+| PBR textures | Yes | Yes | Yes | Yes (2.1) | Documented; not shipped |
+| Remesh / LOD | Yes | Yes | Partial | Manual | Export-tier decimation |
+| Rig + animate | Yes | Yes | T-pose | — | Deferred |
+| Async REST API | Yes | Yes | Yes | Self-host | Deferred |
+| GLB / FBX / USDZ | Yes | Yes | Yes | GLB-first | GLB/OBJ/PLY/STL |
+| HF Gradio native | — | — | — | Yes | Yes |
+| Open weights | — | — | — | Yes | Via adapters |
+
+### Delivery pipeline expectations
+
+[SYNTH] Industry delivery defaults:
+
+- **GLB** — web/mobile preview and Three.js-style viewers (metallic-roughness PBR when textured).
+- **FBX** — rigged characters and DCC/game interchange.
+- **USD / USDZ** — authoring round-trip and iOS AR Quick Look.
+- **Staged queues** — preview mesh fast, texture/refine slower; honest status per stage.
+
+ImageEZGen3D manifest `generation.pipeline_stages` (`shape`, `texture`, `pbr`, `export`) reserves these stages before neural adapters populate them.
+
+### Tier 1 gaps to close next (actionable)
+
+1. Enable Hunyuan shape path on hosted ZeroGPU (G7–G9 admission).
+2. Populate real `texture` / `pbr` stage success from paint models.
+3. PBR map sidecar + FBX/USDZ export tier.
+4. Neural text-to-3D adapter behind the same contract as `text-demo`.
+
+### Tier 2–3 (near-term / frontier)
+
+- Multi-view fusion, retexture-on-mesh, rig/animate, webhooks, batch API (Tier 2).
+- TRELLIS.2 O-Voxel, splat delivery, 3D print repair, agentic multi-stage products (Tier 3).
+
+See also `docs/knowledgebase/creator-product-patterns.md` and `docs/plans/2026-05-28-119-feat-meshy-class-platform-foundation-plan.md`.

@@ -8,6 +8,21 @@ from imageezgen3d.orchestrator import PREVIEW_FALLBACK_DISCLAIMER
 
 
 class ManifestUiTests(unittest.TestCase):
+    def test_generation_summary_chips_show_modality_and_lane(self) -> None:
+        html = mu.generation_summary_chips_html(
+            {
+                "generation": {
+                    "input_modality": "text",
+                    "lane": "production",
+                }
+            }
+        )
+        self.assertIn("Text prompt", html)
+        self.assertIn("Production lane", html)
+
+    def test_backend_label_for_text_demo(self) -> None:
+        self.assertEqual(mu.backend_display_label("text-demo"), "Text-to-3D Stub")
+
     def test_backend_rail_chips_show_adapter_and_fallback(self) -> None:
         html = mu.backend_rail_chips_html(
             adapter_key="cpu-demo",
@@ -50,6 +65,24 @@ class ManifestUiTests(unittest.TestCase):
         self.assertIn("run-abc", html)
         self.assertIn("Draft tier", html)
         self.assertIn("Fallback", html)
+        self.assertIn("Image", html)
+
+    def test_run_status_card_includes_modality_when_present(self) -> None:
+        html = mu.run_status_card_html(
+            {
+                "run_id": "run-text",
+                "stage": "done",
+                "adapter": "text-demo",
+                "parameters": {
+                    "generation": {
+                        "input_modality": "text",
+                        "lane": "draft",
+                    }
+                },
+            }
+        )
+        self.assertIn("Text prompt", html)
+        self.assertIn("Draft lane", html)
 
     def test_artifact_strip_marks_missing_keys(self) -> None:
         html = mu.artifact_strip_html(
