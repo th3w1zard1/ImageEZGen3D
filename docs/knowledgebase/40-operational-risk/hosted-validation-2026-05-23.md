@@ -51,6 +51,13 @@ After Plan 083 (2026-05-28):
 - **`feat/078-ship-pr57-kb-closure`** rebased cleanly on `origin/main` (Plans 078–079 only)
 - **`tests.test_workflows`** pass on rebased branch
 
+## Plan 080 validation (G7 false-neural golden smoke guard)
+
+After Plan 080 (2026-05-28):
+
+- **`validate_g7_not_false_neural_claim`** in `hosted_golden_smoke.py` — fails smoke when status looks like G7 neural success while adapter disabled
+- **Hosted golden smoke:** run `20260528-001022-151788f4` (cpu-demo / Local CPU Preview)
+
 ## Plan 079 validation (CI vs smoke bundle flags)
 
 After Plan 079 (2026-05-27):

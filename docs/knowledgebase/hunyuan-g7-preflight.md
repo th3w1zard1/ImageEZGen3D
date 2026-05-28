@@ -33,6 +33,10 @@ PYTHONPATH=src python scripts/hunyuan_g7_preflight.py --live-probe
 
 **CI:** `hunyuan-admission-audit` and `hosted-golden-smoke` both run `hunyuan_g7_preflight.py` (G1–G6 readiness). Admission audit JSON is built by `imageezgen3d.hunyuan_admission_audit.build_admission_audit_payload()` and includes `g7_readiness` / `g8_enablement`; exits 1 if G1–G6 regress. Hosted doc path: `hosted_validation.HOSTED_VALIDATION_PATH`.
 
+## Golden smoke guard (Plan 080)
+
+`run_hosted_golden_smoke` calls `validate_g7_not_false_neural_claim()` so scheduled/local smoke **fails** if generation status would pass `validate_g7_hosted_generate_status` while the adapter remains disabled (complements G8 CPU fallback honesty).
+
 ## Not claimed
 
 - Neural reconstruction on production Space today

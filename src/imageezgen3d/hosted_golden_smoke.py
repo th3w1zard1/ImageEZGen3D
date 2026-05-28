@@ -79,6 +79,19 @@ def validate_hosted_generate_status(
     return (not issues, issues, run_id)
 
 
+def validate_g7_not_false_neural_claim(status_markdown: str) -> list[str]:
+    """Fail when disabled Space status would satisfy G7 neural closure validators."""
+    from .hunyuan_g7_preflight import validate_g7_hosted_generate_status
+
+    g7_ok, _, _ = validate_g7_hosted_generate_status(status_markdown)
+    if g7_ok:
+        return [
+            "Hosted status matches G7 neural success criteria while Hunyuan "
+            "adapter should remain disabled"
+        ]
+    return []
+
+
 def validate_backend_rail_html(html: str) -> list[str]:
     """Validate Create Project Rail HTML includes Plan 055 backend chips (no network)."""
     issues: list[str] = []
@@ -231,6 +244,7 @@ def run_hosted_golden_smoke(
     status = str(result[1] if isinstance(result, (list, tuple)) else result)
     ok, issues, run_id = validate_hosted_generate_status(status, quality=quality)
     issues.extend(validate_g8_cpu_fallback_status(status))
+    issues.extend(validate_g7_not_false_neural_claim(status))
 
     if isinstance(result, (list, tuple)) and len(result) > _GENERATE_BACKEND_RAIL_INDEX:
         rail_value = result[_GENERATE_BACKEND_RAIL_INDEX]
