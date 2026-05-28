@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 098 validation (PR #65 merged to main)
+
+After Plan 098 (2026-05-28):
+
+- **Merge:** squash `6cf3871` on `main` — PR #65 (Plan 097 G7 live probe record verify)
+- **CI on main:** scheduled smoke validates `hunyuan-g7-live-probe.json` via `verify_hunyuan_g7_live_probe_record.py`
+- **G7 gate:** still **OPEN** for real neural path — verify proves schema/honesty, not Hunyuan E2E
+
 ## Plan 097 validation (G7 live probe learning + record verify)
 
 After Plan 097 (2026-05-28):
