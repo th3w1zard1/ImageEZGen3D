@@ -44,6 +44,17 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 109 validation (export-tier smoke + G7 live probe attestation)
+
+After Plan 109 (2026-05-28):
+
+- **Mode:** hosted CPU fallback for export-tier draft + balanced runs
+- **Export-tier run ids:** `20260528-025824-1345fc91` (draft), `20260528-025828-ef91630a` (balanced)
+- **Adapter:** Local CPU Preview; `g7_false_neural_guard_ok=true` on both checks
+- **G7 live probe:** `hosted_probe.ok=true` — Space rejected `hunyuan-zerogpu` (not in choices); no false G7 neural success
+- **Verify CLIs:** export-tier + G7 live-probe record verify exit 0
+- **G7 gate:** still **OPEN** for real neural Hunyuan path
+
 ## Plan 108 validation (PR #70 merged to main)
 
 After Plan 108 (2026-05-28):
