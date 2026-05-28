@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 084 validation (stack PR 59 on PR 58)
+
+After Plan 084 (2026-05-28):
+
+- **`feat/080-g7-golden-smoke-guard`** rebased onto `feat/078-ship-pr57-kb-closure` — unified hosted-validation (Plans 078–082)
+- Merge **PR #59** only after closing or superseding **PR #58** (same commits now stacked)
+
 ## Plan 083 validation (PR #58 rebase readiness)
 
 After Plan 083 (2026-05-28):

@@ -93,6 +93,7 @@ class HostedGoldenSmokeTests(unittest.TestCase):
             payload = json.loads(path.read_text(encoding="utf-8"))
             self.assertTrue(payload["ok"])
             self.assertEqual(payload["adapter_hint"], "cpu-demo")
+            self.assertTrue(payload["g7_false_neural_guard_ok"])
 
     @patch("gradio_client.Client")
     def test_run_hosted_golden_smoke_validates_predict_output(
