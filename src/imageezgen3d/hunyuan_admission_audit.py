@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from .adapters.hunyuan import HunyuanPlaceholderAdapter
+from .adapters.hunyuan import resolve_hunyuan_configured
 from .hunyuan_admission import GateResult, evaluate_admission_gates
 from .hunyuan_g7_preflight import evaluate_g7_readiness
 from .hunyuan_g8_preflight import g8_enablement_for_gates
@@ -16,7 +16,7 @@ def build_admission_audit_payload(
     readiness = evaluate_g7_readiness(results)
     g8_enablement = g8_enablement_for_gates(results)
     return {
-        "adapter_configured": HunyuanPlaceholderAdapter().capabilities.configured,
+        "adapter_configured": resolve_hunyuan_configured(),
         "g7_readiness": readiness.to_dict(),
         "g8_enablement": g8_enablement.to_dict(),
         "gates": [

@@ -21,7 +21,7 @@ from imageezgen3d.hunyuan_admission_audit import build_admission_audit_payload
 
 class HunyuanAdmissionTests(unittest.TestCase):
     def test_adapter_remains_disabled(self) -> None:
-        self.assertFalse(HunyuanPlaceholderAdapter().capabilities.configured)
+        self.assertFalse(HunyuanPlaceholderAdapter(configured=False).capabilities.configured)
 
     def test_evaluate_returns_nine_gates(self) -> None:
         gates = evaluate_admission_gates()
@@ -73,6 +73,11 @@ class HunyuanAdmissionTests(unittest.TestCase):
         self.assertIn("g7_readiness", payload)
         self.assertIn("g8_enablement", payload)
         self.assertEqual(len(payload["gates"]), 9)
+
+    def test_admission_audit_payload_reflects_hunyuan_env_flag(self) -> None:
+        with patch.dict(os.environ, {"IMAGEEZ_HUNYUAN_CONFIGURED": "true"}, clear=True):
+            payload = build_admission_audit_payload()
+        self.assertTrue(payload["adapter_configured"])
 
     def test_audit_script_writes_record_file(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

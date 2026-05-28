@@ -60,9 +60,9 @@ class HunyuanEnablementPreflightTests(unittest.TestCase):
             return_value=_gates_g1_g6_pass(),
         ):
             with patch(
-                "imageezgen3d.hunyuan_enablement_preflight.HunyuanPlaceholderAdapter"
-            ) as adapter_cls:
-                adapter_cls.return_value.capabilities.configured = False
+                "imageezgen3d.hunyuan_enablement_preflight.resolve_hunyuan_configured",
+                return_value=False,
+            ):
                 with patch(
                     "imageezgen3d.hunyuan_enablement_preflight.g8_enablement_for_gates",
                     return_value=_g8_not_documented(),
@@ -70,6 +70,21 @@ class HunyuanEnablementPreflightTests(unittest.TestCase):
                     result = evaluate_enablement_preflight()
 
         self.assertEqual(enablement_preflight_exit_code(result), 0)
+
+    def test_exit_code_one_when_env_configured_with_open_enablement_gates(self) -> None:
+        with patch.dict(os.environ, {"IMAGEEZ_HUNYUAN_CONFIGURED": "true"}, clear=True):
+            with patch(
+                "imageezgen3d.hunyuan_enablement_preflight.evaluate_admission_gates",
+                return_value=_gates_g1_g6_pass(),
+            ):
+                with patch(
+                    "imageezgen3d.hunyuan_enablement_preflight.g8_enablement_for_gates",
+                    return_value=_g8_not_documented(),
+                ):
+                    result = evaluate_enablement_preflight()
+
+        self.assertTrue(result.adapter_configured)
+        self.assertEqual(enablement_preflight_exit_code(result), 1)
 
     def test_exit_code_one_when_g6_regresses(self) -> None:
         gates = tuple(

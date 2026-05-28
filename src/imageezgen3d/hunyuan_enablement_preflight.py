@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from .adapters.hunyuan import HunyuanPlaceholderAdapter
+from .adapters.hunyuan import resolve_hunyuan_configured
 from .hunyuan_admission import GateResult, evaluate_admission_gates
 from .hunyuan_g7_preflight import G7ReadinessResult, evaluate_g7_readiness
 from .hunyuan_g8_preflight import G8EnablementStatus, g8_enablement_for_gates
@@ -50,7 +50,7 @@ class EnablementPreflightResult:
 
 def evaluate_enablement_preflight() -> EnablementPreflightResult:
     gates = evaluate_admission_gates()
-    configured = HunyuanPlaceholderAdapter().capabilities.configured
+    configured = resolve_hunyuan_configured()
     g7 = evaluate_g7_readiness(gates)
 
     g8_status = g8_enablement_for_gates(gates)

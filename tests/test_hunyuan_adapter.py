@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from imageezgen3d.adapters.base import GenerationRequest
 from imageezgen3d.adapters.hunyuan import (
     HunyuanPlaceholderAdapter,
     _run_hunyuan_inference_on_gpu,
+    resolve_hunyuan_configured,
 )
 
 
@@ -25,7 +28,11 @@ def _sample_request(tmp: Path) -> GenerationRequest:
 
 class HunyuanAdapterTests(unittest.TestCase):
     def test_adapter_defaults_to_disabled(self) -> None:
-        self.assertFalse(HunyuanPlaceholderAdapter().capabilities.configured)
+        self.assertFalse(HunyuanPlaceholderAdapter(configured=False).capabilities.configured)
+
+    def test_resolve_hunyuan_configured_honors_env(self) -> None:
+        with patch.dict(os.environ, {"IMAGEEZ_HUNYUAN_CONFIGURED": "true"}, clear=True):
+            self.assertTrue(resolve_hunyuan_configured())
 
     def test_adapter_honors_configured_constructor_flag(self) -> None:
         self.assertTrue(HunyuanPlaceholderAdapter(configured=True).capabilities.configured)

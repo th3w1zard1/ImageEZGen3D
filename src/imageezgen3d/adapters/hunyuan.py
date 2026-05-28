@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import Any, Callable, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
 from .base import AdapterCapabilities, GenerationRequest, GenerationResult
+
+if TYPE_CHECKING:
+    from ..config import AppConfig
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -47,9 +50,19 @@ def _run_hunyuan_inference_on_gpu(request: GenerationRequest) -> GenerationResul
     )
 
 
+def resolve_hunyuan_configured(*, config: AppConfig | None = None) -> bool:
+    """Configured flag from AppConfig (env/pyproject), matching orchestrator wiring."""
+    if config is not None:
+        return config.hunyuan.configured
+    from ..config import load_config
+
+    return load_config().hunyuan.configured
+
+
 class HunyuanPlaceholderAdapter:
-    def __init__(self, *, configured: bool = False) -> None:
-        self.capabilities = replace(_BASE_CAPABILITIES, configured=configured)
+    def __init__(self, *, configured: bool | None = None) -> None:
+        flag = resolve_hunyuan_configured() if configured is None else configured
+        self.capabilities = replace(_BASE_CAPABILITIES, configured=flag)
 
     def generate(self, request: GenerationRequest) -> GenerationResult:
         if not self.capabilities.configured:
