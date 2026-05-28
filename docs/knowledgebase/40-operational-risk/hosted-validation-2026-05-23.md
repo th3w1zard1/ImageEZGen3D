@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 096 validation (PR #64 merged to main)
+
+After Plan 096 (2026-05-28):
+
+- **Merge:** squash `f45b8cb` on `main` — PR #64 (Plan 095 G7 live probe)
+- **Live probe on main:** Space rejects `hunyuan-zerogpu` adapter choice (not in Gradio list); `hosted_probe.ok=true`
+- **G7 gate:** still **OPEN** for real neural path — probe proves honesty while disabled, not neural E2E
+
 ## Plan 095 validation (G7 live probe in scheduled smoke)
 
 After Plan 095 (2026-05-28):
