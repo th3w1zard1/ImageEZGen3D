@@ -2,7 +2,7 @@
 
 Navigation map for all knowledgebase documents. Use this index to find authority docs before reading flat files at the repository root of `docs/knowledgebase/`.
 
-**Last updated:** 2026-05-23
+**Last updated:** 2026-05-28 (Plans 078–104 guard stack on `main`)
 
 ## How To Use This Index
 
@@ -47,6 +47,8 @@ Navigation map for all knowledgebase documents. Use this index to find authority
 | [capture-guide.md](capture-guide.md) | Companion | Input capture guidance |
 | [license-audit.md](license-audit.md) | Canonical | Legal gates for adapters and assets |
 | [hunyuan-admission-gates.md](hunyuan-admission-gates.md) | Canonical | Hunyuan enablement checklist (gates G1–G9); adapter stays off until closed |
+| [hunyuan-g7-preflight.md](hunyuan-g7-preflight.md) | Companion | G7 readiness CLI, live probe, golden smoke guard |
+| [hunyuan-g9-enablement-runbook.md](hunyuan-g9-enablement-runbook.md) | Companion | Enablement PR checklist and smoke artifact verify steps |
 
 ### 30 — Product & UX
 
@@ -67,7 +69,7 @@ Navigation map for all knowledgebase documents. Use this index to find authority
 | [verification.md](verification.md) | Canonical | Validation ladder and artifact checks |
 | [40-operational-risk/mode-validation-matrix.md](40-operational-risk/mode-validation-matrix.md) | Canonical | Four-mode honesty matrix |
 | [40-operational-risk/hosted-validation-2026-05-23.md](40-operational-risk/hosted-validation-2026-05-23.md) | Dated slice | Live Space Block E2E evidence (hosted CPU fallback) |
-| [40-operational-risk/source-runtime-parity-register.md](40-operational-risk/source-runtime-parity-register.md) | Canonical | Living drift log |
+| [40-operational-risk/source-runtime-parity-register.md](40-operational-risk/source-runtime-parity-register.md) | Canonical | Living drift log (includes P14 hosted smoke guard stack) |
 | [failure-modes.md](failure-modes.md) | Canonical | Failure classes and recovery |
 
 ### 50 — Execution
@@ -98,6 +100,8 @@ Navigation map for all knowledgebase documents. Use this index to find authority
 | CE pipeline stages | [ideation-to-pr-pipeline.md](50-execution/ideation-to-pr-pipeline.md) |
 | Writing new KB docs | [knowledgebase-authoring-playbook.md](knowledgebase-authoring-playbook.md) |
 | Past solved problems / compound learnings | [docs/solutions/README.md](../../solutions/README.md) |
+| Hosted smoke guard stack (while Hunyuan disabled) | [hosted-smoke-guard-stack-2026-05-28.md](../solutions/best-practices/hosted-smoke-guard-stack-2026-05-28.md) + [hunyuan-admission-gates.md](hunyuan-admission-gates.md) |
+| Hunyuan preflight before enablement | [hunyuan-g9-enablement-runbook.md](hunyuan-g9-enablement-runbook.md) — run `hunyuan_preflight_bundle.py` |
 
 ## Taxonomy Migration Status
 
@@ -106,6 +110,7 @@ Navigation map for all knowledgebase documents. Use this index to find authority
 ## Caveats
 
 - `[REPO]` Hosted Block/Vase E2E verified 2026-05-24 — see [hosted-validation-2026-05-23.md](40-operational-risk/hosted-validation-2026-05-23.md). CI golden-sample attestation is local CPU only and does not replace hosted E2E.
-- `[OPEN]` Hosted ZeroGPU path not verified — adapter remains disabled on Space.
+- `[REPO]` Scheduled hosted smoke on `main` (Plans 078–104) runs JSON verify, bundle verify, and G7 live-probe honesty checks while the adapter is disabled — see [hosted-smoke-guard-stack-2026-05-28.md](../solutions/best-practices/hosted-smoke-guard-stack-2026-05-28.md) and parity **P14**. This does **not** close admission gate G7.
+- `[OPEN]` Hosted ZeroGPU / real Hunyuan neural path not verified — adapter remains disabled on Space; `G7_STATUS` stays OPEN in hosted-validation until enablement E2E.
 - `[REPO]` Port env chain documented; live Space uses platform `GRADIO_SERVER_PORT` (typically 7860) per [hf-space-demo-port-binding](../solutions/tooling-decisions/hf-space-demo-port-binding-2026-05-24.md).
 - Dated slices may lag in-flight UI changes; check git diff against `app.py` when implementing UX work.
