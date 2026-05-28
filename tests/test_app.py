@@ -179,6 +179,14 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         )
         self.assertLess(generate_outputs.index("raw_glb_file"), bundle_idx)
 
+    def test_advanced_controls_expose_background_job_queue_toggle(self) -> None:
+        source = Path(app.__file__).read_text(encoding="utf-8")
+        advanced_section = source.split('"Advanced run controls"')[1].split(
+            "starter-card-row"
+        )[0]
+        self.assertIn("Queue as background job", advanced_section)
+        self.assertIn("queue_as_job", advanced_section)
+
     def test_verified_artifact_state_filters_missing_files(self) -> None:
         store = RunStore(Path.cwd() / "outputs")
         with patch.object(store, "artifact_value", side_effect=["/tmp/mesh.glb", None]):

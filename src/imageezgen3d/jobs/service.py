@@ -61,6 +61,28 @@ class JobService:
             )
         return self.run_store.read_manifest(record.run_id)
 
+    def get_generation_payload(self, job_id: str) -> dict[str, Any]:
+        """Return orchestrator-shaped payload for UI clients after job success."""
+        manifest = self.get_result(job_id)
+        parameters = manifest.get("parameters", {})
+        if not isinstance(parameters, dict):
+            parameters = {}
+        artifacts = manifest.get("artifacts", {})
+        if not isinstance(artifacts, dict):
+            artifacts = {}
+        payload = dict(manifest)
+        payload["adapter"] = str(
+            parameters.get("selected_adapter")
+            or parameters.get("requested_adapter")
+            or "unknown"
+        )
+        payload["artifacts"] = {
+            key: self.run_store.artifact_value(path)
+            for key, path in artifacts.items()
+            if self.run_store.artifact_value(path) is not None
+        }
+        return payload
+
     def wait_for(
         self,
         job_id: str,
@@ -111,12 +133,22 @@ class JobService:
             if not image_path.is_file():
                 raise FileNotFoundError(f"Image not found: {image_path}")
             primary_image = Image.open(image_path)
+        view_images: dict[str, Image.Image] = {}
+        if request.view_image_paths:
+            for label, path_str in request.view_image_paths.items():
+                view_path = Path(path_str)
+                if view_path.is_file():
+                    view_images[label] = Image.open(view_path)
         return self.orchestrator.generate(
             primary_image,
+            view_images=view_images or None,
             adapter_name=request.adapter_name,
             quality=request.quality,
             seed=request.seed,
             project_brief=request.project_brief,
+            starter_flow=request.starter_flow,
+            starter_flow_label=request.starter_flow_label,
+            reference_brief=request.reference_brief,
             input_modality=modality,
             prompt_text=request.prompt_text,
             lane=request.lane,
