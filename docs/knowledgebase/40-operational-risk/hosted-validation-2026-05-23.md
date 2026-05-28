@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 090 validation (PR #61 merged to main)
+
+After Plan 090 (2026-05-28):
+
+- **Merge:** squash `c97e07f` on `main` — PR #61 (Plan 089 institutional learning)
+- **Solutions:** [hosted-golden-smoke-record-verify-2026-05-28.md](../../solutions/best-practices/hosted-golden-smoke-record-verify-2026-05-28.md) on `main`
+- **G7 gate:** still **OPEN** for real Hunyuan path; cpu-demo smoke verified with verify CLI
+
 ## Plan 089 validation (smoke record verify learning)
 
 After Plan 089 (2026-05-28):
