@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 079 validation (CI vs smoke bundle flags)
+
+After Plan 079 (2026-05-27):
+
+- **`test_workflows`:** `ci.yml` bundle without `--json`; hosted-golden-smoke with `--json`
+- **Hosted golden smoke:** run `20260528-000007-f209b6bc` (cpu-demo / Local CPU Preview)
+
 ## Plan 078 validation (PR #57 ship closure)
 
 After PR #57 merge to `main` (2026-05-27, commit `5a7483b`):

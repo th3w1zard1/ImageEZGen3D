@@ -18,6 +18,7 @@ class WorkflowContractTests(unittest.TestCase):
         source = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
         self.assertIn("hunyuan-admission-audit:", source)
         self.assertIn("hunyuan_preflight_bundle.py", source)
+        self.assertNotIn("hunyuan_preflight_bundle.py --json", source)
         self.assertIn("hunyuan_g7_preflight.py", source)
 
     def test_hosted_golden_smoke_workflow_runs_g7_preflight(self) -> None:
