@@ -170,11 +170,13 @@ def run_status_card_html(run: Mapping[str, Any]) -> str:
     ]
     if fallback:
         chips.append('<span class="run-status-chip fallback">Fallback</span>')
+    modality_lane = generation_summary_chips_html(parameters)
     return "\n".join(
         [
             '<section class="run-status-card">',
             f'<p class="run-status-id"><strong>{escape(run_id)}</strong></p>',
             f'<p class="run-status-flow">{escape(starter)}</p>',
+            modality_lane,
             f'<div class="run-status-chips">{"".join(chips)}</div>',
             fallback_banner_html(
                 {

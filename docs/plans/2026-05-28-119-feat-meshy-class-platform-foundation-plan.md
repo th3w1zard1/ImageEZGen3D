@@ -1,7 +1,7 @@
 ---
 title: "feat: Meshy-class platform foundation (pipeline contract, text-to-3D, draft/production)"
 type: feat
-status: active
+status: completed
 date: 2026-05-28
 ---
 

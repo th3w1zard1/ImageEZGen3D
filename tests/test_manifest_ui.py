@@ -65,6 +65,24 @@ class ManifestUiTests(unittest.TestCase):
         self.assertIn("run-abc", html)
         self.assertIn("Draft tier", html)
         self.assertIn("Fallback", html)
+        self.assertIn("Image", html)
+
+    def test_run_status_card_includes_modality_when_present(self) -> None:
+        html = mu.run_status_card_html(
+            {
+                "run_id": "run-text",
+                "stage": "done",
+                "adapter": "text-demo",
+                "parameters": {
+                    "generation": {
+                        "input_modality": "text",
+                        "lane": "draft",
+                    }
+                },
+            }
+        )
+        self.assertIn("Text prompt", html)
+        self.assertIn("Draft lane", html)
 
     def test_artifact_strip_marks_missing_keys(self) -> None:
         html = mu.artifact_strip_html(
