@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-from .adapters.hunyuan import HunyuanPlaceholderAdapter
+from .adapters.hunyuan import resolve_hunyuan_configured
 from .hosted_validation import HOSTED_VALIDATION_PATH, hosted_validation_section, read_repo_text
 from .hunyuan_g8_preflight import g8_enablement_validation_passed
 from .hunyuan_manifest_parity import (
@@ -47,7 +47,7 @@ def _g7_hosted_validation_passed(hosted_text: str) -> bool:
 
 
 def _adapter_configured() -> bool:
-    return HunyuanPlaceholderAdapter().capabilities.configured
+    return resolve_hunyuan_configured()
 
 
 def _g6_sample_manifest_valid() -> bool:

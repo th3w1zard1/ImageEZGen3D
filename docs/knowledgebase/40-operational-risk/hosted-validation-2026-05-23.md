@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 117 validation (Hunyuan configured admission parity)
+
+After Plan 117 (2026-05-28):
+
+- **Fix:** `resolve_hunyuan_configured()` used by admission audit + enablement preflight (matches orchestrator env flag)
+- **Safety:** `IMAGEEZ_HUNYUAN_CONFIGURED=true` with open G7–G9 → preflight/audit exit 1
+- **G7 gate:** still **OPEN**
+
 ## Plan 116 validation (PR #74 merged to main)
 
 After Plan 116 (2026-05-28):

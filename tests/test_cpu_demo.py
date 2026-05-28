@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from imageezgen3d.config import AppConfig, AppSettings, StorageSettings
+from imageezgen3d.config import AppConfig, AppSettings, HunyuanSettings, StorageSettings
 from imageezgen3d.mesh_checks import inspect_artifacts
 from imageezgen3d.orchestrator import PREVIEW_FALLBACK_DISCLAIMER, ImageEZOrchestrator
 from imageezgen3d.runtime import RuntimeStatus
@@ -18,6 +18,14 @@ class CpuDemoTests(unittest.TestCase):
     def test_adapter_choices_hide_unconfigured_backends(self) -> None:
         orchestrator = ImageEZOrchestrator(AppConfig())
         self.assertEqual(orchestrator.adapter_choices(), ["auto", "cpu-demo"])
+
+    def test_adapter_choices_include_hunyuan_when_configured(self) -> None:
+        config = AppConfig(hunyuan=HunyuanSettings(configured=True))
+        orchestrator = ImageEZOrchestrator(config)
+        self.assertEqual(
+            orchestrator.adapter_choices(),
+            ["auto", "cpu-demo", "hunyuan-zerogpu"],
+        )
 
     def test_select_adapter_rejects_unconfigured_backend(self) -> None:
         orchestrator = ImageEZOrchestrator(AppConfig())
