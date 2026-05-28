@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 118 validation (PR #75 merged to main)
+
+After Plan 118 (2026-05-28):
+
+- **Merge:** squash `3027343` on `main` — PR #75 (Plan 117 admission configured parity)
+- **On main:** audit/preflight honor `IMAGEEZ_HUNYUAN_CONFIGURED`; G7 **OPEN**
+
 ## Plan 117 validation (Hunyuan configured admission parity)
 
 After Plan 117 (2026-05-28):
