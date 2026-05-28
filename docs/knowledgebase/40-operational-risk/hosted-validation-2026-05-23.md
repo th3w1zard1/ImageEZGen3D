@@ -51,6 +51,14 @@ After Plan 083 (2026-05-28):
 - **`feat/078-ship-pr57-kb-closure`** rebased cleanly on `origin/main` (Plans 078–079 only)
 - **`tests.test_workflows`** pass on rebased branch
 
+## Plan 081 validation (G7 guard institutional learning)
+
+After Plan 081 (2026-05-28):
+
+- **Solutions:** [g7-false-neural-golden-smoke-guard-2026-05-28.md](../../solutions/best-practices/g7-false-neural-golden-smoke-guard-2026-05-28.md)
+- **AGENTS.md** points agents to the learning before changing smoke/G7 validators
+- **Hosted golden smoke:** run `20260528-001645-8268f2b3` (cpu-demo / Local CPU Preview)
+
 ## Plan 080 validation (G7 false-neural golden smoke guard)
 
 After Plan 080 (2026-05-28):
