@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import importlib.util
+import io
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -150,6 +153,44 @@ class HostedGoldenSmokeTests(unittest.TestCase):
             any("G7 neural" in issue for issue in result.issues),
             result.issues,
         )
+
+    @patch("gradio_client.Client")
+    def test_hosted_golden_smoke_cli_json_includes_g7_guard_field(
+        self, client_cls: object,
+    ) -> None:
+        client = client_cls.return_value
+        rail_html = backend_rail_chips_html(adapter_key="cpu-demo")
+        predict_outputs: list[object | None] = [None] * 16
+        predict_outputs[1] = _valid_status()
+        predict_outputs[15] = rail_html
+        client.predict.return_value = tuple(predict_outputs)
+
+        repo_root = Path(__file__).resolve().parents[1]
+        script_path = repo_root / "scripts" / "hosted_golden_smoke.py"
+        spec = importlib.util.spec_from_file_location(
+            "hosted_golden_smoke_cli", script_path,
+        )
+        assert spec is not None and spec.loader is not None
+        cli_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cli_module)
+
+        with tempfile.TemporaryDirectory() as directory:
+            sample = Path(directory) / "block.png"
+            sample.write_bytes(b"png")
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = cli_module.main(
+                    [
+                        "--json",
+                        "--space-url",
+                        "https://test.hf.space/",
+                        "--sample",
+                        str(sample),
+                    ],
+                )
+        self.assertEqual(exit_code, 0)
+        payload = json.loads(stdout.getvalue())
+        self.assertTrue(payload["g7_false_neural_guard_ok"])
 
 
 if __name__ == "__main__":

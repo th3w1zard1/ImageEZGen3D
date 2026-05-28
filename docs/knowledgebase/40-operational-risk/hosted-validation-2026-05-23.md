@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 085 validation (close PR 58, ship via PR 59)
+
+After Plan 085 (2026-05-28):
+
+- **PR #58** closed as superseded by **PR #59** (stacked branch includes Plans 078–084)
+- **CLI test:** `hosted_golden_smoke.py --json` emits `g7_false_neural_guard_ok`
+
 ## Plan 084 validation (stack PR 59 on PR 58)
 
 After Plan 084 (2026-05-28):
