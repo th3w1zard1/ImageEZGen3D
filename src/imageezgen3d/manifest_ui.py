@@ -75,6 +75,12 @@ def generation_summary_chips_html(parameters: Mapping[str, Any]) -> str:
         f'<span class="run-status-chip">{escape(modality_label(str(modality)))}</span>',
         f'<span class="run-status-chip">{escape(lane_label(str(lane)))} lane</span>',
     ]
+    job_id = parameters.get("job_id")
+    if job_id:
+        short_id = escape(str(job_id)[:8])
+        chips.append(f'<span class="run-status-chip">Job {short_id}</span>')
+    if isinstance(generation, dict) and generation.get("async_capable") is True:
+        chips.append('<span class="run-status-chip">Async queue</span>')
     return f'<div class="run-status-chips">{"".join(chips)}</div>'
 
 
