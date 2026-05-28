@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 089 validation (smoke record verify learning)
+
+After Plan 089 (2026-05-28):
+
+- **Solutions:** [hosted-golden-smoke-record-verify-2026-05-28.md](../../solutions/best-practices/hosted-golden-smoke-record-verify-2026-05-28.md)
+- **AGENTS.md** references verify CLI after `--record`
+- **Tests:** subprocess verify CLI exit 0/1 on valid vs incomplete JSON
+
 ## Plan 088 validation (PR #60 merged to main)
 
 After Plan 088 (2026-05-28):

@@ -3,6 +3,9 @@ from __future__ import annotations
 import importlib.util
 import io
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -122,6 +125,51 @@ class HostedGoldenSmokeTests(unittest.TestCase):
             path = Path(directory) / "hosted-golden-smoke.json"
             write_hosted_golden_record(path, result)
             self.assertEqual(verify_hosted_golden_smoke_record_file(path), [])
+
+    def test_verify_hosted_golden_smoke_record_cli_subprocess(self) -> None:
+        result = HostedGoldenSmokeResult(
+            ok=True,
+            run_id="20260524-000000-00000000",
+            space_url="https://example.hf.space/",
+            adapter_hint="cpu-demo",
+            quality="draft",
+            issues=(),
+            g7_false_neural_guard_ok=True,
+        )
+        env = {**os.environ, "PYTHONPATH": "src"}
+        with tempfile.TemporaryDirectory() as directory:
+            valid_path = Path(directory) / "valid.json"
+            write_hosted_golden_record(valid_path, result)
+            invalid_path = Path(directory) / "invalid.json"
+            invalid_path.write_text(
+                json.dumps({"ok": True, "issues": []}),
+                encoding="utf-8",
+            )
+            ok_proc = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/verify_hosted_golden_smoke_record.py",
+                    str(valid_path),
+                ],
+                check=False,
+                env=env,
+                capture_output=True,
+                text=True,
+            )
+            bad_proc = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/verify_hosted_golden_smoke_record.py",
+                    str(invalid_path),
+                ],
+                check=False,
+                env=env,
+                capture_output=True,
+                text=True,
+            )
+        self.assertEqual(ok_proc.returncode, 0, msg=ok_proc.stderr or ok_proc.stdout)
+        self.assertEqual(bad_proc.returncode, 1, msg=bad_proc.stderr or bad_proc.stdout)
+        self.assertIn("g7_false_neural_guard_ok", bad_proc.stderr)
 
     def test_write_hosted_golden_record_persists_json(self) -> None:
         result = HostedGoldenSmokeResult(
