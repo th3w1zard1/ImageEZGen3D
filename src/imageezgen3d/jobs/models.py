@@ -152,6 +152,7 @@ def _optional_int(value: object) -> int | None:
     return int(str(value))
 
 
+
 def _optional_view_paths(value: object) -> dict[str, str] | None:
     if not isinstance(value, dict):
         return None
