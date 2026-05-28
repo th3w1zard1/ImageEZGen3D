@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any, Callable, TypeVar
 
 from .base import AdapterCapabilities, GenerationRequest, GenerationResult
@@ -8,6 +9,19 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 # Future hosted inference must run inside @spaces.GPU (see zerogpu-runtime.md).
 _DEFAULT_GPU_DURATION_SECONDS = 120
+
+_BASE_CAPABILITIES = AdapterCapabilities(
+    name="hunyuan-zerogpu",
+    cpu_safe=False,
+    zerogpu_ready=True,
+    configured=False,
+    supports_multi_view=True,
+    outputs=("glb", "obj"),
+    notes=(
+        "ZeroGPU-first placeholder. GPU path uses @spaces.GPU scaffold; "
+        "enable only after admission gates G1–G8 close."
+    ),
+)
 
 
 def _spaces_gpu_decorator(duration: int = _DEFAULT_GPU_DURATION_SECONDS) -> Callable[[F], F]:
@@ -34,18 +48,8 @@ def _run_hunyuan_inference_on_gpu(request: GenerationRequest) -> GenerationResul
 
 
 class HunyuanPlaceholderAdapter:
-    capabilities = AdapterCapabilities(
-        name="hunyuan-zerogpu",
-        cpu_safe=False,
-        zerogpu_ready=True,
-        configured=False,
-        supports_multi_view=True,
-        outputs=("glb", "obj"),
-        notes=(
-            "ZeroGPU-first placeholder. GPU path uses @spaces.GPU scaffold; "
-            "enable only after admission gates G1–G8 close."
-        ),
-    )
+    def __init__(self, *, configured: bool = False) -> None:
+        self.capabilities = replace(_BASE_CAPABILITIES, configured=configured)
 
     def generate(self, request: GenerationRequest) -> GenerationResult:
         if not self.capabilities.configured:
