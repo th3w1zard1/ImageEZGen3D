@@ -17,8 +17,41 @@
       "reason": "Hosted ZeroGPU path (sample manifest for G6 parity; adapter not enabled)"
     },
     "neural_backend": "hunyuan-zerogpu",
+    "pipeline_mode": "shape+texture",
     "decimation_applied": true,
-    "raw_exported": true
+    "raw_exported": true,
+    "generation": {
+      "input_modality": "image",
+      "lane": "production",
+      "quality": "balanced",
+      "async_capable": false,
+      "pipeline_stages": [
+        {
+          "name": "shape",
+          "status": "succeeded",
+          "adapter": "hunyuan-zerogpu",
+          "notes": "Hunyuan shape tower (sample)"
+        },
+        {
+          "name": "texture",
+          "status": "succeeded",
+          "adapter": "hunyuan-zerogpu",
+          "notes": "Hunyuan paint tower (sample)"
+        },
+        {
+          "name": "pbr",
+          "status": "skipped",
+          "adapter": null,
+          "notes": "PBR map sidecar export deferred to Phase C."
+        },
+        {
+          "name": "export",
+          "status": "succeeded",
+          "adapter": null,
+          "notes": "Mesh exports validated."
+        }
+      ]
+    }
   },
   "artifacts": {
     "manifest": "outputs/g6-sample/manifest.json",

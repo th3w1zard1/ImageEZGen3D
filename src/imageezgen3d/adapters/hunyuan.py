@@ -4,6 +4,7 @@ from dataclasses import replace
 from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
 from .base import AdapterCapabilities, GenerationRequest, GenerationResult
+from ..hunyuan_inference import run_hunyuan_shape_texture, to_generation_result
 
 if TYPE_CHECKING:
     from ..config import AppConfig
@@ -42,12 +43,8 @@ def _spaces_gpu_decorator(duration: int = _DEFAULT_GPU_DURATION_SECONDS) -> Call
 
 @_spaces_gpu_decorator(duration=_DEFAULT_GPU_DURATION_SECONDS)
 def _run_hunyuan_inference_on_gpu(request: GenerationRequest) -> GenerationResult:
-    """GPU-isolated Hunyuan inference shell (G4). Not implemented until G3/G5–G7 close."""
-    _ = request
-    raise NotImplementedError(
-        "Hunyuan GPU inference is not wired yet. Complete dependency audit (G3), "
-        "resource fit (G5), and hosted E2E (G7) before enablement."
-    )
+    """GPU-isolated Hunyuan inference (G4). Delegates to hunyuan_inference module."""
+    return to_generation_result(run_hunyuan_shape_texture(request))
 
 
 def resolve_hunyuan_configured(*, config: AppConfig | None = None) -> bool:
