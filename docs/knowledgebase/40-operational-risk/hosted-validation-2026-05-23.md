@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 095 validation (G7 live probe in scheduled smoke)
+
+After Plan 095 (2026-05-28):
+
+- **Scheduled smoke:** `hunyuan_g7_preflight.py --live-probe --record hunyuan-g7-live-probe.json`
+- **Bundle verify:** `verify_hosted_smoke_artifacts.py` checks golden + export-tier records
+- **G7 gate:** still **OPEN** for real neural Hunyuan path — live probe proves no *false* G7 success while disabled
+
 ## Plan 094 validation (PR #63 merged to main)
 
 After Plan 094 (2026-05-28):

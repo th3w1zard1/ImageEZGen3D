@@ -60,6 +60,17 @@ jobs:
           PYTHONPATH=src python scripts/verify_hosted_export_tier_smoke_record.py
           hosted-export-tier-smoke.json
 
+      - name: Verify hosted smoke artifact bundle
+        run: PYTHONPATH=src python scripts/verify_hosted_smoke_artifacts.py
+
+      - name: Hunyuan G7 live probe (adapter disabled honesty)
+        env:
+          IMAGEEZ_HF_SPACE_URL: ${{ github.event.inputs.space_url || 'https://th3w1zard1-imageezgen3d.hf.space/' }}
+        run: |
+          PYTHONPATH=src python scripts/hunyuan_g7_preflight.py \
+            --live-probe --json --record hunyuan-g7-live-probe.json \
+            --space-url "$IMAGEEZ_HF_SPACE_URL"
+
       - name: Hunyuan preflight bundle (audit + enablement + parity)
         run: python scripts/hunyuan_preflight_bundle.py --json
 
@@ -74,6 +85,7 @@ jobs:
           path: |
             hosted-golden-smoke.json
             hosted-export-tier-smoke.json
+            hunyuan-g7-live-probe.json
             hunyuan-admission-audit.json
             hunyuan-enablement-preflight.json
           if-no-files-found: warn
