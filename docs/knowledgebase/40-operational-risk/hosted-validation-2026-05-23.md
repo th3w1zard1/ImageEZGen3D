@@ -44,6 +44,14 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 094 validation (PR #63 merged to main)
+
+After Plan 094 (2026-05-28):
+
+- **Merge:** squash `60c510b` on `main` — PR #63 (Plan 093 export-tier verify learning)
+- **Smoke guard stack on `main`:** G7 false-neural guard + golden/export-tier JSON verify + solutions index
+- **G7 gate:** still **OPEN** for real Hunyuan path
+
 ## Plan 093 validation (export-tier verify learning)
 
 After Plan 093 (2026-05-28):
