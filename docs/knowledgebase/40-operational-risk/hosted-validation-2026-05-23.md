@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 106 validation (PR #69 merged to main)
+
+After Plan 106 (2026-05-28):
+
+- **Merge:** squash `82b8730` on `main` — PR #69 (Plan 105 KB index guard stack refresh)
+- **On main:** KB index links guard stack, G7 preflight, enablement runbook; G7 still **OPEN**
+
 ## Plan 105 validation (KB index guard stack refresh)
 
 After Plan 105 (2026-05-28):
