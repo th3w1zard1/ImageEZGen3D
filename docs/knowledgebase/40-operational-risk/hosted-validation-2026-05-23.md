@@ -44,6 +44,13 @@ After PR #4 merge (`e3dec36` on `main`) and deploy commit `51bf9f293724b3ab32d85
 - **Artifacts verified:** manifest ☑ (2589 bytes) GLB ☑ (12144 bytes) OBJ ☑ (369 bytes)
 - **Evidence:** Gradio API `/generate` with Block sample (`assets/examples/teal_block.png`)
 
+## Plan 110 validation (PR #71 merged to main)
+
+After Plan 110 (2026-05-28):
+
+- **Merge:** squash `3777259` on `main` — PR #71 (Plan 109 export-tier + G7 live probe attestation)
+- **On main:** Plans 107–109 live attestation complete (golden, export-tier, G7 probe); G7 still **OPEN**
+
 ## Plan 109 validation (export-tier smoke + G7 live probe attestation)
 
 After Plan 109 (2026-05-28):
