@@ -16,6 +16,7 @@ QUALITY_GUIDANCE: dict[str, str] = {
 _BACKEND_LABELS: dict[str, str] = {
     "cpu-demo": "Local CPU Preview",
     "text-demo": "Text-to-3D Stub",
+    "text-neural": "Text-to-3D Neural",
     "hunyuan-zerogpu": "Hosted ZeroGPU",
     "auto": "Auto",
 }

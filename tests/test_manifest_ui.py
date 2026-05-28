@@ -23,6 +23,9 @@ class ManifestUiTests(unittest.TestCase):
     def test_backend_label_for_text_demo(self) -> None:
         self.assertEqual(mu.backend_display_label("text-demo"), "Text-to-3D Stub")
 
+    def test_backend_label_for_text_neural(self) -> None:
+        self.assertEqual(mu.backend_display_label("text-neural"), "Text-to-3D Neural")
+
     def test_backend_rail_chips_show_adapter_and_fallback(self) -> None:
         html = mu.backend_rail_chips_html(
             adapter_key="cpu-demo",

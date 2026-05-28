@@ -6,9 +6,9 @@ from pathlib import Path
 
 from imageezgen3d.adapters.base import GenerationRequest
 from imageezgen3d.adapters.text_demo import TextDemoAdapter
-from imageezgen3d.config import AppConfig
+from imageezgen3d.config import AppConfig, TextNeuralSettings
 from imageezgen3d.generation_pipeline import TEXT_STUB_DISCLAIMER
-from imageezgen3d.orchestrator import ImageEZOrchestrator
+from imageezgen3d.orchestrator import TEXT_NEURAL_FALLBACK_REASON, ImageEZOrchestrator
 
 
 class TextDemoAdapterTests(unittest.TestCase):
@@ -69,6 +69,10 @@ class TextDemoAdapterTests(unittest.TestCase):
                 result["parameters"]["preview_disclaimer"],
                 TEXT_STUB_DISCLAIMER,
             )
+            self.assertEqual(
+                result["parameters"]["fallback_reason"],
+                TEXT_NEURAL_FALLBACK_REASON,
+            )
             stages = {
                 item["name"]: item["status"]
                 for item in generation["pipeline_stages"]
@@ -78,3 +82,14 @@ class TextDemoAdapterTests(unittest.TestCase):
     def test_adapter_choices_include_text_demo(self) -> None:
         orchestrator = ImageEZOrchestrator(AppConfig())
         self.assertIn("text-demo", orchestrator.adapter_choices())
+
+    def test_auto_text_selects_neural_when_configured(self) -> None:
+        config = AppConfig(text_neural=TextNeuralSettings(configured=True))
+        orchestrator = ImageEZOrchestrator(config)
+        key, adapter, fallback = orchestrator.select_adapter(
+            "auto",
+            input_modality="text",
+        )
+        self.assertEqual(key, "text-neural")
+        self.assertTrue(adapter.capabilities.configured)
+        self.assertIsNone(fallback)

@@ -17,12 +17,20 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(config.app.adapter, "auto")
         self.assertTrue(config.runtime.prefer_zerogpu)
         self.assertFalse(config.hunyuan.configured)
+        self.assertFalse(config.text_neural.configured)
         self.assertIn("glb", config.exports.formats)
 
     def test_hunyuan_configured_env_override(self) -> None:
         with patch.dict(os.environ, {"IMAGEEZ_HUNYUAN_CONFIGURED": "true"}, clear=True):
             config = load_config(Path("missing.yaml"))
         self.assertTrue(config.hunyuan.configured)
+
+    def test_text_neural_configured_env_override(self) -> None:
+        with patch.dict(
+            os.environ, {"IMAGEEZ_TEXT_NEURAL_CONFIGURED": "true"}, clear=True
+        ):
+            config = load_config(Path("missing.yaml"))
+        self.assertTrue(config.text_neural.configured)
 
     def test_load_pyproject_toml(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
