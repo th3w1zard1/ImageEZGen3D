@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,13 +10,14 @@ from PIL import Image
 
 from .adapters import CpuDemoAdapter, HunyuanPlaceholderAdapter, TextDemoAdapter
 from .adapters.base import GenerationRequest, ModelAdapter
+from .config import AppConfig
+from .export_tiers import apply_pbr_stage_from_sidecar
 from .generation_pipeline import (
     PipelineStageTracker,
     TEXT_STUB_DISCLAIMER,
     build_pipeline_spec,
     decimation_target_for_spec,
 )
-from .config import AppConfig
 from .mesh_checks import inspect_artifacts
 from .preprocess import save_input_bundle
 from .runtime import RuntimeStatus, runtime_status
@@ -345,6 +347,22 @@ class ImageEZOrchestrator:
                 self.store.record_artifact(manifest, key, path)
             health = inspect_artifacts(result.artifacts)
             manifest.mesh_report = health.to_dict()
+            sidecar_path = result.artifacts.get("export_sidecar")
+            if sidecar_path is not None and Path(sidecar_path).is_file():
+                sidecar_payload = json.loads(
+                    Path(sidecar_path).read_text(encoding="utf-8")
+                )
+                apply_pbr_stage_from_sidecar(
+                    stage_tracker,
+                    sidecar_payload,
+                    adapter=result.adapter,
+                )
+            else:
+                stage_tracker.set_stage(
+                    "pbr",
+                    "skipped",
+                    notes="Export sidecar missing; PBR delivery unknown.",
+                )
             if health.status == "ok":
                 stage_tracker.mark_export_succeeded()
             else:
