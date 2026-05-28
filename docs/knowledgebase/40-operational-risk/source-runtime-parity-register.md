@@ -27,7 +27,8 @@ Living log of surfaces where repository source, built assets, documentation, and
 | P10 | Live HF Space behavior | Hosted app vs README frontmatter | 2026-05-24 | `[UI]` Block E2E on live Space; run `20260524-084947-19c70f8f`; cpu-demo fallback; manifest/GLB/OBJ verified | See [hosted-validation-2026-05-23.md](hosted-validation-2026-05-23.md); ZeroGPU adapter still disabled | OK |
 | P11 | HF Space CI deploy | `.github/workflows/hf-space.yml` + `scripts/hf_space_sync.py` | 2026-05-23 | `[REPO]` Auto sync on default branch + `v*` tags; staged minimal payload; legacy `sync-hf-space.yml` manual-only | CI upload ≠ E2E; verify after workflow edits | OK |
 | P12 | Golden sample CI attestation | `scripts/golden_sample_attestation.py` + `.github/workflows/ci.yml` job `golden-sample` | 2026-05-24 | `[REPO]` Block PNG → cpu-demo generate; manifest/GLB/OBJ/size gates in CI | Does not replace hosted P10 E2E or ZeroGPU verification | OK |
-| P13 | Hosted golden smoke CI | `scripts/hosted_golden_smoke.py` + `.github/workflows/hosted-golden-smoke.yml` | 2026-05-24 | `[REPO]` Scheduled/dispatch Gradio `/generate` on live Space; export budget + run id checks | Complements P12; first green run records run id in KB | OK |
+| P13 | Hosted golden smoke CI | `scripts/hosted_golden_smoke.py` + `.github/workflows/hosted-golden-smoke.yml` | 2026-05-28 | `[REPO]` Scheduled/dispatch Gradio `/generate` on live Space; export budget + run id checks; see P14 for verify chain | Complements P12; does not replace P10 browser attestation | OK |
+| P14 | Hosted smoke guard stack | Verify CLIs + [hosted-smoke-guard-stack-2026-05-28.md](../../solutions/best-practices/hosted-smoke-guard-stack-2026-05-28.md) | 2026-05-28 | `[REPO]` G7 false-neural guard, per-artifact JSON verify, `verify_hosted_smoke_artifacts.py`, G7 live-probe verify (Plans 078–102 on `main`) | Proves honesty while adapter disabled; does **not** close G7 | OK |
 
 ## How To Update
 
