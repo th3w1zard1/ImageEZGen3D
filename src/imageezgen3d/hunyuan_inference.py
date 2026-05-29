@@ -83,10 +83,10 @@ def resolve_default_hunyuan_backend(
 ) -> HunyuanInferenceBackend | None:
     if backend is not None:
         return backend
-    from .hunyuan_backend import resolve_hunyuan_dev_backend
+    from .hunyuan_backend import resolve_hunyuan_backend_from_config
 
     config = load_config()
-    return resolve_hunyuan_dev_backend(dev_enabled=config.hunyuan.dev_backend)
+    return resolve_hunyuan_backend_from_config(config.hunyuan)
 
 
 def run_hunyuan_shape_texture(
@@ -95,7 +95,11 @@ def run_hunyuan_shape_texture(
     backend: HunyuanInferenceBackend | None = None,
 ) -> HunyuanInferenceResult:
     """Shape then texture towers for Hunyuan3D (two-stage neural path)."""
-    from .hunyuan_backend import DevPreviewHunyuanBackend, adapter_note_for_backend
+    from .hunyuan_backend import (
+        DevPreviewHunyuanBackend,
+        WeightVerifiedHunyuanBackend,
+        adapter_note_for_backend,
+    )
 
     tracker = PipelineStageTracker()
     tracker.mark_shape_running(HUNYUAN_ADAPTER)
@@ -115,6 +119,9 @@ def run_hunyuan_shape_texture(
         if isinstance(resolved_backend, DevPreviewHunyuanBackend):
             metadata["dev_preview"] = True
             metadata["preview_disclaimer"] = adapter_note
+        if isinstance(resolved_backend, WeightVerifiedHunyuanBackend):
+            metadata["weight_backend"] = True
+            metadata["tier_c_shell"] = True
         return HunyuanInferenceResult(
             artifacts=artifacts,
             metadata=metadata,

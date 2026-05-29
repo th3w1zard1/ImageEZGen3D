@@ -204,6 +204,7 @@ class HunyuanSettings:
     model_revision: str = "0b94677654c57bb9a6b6845cd7b704ccf551d327"
     cache_dir: str = ""
     dev_backend: bool = False
+    weight_backend: bool = False
 
 
 @dataclass(frozen=True)
@@ -454,6 +455,12 @@ def load_config(path: str | Path | None = None) -> AppConfig:
                 "IMAGEEZ_HUNYUAN_DEV_BACKEND",
                 _bool_value(
                     hunyuan_raw, "dev_backend", HunyuanSettings.dev_backend
+                ),
+            ),
+            weight_backend=_env_bool(
+                "IMAGEEZ_HUNYUAN_WEIGHT_BACKEND",
+                _bool_value(
+                    hunyuan_raw, "weight_backend", HunyuanSettings.weight_backend
                 ),
             ),
         ),

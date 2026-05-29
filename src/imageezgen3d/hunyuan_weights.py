@@ -7,7 +7,8 @@ from .config import HunyuanSettings, load_config
 
 HUNYUAN_MODEL_REPO = "tencent/Hunyuan3D-2.1"
 HUNYUAN_MODEL_REVISION = "0b94677654c57bb9a6b6845cd7b704ccf551d327"
-_SHAPE_CHECKPOINT_REL = Path("hunyuan3d-dit-v2-1/model.fp16.ckpt")
+SHAPE_CHECKPOINT_REL = Path("hunyuan3d-dit-v2-1/model.fp16.ckpt")
+_SHAPE_CHECKPOINT_REL = SHAPE_CHECKPOINT_REL
 
 
 def resolve_hunyuan_cache_dir(settings: HunyuanSettings) -> Path | None:
@@ -59,6 +60,17 @@ def ensure_hunyuan_weights(
         )
         raise FileNotFoundError(msg)
     return local_root
+
+
+def resolve_shape_checkpoint(weight_root: Path) -> Path:
+    checkpoint = weight_root / SHAPE_CHECKPOINT_REL
+    if not checkpoint.is_file():
+        msg = (
+            f"Hunyuan snapshot at {weight_root} is missing expected checkpoint "
+            f"{SHAPE_CHECKPOINT_REL.as_posix()}"
+        )
+        raise FileNotFoundError(msg)
+    return checkpoint
 
 
 def describe_hunyuan_weight_pin(settings: HunyuanSettings | None = None) -> dict[str, str]:
