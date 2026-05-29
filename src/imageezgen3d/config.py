@@ -205,6 +205,7 @@ class HunyuanSettings:
     cache_dir: str = ""
     dev_backend: bool = False
     weight_backend: bool = False
+    inference_runner: str = ""
 
 
 @dataclass(frozen=True)
@@ -461,6 +462,14 @@ def load_config(path: str | Path | None = None) -> AppConfig:
                 "IMAGEEZ_HUNYUAN_WEIGHT_BACKEND",
                 _bool_value(
                     hunyuan_raw, "weight_backend", HunyuanSettings.weight_backend
+                ),
+            ),
+            inference_runner=_env_str(
+                "IMAGEEZ_HUNYUAN_INFERENCE_RUNNER",
+                str(
+                    hunyuan_raw.get(
+                        "inference_runner", HunyuanSettings.inference_runner
+                    )
                 ),
             ),
         ),

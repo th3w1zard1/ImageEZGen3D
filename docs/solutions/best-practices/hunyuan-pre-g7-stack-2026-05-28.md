@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–O)
+# Hunyuan pre-G7 stack (Phases J–P)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -12,6 +12,7 @@
 | **M** | #88 | `hunyuan_runtime`, `hunyuan_warm_weights.py`, `hunyuan_tier_c_probe.py` | Operator probe for tier B/C imports + weight warm CLI |
 | **N** | #89 | `hunyuan_tier_c_runtime`, `hunyuan_tier_c_readiness.py`, `IMAGEEZ_HUNYUAN_WEIGHT_BACKEND` | Tier B/C readiness gate + weight-backend shell |
 | **O** | #90 | `hunyuan_inference_runner`, `hunyuan_inference_runner_probe.py` | Pluggable tier-C runner protocol (unwired by default) |
+| **P** | #91 | `tencent_hunyuan_runner`, `IMAGEEZ_HUNYUAN_INFERENCE_RUNNER=tencent` | Tencent runner shell — checkpoint verify, honest stop |
 
 ## Operator commands
 
@@ -43,6 +44,6 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-O)
+## Next slice (post-P)
 
-Implement Tencent tier-C `HunyuanInferenceRunner` behind `resolve_hunyuan_inference_runner()`, then follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR and G7 Block/Vase hosted attestation.
+Integrate Tencent upstream shape+texture entrypoints inside `TencentHunyuanInferenceRunner`, then follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR and G7 Block/Vase hosted attestation.
