@@ -5,6 +5,10 @@ from pathlib import Path
 from .adapters.base import GenerationRequest
 from .generation_pipeline import PipelineStageTracker
 from .hunyuan_inference import HUNYUAN_ADAPTER, HunyuanMeshResult
+from .tencent_hunyuan_forward import (
+    ShapeForwardExecutor,
+    TextureForwardExecutor,
+)
 from .tencent_hunyuan_pipeline import (
     TencentPipelineReadinessError,
     TencentStageContext,
@@ -13,10 +17,20 @@ from .tencent_hunyuan_pipeline import (
     run_tencent_shape_stage,
     run_tencent_texture_stage,
 )
+from .tencent_mesh_convert import simple_mesh_from_obj
 
 
 class TencentHunyuanInferenceRunner:
-    """Tier-C Tencent runner: validates weights, builds forward plans, stops before __call__."""
+    """Tier-C Tencent runner: forward executors assemble `HunyuanMeshResult` when wired."""
+
+    def __init__(
+        self,
+        *,
+        shape_executor: ShapeForwardExecutor | None = None,
+        texture_executor: TextureForwardExecutor | None = None,
+    ) -> None:
+        self._shape_executor = shape_executor
+        self._texture_executor = texture_executor
 
     def run_shape_texture(
         self,
@@ -46,25 +60,37 @@ class TencentHunyuanInferenceRunner:
             weight_root=weight_root,
             shape_checkpoint=shape_checkpoint,
         )
-        shape_plan = build_tencent_shape_forward_plan(context)
+        build_tencent_shape_forward_plan(context)
 
         tracker.mark_shape_running(HUNYUAN_ADAPTER)
         try:
-            run_tencent_shape_stage(context=context)
+            shape_mesh_path = run_tencent_shape_stage(
+                context=context,
+                shape_executor=self._shape_executor,
+            )
         except NotImplementedError as exc:
             tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=str(exc))
             raise
 
+        tracker.mark_shape_succeeded_staged(
+            HUNYUAN_ADAPTER,
+            notes=f"shape mesh at {shape_mesh_path.name}",
+        )
+
         tracker.mark_texture_running(HUNYUAN_ADAPTER)
         try:
-            run_tencent_texture_stage(
+            textured_mesh_path = run_tencent_texture_stage(
                 context=context,
-                shape_mesh_path=shape_plan.output_mesh,
+                shape_mesh_path=shape_mesh_path,
+                texture_executor=self._texture_executor,
             )
         except NotImplementedError as exc:
             tracker.mark_texture_failed(HUNYUAN_ADAPTER, notes=str(exc))
             raise
 
-        message = "Tencent Hunyuan3D texture stage completed without mesh output."
-        tracker.mark_texture_failed(HUNYUAN_ADAPTER, notes=message)
-        raise NotImplementedError(message)
+        tracker.mark_texture_succeeded(
+            HUNYUAN_ADAPTER,
+            notes=f"textured mesh at {textured_mesh_path.name}",
+        )
+        mesh = simple_mesh_from_obj(textured_mesh_path)
+        return HunyuanMeshResult(mesh=mesh, raw_mesh=None)

@@ -94,7 +94,7 @@ class TencentHunyuanPipelineTests(unittest.TestCase):
                 weight_root=root,
                 shape_checkpoint=checkpoint,
             )
-            with self.assertRaisesRegex(NotImplementedError, "__call__ is not wired"):
+            with self.assertRaisesRegex(NotImplementedError, "executor is not registered"):
                 run_tencent_shape_stage(
                     context=context,
                     probe_runner=_fake_available_probe,
@@ -162,7 +162,7 @@ class TencentHunyuanPipelineTests(unittest.TestCase):
                 weight_root=root,
                 shape_checkpoint=checkpoint,
             )
-            with self.assertRaisesRegex(NotImplementedError, "__call__ is not wired"):
+            with self.assertRaisesRegex(NotImplementedError, "executor is not registered"):
                 run_tencent_texture_stage(
                     context=context,
                     probe_runner=_fake_available_probe,

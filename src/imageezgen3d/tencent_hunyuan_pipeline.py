@@ -25,13 +25,6 @@ SHAPE_PIPELINE_CLASS = "Hunyuan3DDiTPipeline"
 TEXTURE_PIPELINE_CLASS = "Hunyuan3DPaintPipeline"
 SHAPE_MODEL_SUBFOLDER = "hunyuan3d-dit-v2-1"
 
-_SHAPE_CALL_NOT_WIRED = (
-    "Tencent Hunyuan3D shape pipeline __call__ is not wired yet."
-)
-_TEXTURE_CALL_NOT_WIRED = (
-    "Tencent Hunyuan3D texture pipeline __call__ is not wired yet."
-)
-
 
 @dataclass(frozen=True)
 class TencentStageContext:
@@ -265,7 +258,14 @@ def run_tencent_shape_stage(
     *,
     context: TencentStageContext,
     probe_runner: Callable[[str], dict[str, Any]] = probe_tencent_module,
+    shape_executor: Callable[..., Path] | None = None,
 ) -> Path:
+    from .tencent_hunyuan_forward import (
+        default_shape_forward_executor,
+        import_tencent_pipeline_class,
+        invoke_tencent_shape_forward,
+    )
+
     report = ensure_tencent_pipeline_ready(probe_runner=probe_runner)
     shape_binding = report["bindings"]["shape_class"]
     if not shape_binding.get("available"):
@@ -285,8 +285,18 @@ def run_tencent_shape_stage(
             f"binding={shape_binding.get('symbol')}"
         )
         raise TencentPipelineReadinessError(message, report=report)
-    _ = plan  # reserved for upstream from_pretrained + __call__ wiring (post-S)
-    raise NotImplementedError(_SHAPE_CALL_NOT_WIRED)
+
+    pipeline_cls: type[Any] | None = None
+    try:
+        pipeline_cls = import_tencent_pipeline_class(
+            str(shape_binding["module"]),
+            str(shape_binding["attr"]),
+        )
+    except Exception:  # noqa: BLE001 — default executor stops before GPU either way
+        pipeline_cls = None
+
+    executor = shape_executor or default_shape_forward_executor
+    return invoke_tencent_shape_forward(plan, pipeline_cls, executor=executor)
 
 
 def run_tencent_texture_stage(
@@ -294,7 +304,14 @@ def run_tencent_texture_stage(
     context: TencentStageContext,
     shape_mesh_path: Path | None = None,
     probe_runner: Callable[[str], dict[str, Any]] = probe_tencent_module,
+    texture_executor: Callable[..., Path] | None = None,
 ) -> Path:
+    from .tencent_hunyuan_forward import (
+        default_texture_forward_executor,
+        import_tencent_pipeline_class,
+        invoke_tencent_texture_forward,
+    )
+
     report = ensure_tencent_pipeline_ready(probe_runner=probe_runner)
     texture_binding = report["bindings"]["texture_class"]
     if not texture_binding.get("available"):
@@ -311,8 +328,18 @@ def run_tencent_texture_stage(
     if not plan.shape_mesh.is_file() and shape_mesh_path is not None:
         message = f"Shape mesh missing at {plan.shape_mesh}"
         raise FileNotFoundError(message)
-    _ = plan  # reserved for upstream paint __call__ wiring (post-S)
-    raise NotImplementedError(_TEXTURE_CALL_NOT_WIRED)
+
+    pipeline_cls: type[Any] | None = None
+    try:
+        pipeline_cls = import_tencent_pipeline_class(
+            str(texture_binding["module"]),
+            str(texture_binding["attr"]),
+        )
+    except Exception:  # noqa: BLE001 — default executor stops before GPU either way
+        pipeline_cls = None
+
+    executor = texture_executor or default_texture_forward_executor
+    return invoke_tencent_texture_forward(plan, pipeline_cls, executor=executor)
 
 
 def format_tencent_pipeline_report(report: dict[str, Any]) -> str:
