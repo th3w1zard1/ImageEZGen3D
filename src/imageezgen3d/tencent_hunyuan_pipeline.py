@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .hunyuan_runtime import probe_import
+from .hunyuan_weights import HUNYUAN_MODEL_REPO, SHAPE_CHECKPOINT_REL
 
 # [OFFICIAL] Tencent-Hunyuan/Hunyuan3D-2.1 @ 82920d64 (G1/G3 pin)
 TENCENT_UPSTREAM_COMMIT = "82920d643c0dc2f7bfd7255f45f62d386edfe60c"
@@ -18,14 +19,17 @@ TEXTURE_PIPELINE_MODULES: tuple[tuple[str, str], ...] = (
     ("hunyuan_paint_pbr", "hy3dpaint.hunyuanpaintpbr.pipeline"),
 )
 
+SHAPE_PIPELINE_MODULE = SHAPE_PIPELINE_MODULES[0][1]
+TEXTURE_PIPELINE_MODULE = TEXTURE_PIPELINE_MODULES[0][1]
 SHAPE_PIPELINE_CLASS = "Hunyuan3DDiTPipeline"
 TEXTURE_PIPELINE_CLASS = "Hunyuan3DPaintPipeline"
+SHAPE_MODEL_SUBFOLDER = "hunyuan3d-dit-v2-1"
 
-_SHAPE_FORWARD_NOT_WIRED = (
-    "Tencent Hunyuan3D shape pipeline class is resolved but forward pass is not wired yet."
+_SHAPE_CALL_NOT_WIRED = (
+    "Tencent Hunyuan3D shape pipeline __call__ is not wired yet."
 )
-_TEXTURE_FORWARD_NOT_WIRED = (
-    "Tencent Hunyuan3D texture pipeline class is resolved but forward pass is not wired yet."
+_TEXTURE_CALL_NOT_WIRED = (
+    "Tencent Hunyuan3D texture pipeline __call__ is not wired yet."
 )
 
 
@@ -39,12 +43,97 @@ class TencentStageContext:
     shape_checkpoint: Path
 
 
+@dataclass(frozen=True)
+class TencentShapeForwardPlan:
+    """Pinned upstream shape load + __call__ contract (Hunyuan3DDiTPipeline)."""
+
+    pipeline_symbol: str
+    load_method: str
+    model_repo: str
+    model_path: Path
+    shape_checkpoint: Path
+    processed_image: Path
+    output_mesh: Path
+    subfolder: str
+    device: str
+    dtype: str
+    call_args: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class TencentTextureForwardPlan:
+    """Pinned upstream texture __call__ contract (Hunyuan3DPaintPipeline)."""
+
+    pipeline_symbol: str
+    processed_image: Path
+    shape_mesh: Path
+    output_mesh: Path
+    device: str
+    call_args: tuple[str, ...]
+
+
 class TencentPipelineReadinessError(RuntimeError):
     """Upstream Tencent pipeline modules or bindings are not ready."""
 
     def __init__(self, message: str, *, report: dict[str, Any]) -> None:
         super().__init__(message)
         self.report = report
+
+
+def describe_tencent_forward_contract() -> dict[str, Any]:
+    """Static upstream forward contract metadata for operator probes."""
+    return {
+        "upstream_commit": TENCENT_UPSTREAM_COMMIT,
+        "shape": {
+            "pipeline_class": SHAPE_PIPELINE_CLASS,
+            "pipeline_module": SHAPE_PIPELINE_MODULE,
+            "load_method": "from_pretrained",
+            "model_repo": HUNYUAN_MODEL_REPO,
+            "subfolder": SHAPE_MODEL_SUBFOLDER,
+            "checkpoint_rel": SHAPE_CHECKPOINT_REL.as_posix(),
+            "call_args": ("image", "num_inference_steps", "output_type"),
+        },
+        "texture": {
+            "pipeline_class": TEXTURE_PIPELINE_CLASS,
+            "pipeline_module": TEXTURE_PIPELINE_MODULE,
+            "load_method": "__init__",
+            "call_args": ("mesh_path", "image_path", "output_mesh_path"),
+        },
+    }
+
+
+def build_tencent_shape_forward_plan(context: TencentStageContext) -> TencentShapeForwardPlan:
+    contract = describe_tencent_forward_contract()["shape"]
+    return TencentShapeForwardPlan(
+        pipeline_symbol=f"{SHAPE_PIPELINE_MODULE}.{SHAPE_PIPELINE_CLASS}",
+        load_method=str(contract["load_method"]),
+        model_repo=str(contract["model_repo"]),
+        model_path=context.weight_root,
+        shape_checkpoint=context.shape_checkpoint,
+        processed_image=context.processed_image,
+        output_mesh=context.run_dir / "tencent_shape_mesh.obj",
+        subfolder=str(contract["subfolder"]),
+        device="cuda",
+        dtype="float16",
+        call_args=tuple(str(item) for item in contract["call_args"]),
+    )
+
+
+def build_tencent_texture_forward_plan(
+    context: TencentStageContext,
+    *,
+    shape_mesh_path: Path | None = None,
+) -> TencentTextureForwardPlan:
+    contract = describe_tencent_forward_contract()["texture"]
+    shape_mesh = shape_mesh_path or (context.run_dir / "tencent_shape_mesh.obj")
+    return TencentTextureForwardPlan(
+        pipeline_symbol=f"{TEXTURE_PIPELINE_MODULE}.{TEXTURE_PIPELINE_CLASS}",
+        processed_image=context.processed_image,
+        shape_mesh=shape_mesh,
+        output_mesh=context.run_dir / "tencent_textured_mesh.obj",
+        device="cuda",
+        call_args=tuple(str(item) for item in contract["call_args"]),
+    )
 
 
 def probe_tencent_module(module_name: str) -> dict[str, Any]:
@@ -101,15 +190,13 @@ def resolve_tencent_pipeline_bindings(
     *,
     probe_runner: Callable[[str], dict[str, Any]] = probe_tencent_module,
 ) -> dict[str, Any]:
-    shape_module = SHAPE_PIPELINE_MODULES[0][1]
-    texture_module = TEXTURE_PIPELINE_MODULES[0][1]
     shape = resolve_tencent_symbol(
-        shape_module,
+        SHAPE_PIPELINE_MODULE,
         SHAPE_PIPELINE_CLASS,
         probe_runner=probe_runner,
     )
     texture = resolve_tencent_symbol(
-        texture_module,
+        TEXTURE_PIPELINE_MODULE,
         TEXTURE_PIPELINE_CLASS,
         probe_runner=probe_runner,
     )
@@ -149,6 +236,7 @@ def probe_tencent_pipeline_modules(
         "texture_ready": texture_ready,
         "bindings": bindings,
         "bindings_ready": bindings["bindings_ready"],
+        "forward_contract": describe_tencent_forward_contract(),
         "pipeline_ready": pipeline_ready,
     }
 
@@ -177,7 +265,7 @@ def run_tencent_shape_stage(
     *,
     context: TencentStageContext,
     probe_runner: Callable[[str], dict[str, Any]] = probe_tencent_module,
-) -> None:
+) -> Path:
     report = ensure_tencent_pipeline_ready(probe_runner=probe_runner)
     shape_binding = report["bindings"]["shape_class"]
     if not shape_binding.get("available"):
@@ -189,8 +277,16 @@ def run_tencent_shape_stage(
     if not context.processed_image.is_file():
         message = f"Processed image missing at {context.processed_image}"
         raise FileNotFoundError(message)
-    _ = context  # reserved for upstream from_pretrained / __call__ wiring (post-R)
-    raise NotImplementedError(_SHAPE_FORWARD_NOT_WIRED)
+
+    plan = build_tencent_shape_forward_plan(context)
+    if plan.pipeline_symbol != shape_binding.get("symbol"):
+        message = (
+            f"Shape pipeline symbol mismatch: plan={plan.pipeline_symbol} "
+            f"binding={shape_binding.get('symbol')}"
+        )
+        raise TencentPipelineReadinessError(message, report=report)
+    _ = plan  # reserved for upstream from_pretrained + __call__ wiring (post-S)
+    raise NotImplementedError(_SHAPE_CALL_NOT_WIRED)
 
 
 def run_tencent_texture_stage(
@@ -198,17 +294,25 @@ def run_tencent_texture_stage(
     context: TencentStageContext,
     shape_mesh_path: Path | None = None,
     probe_runner: Callable[[str], dict[str, Any]] = probe_tencent_module,
-) -> None:
+) -> Path:
     report = ensure_tencent_pipeline_ready(probe_runner=probe_runner)
     texture_binding = report["bindings"]["texture_class"]
     if not texture_binding.get("available"):
         message = "Tencent texture pipeline class binding is unavailable."
         raise TencentPipelineReadinessError(message, report=report)
-    if shape_mesh_path is not None and not shape_mesh_path.is_file():
-        message = f"Shape mesh missing at {shape_mesh_path}"
+
+    plan = build_tencent_texture_forward_plan(context, shape_mesh_path=shape_mesh_path)
+    if plan.pipeline_symbol != texture_binding.get("symbol"):
+        message = (
+            f"Texture pipeline symbol mismatch: plan={plan.pipeline_symbol} "
+            f"binding={texture_binding.get('symbol')}"
+        )
+        raise TencentPipelineReadinessError(message, report=report)
+    if not plan.shape_mesh.is_file() and shape_mesh_path is not None:
+        message = f"Shape mesh missing at {plan.shape_mesh}"
         raise FileNotFoundError(message)
-    _ = (context, shape_mesh_path)  # reserved for upstream paint __call__ (post-R)
-    raise NotImplementedError(_TEXTURE_FORWARD_NOT_WIRED)
+    _ = plan  # reserved for upstream paint __call__ wiring (post-S)
+    raise NotImplementedError(_TEXTURE_CALL_NOT_WIRED)
 
 
 def format_tencent_pipeline_report(report: dict[str, Any]) -> str:
@@ -219,6 +323,7 @@ def format_tencent_pipeline_report(report: dict[str, Any]) -> str:
         f"texture_ready={report['texture_ready']}",
         f"bindings_ready={report['bindings_ready']}",
         f"pipeline_ready={report['pipeline_ready']}",
+        "forward_contract=shape+texture",
     ]
     if report.get("missing_shape"):
         lines.append(f"missing_shape={','.join(report['missing_shape'])}")

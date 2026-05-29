@@ -14,6 +14,9 @@ from PIL import Image
 from imageezgen3d.tencent_hunyuan_pipeline import (
     TencentPipelineReadinessError,
     TencentStageContext,
+    build_tencent_shape_forward_plan,
+    build_tencent_texture_forward_plan,
+    describe_tencent_forward_contract,
     ensure_tencent_pipeline_ready,
     format_tencent_pipeline_report,
     probe_tencent_pipeline_modules,
@@ -47,6 +50,7 @@ class TencentHunyuanPipelineTests(unittest.TestCase):
         self.assertIn("texture_ready", report)
         self.assertIn("bindings", report)
         self.assertIn("bindings_ready", report)
+        self.assertIn("forward_contract", report)
         self.assertIn("pipeline_ready", report)
         self.assertFalse(report["pipeline_ready"])
 
@@ -90,11 +94,53 @@ class TencentHunyuanPipelineTests(unittest.TestCase):
                 weight_root=root,
                 shape_checkpoint=checkpoint,
             )
-            with self.assertRaisesRegex(NotImplementedError, "forward pass is not wired"):
+            with self.assertRaisesRegex(NotImplementedError, "__call__ is not wired"):
                 run_tencent_shape_stage(
                     context=context,
                     probe_runner=_fake_available_probe,
                 )
+
+    def test_shape_forward_plan_matches_upstream_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            checkpoint = root / "hunyuan3d-dit-v2-1" / "model.fp16.ckpt"
+            checkpoint.parent.mkdir(parents=True)
+            checkpoint.write_bytes(b"ckpt")
+            image = root / "input.png"
+            Image.new("RGB", (8, 8), color=(10, 20, 30)).save(image)
+            context = TencentStageContext(
+                run_dir=root,
+                processed_image=image,
+                weight_root=root,
+                shape_checkpoint=checkpoint,
+            )
+            plan = build_tencent_shape_forward_plan(context)
+            contract = describe_tencent_forward_contract()["shape"]
+            self.assertEqual(plan.load_method, contract["load_method"])
+            self.assertEqual(plan.subfolder, contract["subfolder"])
+            self.assertEqual(plan.output_mesh, root / "tencent_shape_mesh.obj")
+
+    def test_texture_forward_plan_uses_shape_mesh_path(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            checkpoint = root / "model.fp16.ckpt"
+            checkpoint.write_bytes(b"ckpt")
+            image = root / "input.png"
+            shape_mesh = root / "shape.obj"
+            shape_mesh.write_text("o mesh\n", encoding="utf-8")
+            Image.new("RGB", (8, 8), color=(10, 20, 30)).save(image)
+            context = TencentStageContext(
+                run_dir=root,
+                processed_image=image,
+                weight_root=root,
+                shape_checkpoint=checkpoint,
+            )
+            plan = build_tencent_texture_forward_plan(
+                context,
+                shape_mesh_path=shape_mesh,
+            )
+            self.assertEqual(plan.shape_mesh, shape_mesh)
+            self.assertEqual(plan.output_mesh, root / "tencent_textured_mesh.obj")
 
     @patch("imageezgen3d.tencent_hunyuan_pipeline.resolve_tencent_symbol")
     def test_run_texture_stage_raises_when_bindings_ready(
@@ -116,7 +162,7 @@ class TencentHunyuanPipelineTests(unittest.TestCase):
                 weight_root=root,
                 shape_checkpoint=checkpoint,
             )
-            with self.assertRaisesRegex(NotImplementedError, "forward pass is not wired"):
+            with self.assertRaisesRegex(NotImplementedError, "__call__ is not wired"):
                 run_tencent_texture_stage(
                     context=context,
                     probe_runner=_fake_available_probe,
@@ -127,6 +173,7 @@ class TencentHunyuanPipelineTests(unittest.TestCase):
         text = format_tencent_pipeline_report(report)
         self.assertIn("hunyuan_tencent_pipeline_probe_ok=True", text)
         self.assertIn("bindings_ready=", text)
+        self.assertIn("forward_contract=", text)
 
     def test_pipeline_probe_script(self) -> None:
         result = subprocess.run(
@@ -152,6 +199,7 @@ class TencentHunyuanPipelineTests(unittest.TestCase):
         payload = json.loads(result.stdout)
         self.assertIn("missing_shape", payload)
         self.assertIn("bindings_ready", payload)
+        self.assertIn("forward_contract", payload)
 
     @patch("imageezgen3d.tencent_hunyuan_runner.ensure_tencent_pipeline_ready")
     def test_runner_reports_missing_pipeline_modules(

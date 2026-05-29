@@ -8,6 +8,7 @@ from .hunyuan_inference import HUNYUAN_ADAPTER, HunyuanMeshResult
 from .tencent_hunyuan_pipeline import (
     TencentPipelineReadinessError,
     TencentStageContext,
+    build_tencent_shape_forward_plan,
     ensure_tencent_pipeline_ready,
     run_tencent_shape_stage,
     run_tencent_texture_stage,
@@ -15,7 +16,7 @@ from .tencent_hunyuan_pipeline import (
 
 
 class TencentHunyuanInferenceRunner:
-    """Tier-C Tencent runner: validates weights, resolves pipeline bindings, stops before forward."""
+    """Tier-C Tencent runner: validates weights, builds forward plans, stops before __call__."""
 
     def run_shape_texture(
         self,
@@ -45,6 +46,7 @@ class TencentHunyuanInferenceRunner:
             weight_root=weight_root,
             shape_checkpoint=shape_checkpoint,
         )
+        shape_plan = build_tencent_shape_forward_plan(context)
 
         tracker.mark_shape_running(HUNYUAN_ADAPTER)
         try:
@@ -55,7 +57,10 @@ class TencentHunyuanInferenceRunner:
 
         tracker.mark_texture_running(HUNYUAN_ADAPTER)
         try:
-            run_tencent_texture_stage(context=context)
+            run_tencent_texture_stage(
+                context=context,
+                shape_mesh_path=shape_plan.output_mesh,
+            )
         except NotImplementedError as exc:
             tracker.mark_texture_failed(HUNYUAN_ADAPTER, notes=str(exc))
             raise
