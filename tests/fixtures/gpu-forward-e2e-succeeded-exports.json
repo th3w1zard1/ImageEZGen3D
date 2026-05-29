@@ -1,5 +1,10 @@
 {
-  "artifacts": {},
+  "artifacts": {
+    "export_sidecar": 120,
+    "glb": 1200,
+    "manifest": 500,
+    "obj": 200
+  },
   "attempt_status": "succeeded",
   "blockers": [],
   "issues": [],
@@ -21,9 +26,9 @@
     }
   ],
   "record_kind": "hunyuan_gpu_forward_e2e",
-  "run_dir": "/tmp/hunyuan-gpu-forward-e2e-example",
+  "run_dir": "/tmp/hunyuan-gpu-forward-exports-e2e-example",
   "sample_path": "assets/examples/teal_block.png",
   "skip_reason": null,
-  "with_exports": false,
+  "with_exports": true,
   "workstation_ready": true
 }

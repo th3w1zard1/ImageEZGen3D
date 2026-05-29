@@ -1,4 +1,5 @@
 {
+  "artifacts": {},
   "attempt_status": "skipped",
   "blockers": [
     "gpu_forward_disabled",
@@ -16,5 +17,6 @@
   "run_dir": null,
   "sample_path": null,
   "skip_reason": "workstation_not_ready",
+  "with_exports": false,
   "workstation_ready": false
 }
