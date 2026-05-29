@@ -21,6 +21,9 @@ _DEV_PREVIEW_NOTE = (
 _NEURAL_SHELL_NOTE = (
     "Hunyuan weights and tier-C deps verified; inference runner is not wired yet."
 )
+_NEURAL_FORWARD_NOTE = (
+    "Hunyuan Tencent neural forward path; requires tier-C GPU workstation gates."
+)
 _SUBDIVIDE_LEVELS_BY_QUALITY: dict[str, int] = {
     "draft": 0,
     "balanced": 7,
@@ -142,9 +145,19 @@ def resolve_hunyuan_backend_from_config(
     return None
 
 
-def adapter_note_for_backend(backend: HunyuanInferenceBackend) -> str:
+def adapter_note_for_backend(
+    backend: HunyuanInferenceBackend,
+    *,
+    settings: HunyuanSettings | None = None,
+) -> str:
     if isinstance(backend, DevPreviewHunyuanBackend):
         return _DEV_PREVIEW_NOTE
     if isinstance(backend, WeightVerifiedHunyuanBackend):
+        from .config import load_config
+
+        cfg = settings or load_config().hunyuan
+        runner = resolve_hunyuan_inference_runner(cfg)
+        if cfg.gpu_forward and runner is not None:
+            return _NEURAL_FORWARD_NOTE
         return _NEURAL_SHELL_NOTE
     return "Hunyuan shape+texture inference backend."

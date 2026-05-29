@@ -111,7 +111,11 @@ def run_hunyuan_shape_texture(
             request,
             raw_mesh=mesh_result.raw_mesh,
         )
-        adapter_note = adapter_note_for_backend(resolved_backend)
+        config = load_config()
+        adapter_note = adapter_note_for_backend(
+            resolved_backend,
+            settings=config.hunyuan,
+        )
         metadata = {
             **export_metadata,
             "adapter_note": adapter_note,
@@ -121,7 +125,13 @@ def run_hunyuan_shape_texture(
             metadata["preview_disclaimer"] = adapter_note
         if isinstance(resolved_backend, WeightVerifiedHunyuanBackend):
             metadata["weight_backend"] = True
-            metadata["tier_c_shell"] = True
+            from .hunyuan_inference_runner import resolve_hunyuan_inference_runner
+
+            runner = resolve_hunyuan_inference_runner(config.hunyuan)
+            if config.hunyuan.gpu_forward and runner is not None:
+                metadata["neural_forward"] = True
+            else:
+                metadata["tier_c_shell"] = True
         return HunyuanInferenceResult(
             artifacts=artifacts,
             metadata=metadata,
