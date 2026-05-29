@@ -9,15 +9,16 @@ from PIL import Image, ImageStat
 from .adapters.base import GenerationRequest
 from .exporters import SimpleMesh, make_box_mesh
 from .generation_pipeline import PipelineStageTracker
+from .config import HunyuanSettings
 from .hunyuan_inference import HUNYUAN_ADAPTER, HunyuanInferenceBackend, HunyuanMeshResult
-from .hunyuan_weights import ensure_hunyuan_weights
+from .hunyuan_tier_c_runtime import TierCReadinessError, prepare_tier_c_runtime
 from .mesh_decimation import subdivide_mesh
 
 _DEV_PREVIEW_NOTE = (
     "Dev preview mesh derived from input image colors; not Hunyuan3D neural inference."
 )
 _NEURAL_SHELL_NOTE = (
-    "Hunyuan weights verified; tier-C inference runtime is not wired yet."
+    "Hunyuan weights and tier-C deps verified; inference runner is not wired yet."
 )
 _SUBDIVIDE_LEVELS_BY_QUALITY: dict[str, int] = {
     "draft": 0,
@@ -74,16 +75,16 @@ class DevPreviewHunyuanBackend:
 
 
 class WeightVerifiedHunyuanBackend:
-    """Warm the pinned weight cache, then stop before tier-C runtime integration."""
+    """Warm weights, verify tier B/C imports, then stop before inference wiring."""
 
     def __init__(
         self,
         *,
-        ensure_weights=ensure_hunyuan_weights,
-        settings=None,
+        settings: HunyuanSettings | None = None,
+        prepare_runtime=prepare_tier_c_runtime,
     ) -> None:
-        self._ensure_weights = ensure_weights
         self._settings = settings
+        self._prepare_runtime = prepare_runtime
 
     def run_shape_texture(
         self,
@@ -91,11 +92,15 @@ class WeightVerifiedHunyuanBackend:
         *,
         tracker: PipelineStageTracker,
     ) -> HunyuanMeshResult:
-        weight_root = self._ensure_weights(settings=self._settings)
-        message = (
-            "Hunyuan tier-C inference runtime is not wired yet. "
-            f"Weights verified at {weight_root}."
-        )
+        try:
+            self._prepare_runtime(settings=self._settings)
+        except TierCReadinessError as exc:
+            tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=str(exc))
+            raise NotImplementedError(str(exc)) from exc
+        except NotImplementedError as exc:
+            tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=str(exc))
+            raise
+        message = "Hunyuan inference runner is not wired yet."
         tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=message)
         raise NotImplementedError(message)
 
@@ -104,6 +109,26 @@ def resolve_hunyuan_dev_backend(*, dev_enabled: bool) -> HunyuanInferenceBackend
     if not dev_enabled:
         return None
     return DevPreviewHunyuanBackend()
+
+
+def resolve_hunyuan_weight_backend(
+    *,
+    weight_enabled: bool,
+    settings: HunyuanSettings | None = None,
+) -> HunyuanInferenceBackend | None:
+    if not weight_enabled:
+        return None
+    return WeightVerifiedHunyuanBackend(settings=settings)
+
+
+def resolve_hunyuan_backend_from_config(
+    settings: HunyuanSettings,
+) -> HunyuanInferenceBackend | None:
+    if settings.dev_backend:
+        return DevPreviewHunyuanBackend()
+    if settings.weight_backend:
+        return WeightVerifiedHunyuanBackend(settings=settings)
+    return None
 
 
 def adapter_note_for_backend(backend: HunyuanInferenceBackend) -> str:

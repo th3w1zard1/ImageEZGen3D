@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–M)
+# Hunyuan pre-G7 stack (Phases J–N)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -10,6 +10,7 @@
 | **K** | #86 | `hunyuan_weights.ensure_hunyuan_weights()` | G2 Hub cache warm + sentinel checkpoint |
 | **L** | #87 | `hunyuan_backend` dev preview + weight-verified shell | Honest local stand-in; stops before tier-C runtime |
 | **M** | #88 | `hunyuan_runtime`, `hunyuan_warm_weights.py`, `hunyuan_tier_c_probe.py` | Operator probe for tier B/C imports + weight warm CLI |
+| **N** | #89 | `hunyuan_tier_c_runtime`, `hunyuan_tier_c_readiness.py`, `IMAGEEZ_HUNYUAN_WEIGHT_BACKEND` | Tier B/C readiness gate + weight-backend shell |
 
 ## Operator commands
 
@@ -24,6 +25,10 @@ PYTHONPATH=src python scripts/hunyuan_warm_weights.py --describe-only
 # Warm pinned snapshot (requires HF token for private/gated assets)
 PYTHONPATH=src python scripts/hunyuan_warm_weights.py
 
+# Tier B/C readiness (imports + optional weight warm; informational exit 0)
+PYTHONPATH=src python scripts/hunyuan_tier_c_readiness.py --skip-weight-warm
+PYTHONPATH=src python scripts/hunyuan_tier_c_readiness.py --json
+
 # Admission + enablement bundle (adapter disabled)
 PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 ```
@@ -34,6 +39,6 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-M)
+## Next slice (post-N)
 
-Wire real tier-C inference behind `WeightVerifiedHunyuanBackend`, then follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR and G7 Block/Vase hosted attestation.
+Wire real tier-C inference runner behind `prepare_tier_c_runtime()` / `WeightVerifiedHunyuanBackend`, then follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR and G7 Block/Vase hosted attestation.
