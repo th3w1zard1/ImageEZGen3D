@@ -10,7 +10,13 @@ Gate **G9** closes when an explicit enablement PR merges with rollback steps doc
 python scripts/hunyuan_preflight_bundle.py
 ```
 
-Writes `hunyuan-admission-audit.json` and `hunyuan-enablement-preflight.json` in the current directory and runs parity verify.
+**Tier-C workstation (after admission preflight passes):**
+
+```bash
+PYTHONPATH=src python scripts/hunyuan_g9_preflight_bundle.py --record-dir . --strict
+```
+
+Writes admission, enablement, workstation, and G9 bundle JSON under `--record-dir` and verifies record + parity. Expect `workstation_evidence_ready=false` on CI; on tier-C GPU workstation re-run until `ok=true` in `g9-workstation-bundle.json`.
 
 **Individual steps (same contract):**
 

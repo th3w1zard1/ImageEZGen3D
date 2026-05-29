@@ -18,6 +18,9 @@ build/
 !.env.example
 hunyuan-admission-audit.json
 hunyuan-enablement-preflight.json
+g9-workstation-bundle.json
+workstation-enablement-preflight.json
+gpu-forward-e2e.json
 *.glb
 *.obj
 *.ply
