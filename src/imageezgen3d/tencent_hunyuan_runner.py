@@ -3,11 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 
 from .adapters.base import GenerationRequest
+from .config import HunyuanSettings
 from .generation_pipeline import PipelineStageTracker
 from .hunyuan_inference import HUNYUAN_ADAPTER, HunyuanMeshResult
 from .tencent_hunyuan_forward import (
     ShapeForwardExecutor,
     TextureForwardExecutor,
+    resolve_tencent_forward_executors,
 )
 from .tencent_hunyuan_pipeline import (
     TencentPipelineReadinessError,
@@ -28,7 +30,12 @@ class TencentHunyuanInferenceRunner:
         *,
         shape_executor: ShapeForwardExecutor | None = None,
         texture_executor: TextureForwardExecutor | None = None,
+        settings: HunyuanSettings | None = None,
     ) -> None:
+        if shape_executor is None and texture_executor is None:
+            shape_executor, texture_executor = resolve_tencent_forward_executors(
+                settings
+            )
         self._shape_executor = shape_executor
         self._texture_executor = texture_executor
 

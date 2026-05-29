@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–T)
+# Hunyuan pre-G7 stack (Phases J–U)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -17,6 +17,7 @@
 | **R** | #93 | `TencentStageContext`, pipeline class bindings | Resolve `Hunyuan3DDiTPipeline` / `Hunyuan3DPaintPipeline`; stop before forward |
 | **S** | #94 | `TencentShapeForwardPlan`, forward contract probe | Build `from_pretrained` / `__call__` plans; stop before neural execution |
 | **T** | #95 | `tencent_mesh_convert`, forward executors | Mesh conversion + injectable executors; default stops before GPU |
+| **U** | #96 | `gpu_*_forward_executor`, `IMAGEEZ_HUNYUAN_GPU_FORWARD` | Opt-in GPU upstream forward; default off for CI/Space |
 
 ## Operator commands
 
@@ -51,6 +52,6 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-T)
+## Next slice (post-U)
 
-Register default GPU forward executors that call upstream `from_pretrained` / `__call__`, then follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR and G7 Block/Vase hosted attestation.
+Validate GPU forward on a tier-C workstation with warmed weights, then follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR and G7 Block/Vase hosted attestation.

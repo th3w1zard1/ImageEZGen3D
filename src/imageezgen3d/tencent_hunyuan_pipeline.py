@@ -219,6 +219,8 @@ def probe_tencent_pipeline_modules(
     texture_ready = not missing_texture
     bindings = resolve_tencent_pipeline_bindings(probe_runner=probe_runner)
     pipeline_ready = shape_ready and texture_ready and bindings["bindings_ready"]
+    from .tencent_hunyuan_forward import describe_tencent_gpu_forward_readiness
+
     return {
         "upstream_commit": TENCENT_UPSTREAM_COMMIT,
         "shape": shape,
@@ -230,6 +232,7 @@ def probe_tencent_pipeline_modules(
         "bindings": bindings,
         "bindings_ready": bindings["bindings_ready"],
         "forward_contract": describe_tencent_forward_contract(),
+        "gpu_forward": describe_tencent_gpu_forward_readiness(),
         "pipeline_ready": pipeline_ready,
     }
 
@@ -351,6 +354,8 @@ def format_tencent_pipeline_report(report: dict[str, Any]) -> str:
         f"bindings_ready={report['bindings_ready']}",
         f"pipeline_ready={report['pipeline_ready']}",
         "forward_contract=shape+texture",
+        f"gpu_forward_enabled={report['gpu_forward']['gpu_forward_enabled']}",
+        f"gpu_forward_ready={report['gpu_forward']['gpu_forward_ready']}",
     ]
     if report.get("missing_shape"):
         lines.append(f"missing_shape={','.join(report['missing_shape'])}")
