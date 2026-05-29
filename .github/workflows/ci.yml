@@ -143,8 +143,8 @@ jobs:
       - name: Workstation enablement fixture verify
         run: PYTHONPATH=src python scripts/verify_workstation_enablement_fixtures.py
 
-      - name: G9 workstation preflight bundle (CI-like skip path)
-        run: PYTHONPATH=src python scripts/hunyuan_g9_preflight_bundle.py --skip-weight-warm
+      - name: G7 enablement preflight bundle (CI-like skip path)
+        run: PYTHONPATH=src python scripts/hunyuan_g7_enablement_preflight_bundle.py --skip-weight-warm
 
       - name: G9 workstation bundle fixture verify
         run: PYTHONPATH=src python scripts/verify_g9_workstation_bundle_fixtures.py
