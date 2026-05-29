@@ -18,7 +18,6 @@ from imageezgen3d.tencent_hunyuan_forward import (
 )
 from imageezgen3d.tencent_hunyuan_pipeline import (
     TencentShapeForwardPlan,
-    TencentTextureForwardPlan,
     build_tencent_shape_forward_plan,
     build_tencent_texture_forward_plan,
     TencentStageContext,
