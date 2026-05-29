@@ -13,6 +13,7 @@ from imageezgen3d.generation_pipeline import PipelineStageTracker
 from imageezgen3d.hunyuan_backend import (
     DevPreviewHunyuanBackend,
     WeightVerifiedHunyuanBackend,
+    adapter_note_for_backend,
     resolve_hunyuan_backend_from_config,
     resolve_hunyuan_dev_backend,
     resolve_hunyuan_weight_backend,
@@ -107,6 +108,17 @@ class HunyuanBackendTests(unittest.TestCase):
         settings = HunyuanSettings(dev_backend=True, weight_backend=True)
         backend = resolve_hunyuan_backend_from_config(settings)
         self.assertIsInstance(backend, DevPreviewHunyuanBackend)
+
+    def test_adapter_note_neural_forward_when_gpu_runner_set(self) -> None:
+        settings = HunyuanSettings(
+            gpu_forward=True,
+            inference_runner="tencent",
+        )
+        note = adapter_note_for_backend(
+            WeightVerifiedHunyuanBackend(settings=settings),
+            settings=settings,
+        )
+        self.assertIn("neural forward", note.lower())
 
     def test_weight_backend_env_raises_with_missing_tier_c(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
