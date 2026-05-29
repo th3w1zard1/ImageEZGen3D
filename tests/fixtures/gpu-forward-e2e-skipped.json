@@ -1,0 +1,20 @@
+{
+  "attempt_status": "skipped",
+  "blockers": [
+    "gpu_forward_disabled",
+    "tier_b",
+    "tier_c"
+  ],
+  "issues": [
+    "attempt_status='skipped' (expected 'succeeded' for ok=True)"
+  ],
+  "mesh_faces": null,
+  "mesh_vertices": null,
+  "ok": false,
+  "pipeline_stages": [],
+  "record_kind": "hunyuan_gpu_forward_e2e",
+  "run_dir": null,
+  "sample_path": null,
+  "skip_reason": "workstation_not_ready",
+  "workstation_ready": false
+}
