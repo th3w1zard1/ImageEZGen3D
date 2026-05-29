@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–AE)
+# Hunyuan pre-G7 stack (Phases J–AF)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -28,6 +28,7 @@
 | **AC** | #104 | `hunyuan_workstation_enablement_record`, `verify_workstation_enablement_record.py` | Enablement attestation record + verify for G9 evidence |
 | **AD** | #105 | `hunyuan_g9_workstation_bundle.py` | Admission preflight bundle + workstation enablement record |
 | **AE** | #106 | `hunyuan_g9_workstation_bundle_record`, `verify_g9_workstation_bundle_record.py` | G9 bundle attestation record + verify for tier-C evidence |
+| **AF** | #107 | `hunyuan_g9_preflight_bundle.py`, `verify_g9_workstation_artifact_parity.py` | G9 preflight bundle + cross-artifact parity |
 
 ## Operator commands
 
@@ -90,6 +91,9 @@ PYTHONPATH=src python scripts/hunyuan_g9_workstation_bundle.py --record-dir .
 PYTHONPATH=src python scripts/hunyuan_g9_workstation_bundle.py --record-dir . --strict
 PYTHONPATH=src python scripts/verify_g9_workstation_bundle_record.py g9-workstation-bundle.json
 PYTHONPATH=src python scripts/verify_g9_workstation_bundle_fixtures.py
+PYTHONPATH=src python scripts/hunyuan_g9_preflight_bundle.py --record-dir .
+PYTHONPATH=src python scripts/hunyuan_g9_preflight_bundle.py --record-dir . --strict
+PYTHONPATH=src python scripts/verify_g9_workstation_artifact_parity.py --record-dir .
 
 # Admission + enablement bundle (adapter disabled)
 PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
@@ -101,6 +105,6 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-AE)
+## Next slice (post-AF)
 
-On a tier-C workstation: `hunyuan_g9_workstation_bundle.py --record-dir . --strict` until `g9-workstation-bundle.json` has `ok=true`, then follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md).
+Pre-G7 **code** automation is structurally complete through Phase AF. Next work is operational tier-C evidence (`hunyuan_g9_preflight_bundle.py --record-dir . --strict` until `ok=true`) and G7 hosted neural E2E per [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) — not another pre-G7 bundle slice unless inference wiring lands.
