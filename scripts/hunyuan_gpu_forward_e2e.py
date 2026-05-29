@@ -10,6 +10,10 @@ _REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
 
+from imageezgen3d.hunyuan_gpu_forward_e2e_attestation import (  # noqa: E402
+    attestation_from_attempt_report,
+    write_attestation_record,
+)
 from imageezgen3d.hunyuan_gpu_forward_smoke import (  # noqa: E402
     DEFAULT_GPU_FORWARD_E2E_SAMPLE,
     attempt_gpu_forward_workstation_e2e,
@@ -47,6 +51,12 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Exit 1 when attempt_status is failed (workstation was ready).",
     )
+    parser.add_argument(
+        "--record",
+        type=Path,
+        default=None,
+        help="Write GPU forward E2E attestation JSON to this path.",
+    )
     args = parser.parse_args(argv)
 
     run_dir = args.output_dir
@@ -60,6 +70,9 @@ def main(argv: list[str] | None = None) -> int:
         run_dir=run_dir,
         skip_weight_warm=args.skip_weight_warm,
     )
+    if args.record is not None:
+        attestation = attestation_from_attempt_report(report)
+        write_attestation_record(args.record, attestation)
 
     if args.as_json:
         print(json.dumps(report, indent=2, sort_keys=True))

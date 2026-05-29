@@ -1,0 +1,27 @@
+{
+  "attempt_status": "succeeded",
+  "blockers": [],
+  "issues": [],
+  "mesh_faces": 12,
+  "mesh_vertices": 8,
+  "ok": true,
+  "pipeline_stages": [
+    {
+      "adapter": "hunyuan-zerogpu",
+      "name": "shape",
+      "notes": "shape mesh at shape.obj",
+      "status": "succeeded"
+    },
+    {
+      "adapter": "hunyuan-zerogpu",
+      "name": "texture",
+      "notes": "textured mesh at textured.obj",
+      "status": "succeeded"
+    }
+  ],
+  "record_kind": "hunyuan_gpu_forward_e2e",
+  "run_dir": "/tmp/hunyuan-gpu-forward-e2e-example",
+  "sample_path": "assets/examples/teal_block.png",
+  "skip_reason": null,
+  "workstation_ready": true
+}
