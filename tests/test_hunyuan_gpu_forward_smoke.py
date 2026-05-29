@@ -12,6 +12,7 @@ from unittest import mock
 from imageezgen3d.config import HunyuanSettings
 from imageezgen3d.hunyuan_gpu_forward_smoke import (
     attempt_gpu_forward_workstation_e2e,
+    attempt_gpu_forward_workstation_exports_e2e,
     evaluate_gpu_forward_workstation_readiness,
     format_gpu_forward_e2e_report,
     format_gpu_forward_workstation_report,
@@ -177,6 +178,15 @@ class HunyuanGpuForwardSmokeTests(unittest.TestCase):
         text = format_gpu_forward_e2e_report(report)
         self.assertIn("hunyuan_gpu_forward_e2e_ok=True", text)
         self.assertIn("attempt_status=skipped", text)
+
+    def test_exports_e2e_skips_when_workstation_not_ready(self) -> None:
+        report = attempt_gpu_forward_workstation_exports_e2e(
+            run_dir=Path("/tmp/unused"),
+            settings=HunyuanSettings(gpu_forward=False),
+            skip_weight_warm=True,
+        )
+        self.assertEqual(report["attempt_status"], "skipped")
+        self.assertFalse(report["with_exports"])
 
     def test_gpu_forward_e2e_script(self) -> None:
         result = subprocess.run(

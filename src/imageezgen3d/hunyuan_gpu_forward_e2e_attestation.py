@@ -5,7 +5,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from .hunyuan_gpu_forward_smoke import attempt_gpu_forward_workstation_e2e
+from .golden_sample import MIN_ARTIFACT_BYTES, REQUIRED_ARTIFACT_KEYS
+from .hunyuan_gpu_forward_smoke import (
+    attempt_gpu_forward_workstation_e2e,
+    attempt_gpu_forward_workstation_exports_e2e,
+)
 from .hunyuan_inference import HUNYUAN_ADAPTER
 
 RECORD_KIND = "hunyuan_gpu_forward_e2e"
@@ -26,6 +30,8 @@ class GpuForwardE2eAttestation:
     sample_path: str | None = None
     run_dir: str | None = None
     pipeline_stages: tuple[dict[str, Any], ...] = ()
+    with_exports: bool = False
+    artifacts: tuple[tuple[str, int], ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -41,6 +47,8 @@ class GpuForwardE2eAttestation:
             "sample_path": self.sample_path,
             "run_dir": self.run_dir,
             "pipeline_stages": list(self.pipeline_stages),
+            "with_exports": self.with_exports,
+            "artifacts": {key: size for key, size in self.artifacts},
         }
 
 
@@ -64,6 +72,21 @@ def _pipeline_stage_issues(stages: list[dict[str, Any]]) -> list[str]:
     return issues
 
 
+def _artifact_issues(artifacts: dict[str, int]) -> list[str]:
+    issues: list[str] = []
+    for key in REQUIRED_ARTIFACT_KEYS:
+        size = artifacts.get(key)
+        if size is None:
+            issues.append(f"Missing artifact key: {key}")
+            continue
+        minimum = MIN_ARTIFACT_BYTES[key]
+        if size < minimum:
+            issues.append(
+                f"Artifact {key} too small ({size} bytes, minimum {minimum})"
+            )
+    return issues
+
+
 def attestation_from_attempt_report(report: dict[str, Any]) -> GpuForwardE2eAttestation:
     readiness = report.get("readiness") or {}
     attempt_status = str(report.get("attempt_status") or "skipped")
@@ -72,6 +95,11 @@ def attestation_from_attempt_report(report: dict[str, Any]) -> GpuForwardE2eAtte
     pipeline_stages = tuple(report.get("pipeline_stages") or [])
     mesh_vertices = report.get("mesh_vertices")
     mesh_faces = report.get("mesh_faces")
+    with_exports = bool(report.get("with_exports"))
+    raw_artifacts = report.get("artifacts") or {}
+    artifacts = tuple(
+        sorted((str(key), int(size)) for key, size in raw_artifacts.items())
+    )
 
     issues: list[str] = []
     if attempt_status != "succeeded":
@@ -90,6 +118,8 @@ def attestation_from_attempt_report(report: dict[str, Any]) -> GpuForwardE2eAtte
                 f"minimum {MIN_MESH_FACES})"
             )
         issues.extend(_pipeline_stage_issues(list(pipeline_stages)))
+        if with_exports:
+            issues.extend(_artifact_issues(dict(raw_artifacts)))
 
     return GpuForwardE2eAttestation(
         ok=not issues and attempt_status == "succeeded",
@@ -103,6 +133,8 @@ def attestation_from_attempt_report(report: dict[str, Any]) -> GpuForwardE2eAtte
         sample_path=report.get("sample_path"),
         run_dir=report.get("run_dir"),
         pipeline_stages=pipeline_stages,
+        with_exports=with_exports,
+        artifacts=artifacts,
     )
 
 
@@ -111,8 +143,14 @@ def run_gpu_forward_e2e_attestation(
     sample_path: Path | None = None,
     run_dir: Path | None = None,
     skip_weight_warm: bool = False,
+    with_exports: bool = False,
 ) -> GpuForwardE2eAttestation:
-    report = attempt_gpu_forward_workstation_e2e(
+    attempt = (
+        attempt_gpu_forward_workstation_exports_e2e
+        if with_exports
+        else attempt_gpu_forward_workstation_e2e
+    )
+    report = attempt(
         sample_path=sample_path,
         run_dir=run_dir,
         skip_weight_warm=skip_weight_warm,
@@ -131,6 +169,10 @@ def format_attestation_report(attestation: GpuForwardE2eAttestation) -> str:
     if attestation.mesh_vertices is not None:
         lines.append(f"mesh_vertices={attestation.mesh_vertices}")
         lines.append(f"mesh_faces={attestation.mesh_faces}")
+    if attestation.with_exports:
+        lines.append(f"with_exports={attestation.with_exports}")
+        for key, size in attestation.artifacts:
+            lines.append(f"{key}_bytes={size}")
     if attestation.blockers:
         lines.append(f"blockers={','.join(attestation.blockers)}")
     for issue in attestation.issues:
@@ -165,6 +207,8 @@ def verify_gpu_forward_e2e_record(payload: dict[str, Any]) -> list[str]:
         "blockers",
         "issues",
         "pipeline_stages",
+        "with_exports",
+        "artifacts",
     ):
         if key not in payload:
             issues.append(f"Missing required key: {key}")
@@ -180,6 +224,8 @@ def verify_gpu_forward_e2e_record(payload: dict[str, Any]) -> list[str]:
                 "mesh_vertices": payload.get("mesh_vertices"),
                 "mesh_faces": payload.get("mesh_faces"),
                 "pipeline_stages": payload.get("pipeline_stages") or [],
+                "with_exports": payload.get("with_exports"),
+                "artifacts": payload.get("artifacts") or {},
             }
         )
         if not attestation.ok:

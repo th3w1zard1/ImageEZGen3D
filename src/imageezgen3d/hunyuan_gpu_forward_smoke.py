@@ -8,6 +8,7 @@ from .config import HunyuanSettings, load_config
 from .exporters import mesh_topology
 from .generation_pipeline import PipelineStageTracker
 from .hunyuan_backend import WeightVerifiedHunyuanBackend
+from .hunyuan_inference import run_hunyuan_shape_texture
 from .hunyuan_tier_c_runtime import evaluate_tier_c_readiness
 from .tencent_hunyuan_forward import (
     describe_tencent_gpu_forward_readiness,
@@ -87,14 +88,13 @@ def format_gpu_forward_workstation_report(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def attempt_gpu_forward_workstation_e2e(
+def _prepare_gpu_forward_e2e_attempt(
     *,
-    sample_path: Path | None = None,
-    run_dir: Path | None = None,
-    settings: HunyuanSettings | None = None,
-    skip_weight_warm: bool = False,
-) -> dict[str, Any]:
-    """Run weight-verified Tencent GPU forward when workstation gates pass."""
+    sample_path: Path | None,
+    run_dir: Path | None,
+    settings: HunyuanSettings | None,
+    skip_weight_warm: bool,
+) -> tuple[dict[str, Any], HunyuanSettings, GenerationRequest] | dict[str, Any]:
     cfg = settings or load_config().hunyuan
     readiness = evaluate_gpu_forward_workstation_readiness(
         settings=cfg,
@@ -110,6 +110,8 @@ def attempt_gpu_forward_workstation_e2e(
         "mesh_faces": None,
         "sample_path": None,
         "run_dir": None,
+        "with_exports": False,
+        "artifacts": {},
     }
 
     if not readiness["workstation_ready"]:
@@ -131,8 +133,6 @@ def attempt_gpu_forward_workstation_e2e(
         return report
 
     report["run_dir"] = str(run_dir)
-    tracker = PipelineStageTracker()
-    backend = WeightVerifiedHunyuanBackend(settings=cfg)
     request = GenerationRequest(
         run_dir=run_dir,
         processed_image=sample,
@@ -141,6 +141,29 @@ def attempt_gpu_forward_workstation_e2e(
         seed=1,
         decimation_target=25_000,
     )
+    return report, cfg, request
+
+
+def attempt_gpu_forward_workstation_e2e(
+    *,
+    sample_path: Path | None = None,
+    run_dir: Path | None = None,
+    settings: HunyuanSettings | None = None,
+    skip_weight_warm: bool = False,
+) -> dict[str, Any]:
+    """Run weight-verified Tencent GPU forward when workstation gates pass."""
+    prepared = _prepare_gpu_forward_e2e_attempt(
+        sample_path=sample_path,
+        run_dir=run_dir,
+        settings=settings,
+        skip_weight_warm=skip_weight_warm,
+    )
+    if isinstance(prepared, dict):
+        return prepared
+    report, cfg, request = prepared
+
+    tracker = PipelineStageTracker()
+    backend = WeightVerifiedHunyuanBackend(settings=cfg)
 
     try:
         mesh_result = backend.run_shape_texture(request, tracker=tracker)
@@ -163,6 +186,52 @@ def attempt_gpu_forward_workstation_e2e(
     return report
 
 
+def attempt_gpu_forward_workstation_exports_e2e(
+    *,
+    sample_path: Path | None = None,
+    run_dir: Path | None = None,
+    settings: HunyuanSettings | None = None,
+    skip_weight_warm: bool = False,
+) -> dict[str, Any]:
+    """Run GPU forward through `run_hunyuan_shape_texture` with G6 export finalization."""
+    prepared = _prepare_gpu_forward_e2e_attempt(
+        sample_path=sample_path,
+        run_dir=run_dir,
+        settings=settings,
+        skip_weight_warm=skip_weight_warm,
+    )
+    if isinstance(prepared, dict):
+        return prepared
+    report, cfg, request = prepared
+    report["with_exports"] = True
+
+    backend = WeightVerifiedHunyuanBackend(settings=cfg)
+    try:
+        inference = run_hunyuan_shape_texture(request, backend=backend)
+    except NotImplementedError as exc:
+        report["attempt_status"] = "not_implemented"
+        report["error"] = str(exc)
+        report["pipeline_stages"] = []
+        return report
+    except Exception as exc:
+        report["attempt_status"] = "failed"
+        report["error"] = str(exc)
+        return report
+
+    artifacts: dict[str, int] = {}
+    for key, path_value in inference.artifacts.items():
+        path = Path(path_value)
+        if path.is_file():
+            artifacts[key] = path.stat().st_size
+
+    report["attempt_status"] = "succeeded"
+    report["mesh_vertices"] = inference.metadata.get("vertex_count")
+    report["mesh_faces"] = inference.metadata.get("face_count")
+    report["pipeline_stages"] = list(inference.pipeline_stages)
+    report["artifacts"] = artifacts
+    return report
+
+
 def format_gpu_forward_e2e_report(report: dict[str, Any]) -> str:
     readiness = report["readiness"]
     lines = [
@@ -177,6 +246,10 @@ def format_gpu_forward_e2e_report(report: dict[str, Any]) -> str:
     if report.get("mesh_vertices") is not None:
         lines.append(f"mesh_vertices={report['mesh_vertices']}")
         lines.append(f"mesh_faces={report['mesh_faces']}")
+    if report.get("with_exports"):
+        lines.append(f"with_exports={report['with_exports']}")
+        for key, size in sorted(report.get("artifacts", {}).items()):
+            lines.append(f"{key}_bytes={size}")
     if readiness.get("blockers"):
         lines.append(f"blockers={','.join(readiness['blockers'])}")
     return "\n".join(lines) + "\n"

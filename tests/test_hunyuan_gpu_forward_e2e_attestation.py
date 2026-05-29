@@ -70,6 +70,38 @@ class HunyuanGpuForwardE2eAttestationTests(unittest.TestCase):
         self.assertFalse(attestation.ok)
         self.assertTrue(any("shape" in issue for issue in attestation.issues))
 
+    def test_succeeded_with_exports_requires_artifacts(self) -> None:
+        attestation = attestation_from_attempt_report(
+            {
+                "readiness": {"workstation_ready": True, "blockers": []},
+                "attempt_status": "succeeded",
+                "mesh_vertices": 100,
+                "mesh_faces": 50,
+                "with_exports": True,
+                "artifacts": {},
+                "pipeline_stages": [
+                    {
+                        "name": "shape",
+                        "status": "succeeded",
+                        "adapter": HUNYUAN_ADAPTER,
+                    },
+                    {
+                        "name": "texture",
+                        "status": "succeeded",
+                        "adapter": HUNYUAN_ADAPTER,
+                    },
+                ],
+            }
+        )
+        self.assertFalse(attestation.ok)
+        self.assertTrue(any("artifact" in issue.lower() for issue in attestation.issues))
+
+    def test_verify_succeeded_exports_fixture(self) -> None:
+        issues = verify_gpu_forward_e2e_record_file(
+            FIXTURES / "gpu-forward-e2e-succeeded-exports.json"
+        )
+        self.assertEqual(issues, [])
+
     def test_verify_skipped_fixture(self) -> None:
         issues = verify_gpu_forward_e2e_record_file(
             FIXTURES / "gpu-forward-e2e-skipped.json"
@@ -89,6 +121,27 @@ class HunyuanGpuForwardE2eAttestationTests(unittest.TestCase):
         payload["pipeline_stages"] = []
         issues = verify_gpu_forward_e2e_record(payload)
         self.assertTrue(issues)
+
+    @mock.patch(
+        "imageezgen3d.hunyuan_gpu_forward_e2e_attestation.attempt_gpu_forward_workstation_exports_e2e"
+    )
+    def test_run_attestation_with_exports(
+        self,
+        attempt: mock.MagicMock,
+    ) -> None:
+        attempt.return_value = {
+            "readiness": {"workstation_ready": False, "blockers": ["cuda"]},
+            "attempt_status": "skipped",
+            "skip_reason": "workstation_not_ready",
+            "with_exports": True,
+            "artifacts": {},
+        }
+        attestation = run_gpu_forward_e2e_attestation(
+            skip_weight_warm=True,
+            with_exports=True,
+        )
+        self.assertFalse(attestation.ok)
+        attempt.assert_called_once()
 
     @mock.patch(
         "imageezgen3d.hunyuan_gpu_forward_e2e_attestation.attempt_gpu_forward_workstation_e2e"
@@ -157,6 +210,18 @@ class HunyuanGpuForwardE2eAttestationTests(unittest.TestCase):
             payload = json.loads(record.read_text(encoding="utf-8"))
             self.assertEqual(payload["record_kind"], "hunyuan_gpu_forward_e2e")
             self.assertFalse(payload["ok"])
+
+    def test_exports_e2e_script(self) -> None:
+        result = subprocess.run(
+            [sys.executable, "scripts/hunyuan_gpu_forward_exports_e2e.py"],
+            check=False,
+            capture_output=True,
+            text=True,
+            env={**__import__("os").environ, "PYTHONPATH": "src"},
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr or result.stdout)
+        self.assertIn("hunyuan_gpu_forward_e2e_ok=True", result.stdout)
+        self.assertIn("attempt_status=skipped", result.stdout)
 
 
 if __name__ == "__main__":
