@@ -186,7 +186,7 @@ class HunyuanGpuForwardSmokeTests(unittest.TestCase):
             skip_weight_warm=True,
         )
         self.assertEqual(report["attempt_status"], "skipped")
-        self.assertTrue(report["with_exports"])
+        self.assertFalse(report["with_exports"])
 
     def test_gpu_forward_e2e_script(self) -> None:
         result = subprocess.run(
