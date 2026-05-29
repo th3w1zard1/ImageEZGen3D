@@ -134,6 +134,9 @@ jobs:
       - name: Hunyuan preflight bundle (audit + enablement + parity)
         run: python scripts/hunyuan_preflight_bundle.py
 
+      - name: GPU forward E2E fixture verify
+        run: PYTHONPATH=src python scripts/verify_gpu_forward_e2e_fixtures.py
+
       - name: Hunyuan G7 preflight readiness (G1-G6)
         run: PYTHONPATH=src python scripts/hunyuan_g7_preflight.py
 
