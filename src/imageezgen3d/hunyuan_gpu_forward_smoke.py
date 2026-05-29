@@ -1,14 +1,21 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
+from .adapters.base import GenerationRequest
 from .config import HunyuanSettings, load_config
+from .exporters import mesh_topology
+from .generation_pipeline import PipelineStageTracker
+from .hunyuan_backend import WeightVerifiedHunyuanBackend
 from .hunyuan_tier_c_runtime import evaluate_tier_c_readiness
 from .tencent_hunyuan_forward import (
     describe_tencent_gpu_forward_readiness,
     resolve_tencent_forward_executors,
 )
 from .tencent_hunyuan_pipeline import probe_tencent_pipeline_modules
+
+DEFAULT_GPU_FORWARD_E2E_SAMPLE = Path("assets/examples/teal_block.png")
 
 
 def evaluate_gpu_forward_workstation_readiness(
@@ -77,4 +84,99 @@ def format_gpu_forward_workstation_report(report: dict[str, Any]) -> str:
         lines.append(f"blockers={','.join(report['blockers'])}")
     if report["tier_c"].get("weight_root"):
         lines.append(f"weight_root={report['tier_c']['weight_root']}")
+    return "\n".join(lines) + "\n"
+
+
+def attempt_gpu_forward_workstation_e2e(
+    *,
+    sample_path: Path | None = None,
+    run_dir: Path | None = None,
+    settings: HunyuanSettings | None = None,
+    skip_weight_warm: bool = False,
+) -> dict[str, Any]:
+    """Run weight-verified Tencent GPU forward when workstation gates pass."""
+    cfg = settings or load_config().hunyuan
+    readiness = evaluate_gpu_forward_workstation_readiness(
+        settings=cfg,
+        skip_weight_warm=skip_weight_warm,
+    )
+    report: dict[str, Any] = {
+        "readiness": readiness,
+        "attempt_status": "skipped",
+        "skip_reason": None,
+        "error": None,
+        "pipeline_stages": [],
+        "mesh_vertices": None,
+        "mesh_faces": None,
+        "sample_path": None,
+        "run_dir": None,
+    }
+
+    if not readiness["workstation_ready"]:
+        report["skip_reason"] = "workstation_not_ready"
+        return report
+    if not cfg.weight_backend:
+        report["skip_reason"] = "weight_backend_disabled"
+        return report
+
+    sample = sample_path or DEFAULT_GPU_FORWARD_E2E_SAMPLE
+    report["sample_path"] = str(sample)
+    if not sample.is_file():
+        report["skip_reason"] = "sample_missing"
+        report["error"] = f"Sample image not found: {sample}"
+        return report
+    if run_dir is None:
+        report["skip_reason"] = "run_dir_required"
+        report["error"] = "run_dir is required for GPU forward E2E attempts."
+        return report
+
+    report["run_dir"] = str(run_dir)
+    tracker = PipelineStageTracker()
+    backend = WeightVerifiedHunyuanBackend(settings=cfg)
+    request = GenerationRequest(
+        run_dir=run_dir,
+        processed_image=sample,
+        view_images={},
+        quality="draft",
+        seed=1,
+        decimation_target=25_000,
+    )
+
+    try:
+        mesh_result = backend.run_shape_texture(request, tracker=tracker)
+    except NotImplementedError as exc:
+        report["attempt_status"] = "not_implemented"
+        report["error"] = str(exc)
+        report["pipeline_stages"] = list(tracker.stages)
+        return report
+    except Exception as exc:
+        report["attempt_status"] = "failed"
+        report["error"] = str(exc)
+        report["pipeline_stages"] = list(tracker.stages)
+        return report
+
+    vertices, faces = mesh_topology(mesh_result.mesh)
+    report["attempt_status"] = "succeeded"
+    report["mesh_vertices"] = vertices
+    report["mesh_faces"] = faces
+    report["pipeline_stages"] = list(tracker.stages)
+    return report
+
+
+def format_gpu_forward_e2e_report(report: dict[str, Any]) -> str:
+    readiness = report["readiness"]
+    lines = [
+        "hunyuan_gpu_forward_e2e_ok=True",
+        f"attempt_status={report['attempt_status']}",
+        f"workstation_ready={readiness['workstation_ready']}",
+    ]
+    if report.get("skip_reason"):
+        lines.append(f"skip_reason={report['skip_reason']}")
+    if report.get("error"):
+        lines.append(f"error={report['error']}")
+    if report.get("mesh_vertices") is not None:
+        lines.append(f"mesh_vertices={report['mesh_vertices']}")
+        lines.append(f"mesh_faces={report['mesh_faces']}")
+    if readiness.get("blockers"):
+        lines.append(f"blockers={','.join(readiness['blockers'])}")
     return "\n".join(lines) + "\n"
