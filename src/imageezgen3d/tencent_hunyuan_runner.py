@@ -7,13 +7,15 @@ from .generation_pipeline import PipelineStageTracker
 from .hunyuan_inference import HUNYUAN_ADAPTER, HunyuanMeshResult
 from .tencent_hunyuan_pipeline import (
     TencentPipelineReadinessError,
+    TencentStageContext,
     ensure_tencent_pipeline_ready,
     run_tencent_shape_stage,
+    run_tencent_texture_stage,
 )
 
 
 class TencentHunyuanInferenceRunner:
-    """Tier-C Tencent runner shell: validates weights and pipeline probes, stops before neural inference."""
+    """Tier-C Tencent runner: validates weights, resolves pipeline bindings, stops before forward."""
 
     def run_shape_texture(
         self,
@@ -37,13 +39,27 @@ class TencentHunyuanInferenceRunner:
             tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=str(exc))
             raise NotImplementedError(str(exc)) from exc
 
+        context = TencentStageContext(
+            run_dir=Path(request.run_dir),
+            processed_image=Path(request.processed_image),
+            weight_root=weight_root,
+            shape_checkpoint=shape_checkpoint,
+        )
+
         tracker.mark_shape_running(HUNYUAN_ADAPTER)
         try:
-            run_tencent_shape_stage()
+            run_tencent_shape_stage(context=context)
         except NotImplementedError as exc:
             tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=str(exc))
             raise
 
-        message = "Tencent Hunyuan3D shape stage completed without mesh output."
-        tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=message)
+        tracker.mark_texture_running(HUNYUAN_ADAPTER)
+        try:
+            run_tencent_texture_stage(context=context)
+        except NotImplementedError as exc:
+            tracker.mark_texture_failed(HUNYUAN_ADAPTER, notes=str(exc))
+            raise
+
+        message = "Tencent Hunyuan3D texture stage completed without mesh output."
+        tracker.mark_texture_failed(HUNYUAN_ADAPTER, notes=message)
         raise NotImplementedError(message)

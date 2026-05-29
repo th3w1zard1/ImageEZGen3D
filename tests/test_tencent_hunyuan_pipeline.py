@@ -4,16 +4,37 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
+
+from PIL import Image
 
 from imageezgen3d.tencent_hunyuan_pipeline import (
     TencentPipelineReadinessError,
+    TencentStageContext,
     ensure_tencent_pipeline_ready,
     format_tencent_pipeline_report,
     probe_tencent_pipeline_modules,
+    resolve_tencent_pipeline_bindings,
     run_tencent_shape_stage,
+    run_tencent_texture_stage,
 )
+
+
+def _fake_available_probe(_module: str) -> dict[str, object]:
+    return {"available": True}
+
+
+def _fake_binding(symbol: str) -> dict[str, object]:
+    return {
+        "available": True,
+        "module": symbol.rsplit(".", 1)[0],
+        "attr": symbol.rsplit(".", 1)[-1],
+        "symbol": symbol,
+        "symbol_type": "type",
+    }
 
 
 class TencentHunyuanPipelineTests(unittest.TestCase):
@@ -24,6 +45,8 @@ class TencentHunyuanPipelineTests(unittest.TestCase):
         self.assertIn("texture", report)
         self.assertIn("shape_ready", report)
         self.assertIn("texture_ready", report)
+        self.assertIn("bindings", report)
+        self.assertIn("bindings_ready", report)
         self.assertIn("pipeline_ready", report)
         self.assertFalse(report["pipeline_ready"])
 
@@ -35,18 +58,75 @@ class TencentHunyuanPipelineTests(unittest.TestCase):
             ensure_tencent_pipeline_ready(probe_runner=fake_probe)
         self.assertIn("Missing Tencent shape pipeline modules", str(ctx.exception))
 
-    def test_run_shape_stage_raises_when_modules_ready(self) -> None:
-        def fake_probe(_module: str) -> dict[str, object]:
-            return {"available": True}
+    @patch("imageezgen3d.tencent_hunyuan_pipeline.resolve_tencent_symbol")
+    def test_bindings_ready_when_symbols_resolve(
+        self,
+        resolve_symbol: object,
+    ) -> None:
+        resolve_symbol.side_effect = lambda module, attr, **kwargs: _fake_binding(
+            f"{module}.{attr}"
+        )
+        bindings = resolve_tencent_pipeline_bindings(probe_runner=_fake_available_probe)
+        self.assertTrue(bindings["bindings_ready"])
+        self.assertEqual(bindings["missing_bindings"], [])
 
-        with self.assertRaisesRegex(NotImplementedError, "shape tower entrypoints"):
-            run_tencent_shape_stage(probe_runner=fake_probe)
+    @patch("imageezgen3d.tencent_hunyuan_pipeline.resolve_tencent_symbol")
+    def test_run_shape_stage_raises_when_bindings_ready(
+        self,
+        resolve_symbol: object,
+    ) -> None:
+        resolve_symbol.side_effect = lambda module, attr, **kwargs: _fake_binding(
+            f"{module}.{attr}"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            checkpoint = root / "model.fp16.ckpt"
+            checkpoint.write_bytes(b"ckpt")
+            image = root / "input.png"
+            Image.new("RGB", (8, 8), color=(10, 20, 30)).save(image)
+            context = TencentStageContext(
+                run_dir=root,
+                processed_image=image,
+                weight_root=root,
+                shape_checkpoint=checkpoint,
+            )
+            with self.assertRaisesRegex(NotImplementedError, "forward pass is not wired"):
+                run_tencent_shape_stage(
+                    context=context,
+                    probe_runner=_fake_available_probe,
+                )
 
-    def test_format_report_includes_missing_modules(self) -> None:
+    @patch("imageezgen3d.tencent_hunyuan_pipeline.resolve_tencent_symbol")
+    def test_run_texture_stage_raises_when_bindings_ready(
+        self,
+        resolve_symbol: object,
+    ) -> None:
+        resolve_symbol.side_effect = lambda module, attr, **kwargs: _fake_binding(
+            f"{module}.{attr}"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            checkpoint = root / "model.fp16.ckpt"
+            checkpoint.write_bytes(b"ckpt")
+            image = root / "input.png"
+            Image.new("RGB", (8, 8), color=(10, 20, 30)).save(image)
+            context = TencentStageContext(
+                run_dir=root,
+                processed_image=image,
+                weight_root=root,
+                shape_checkpoint=checkpoint,
+            )
+            with self.assertRaisesRegex(NotImplementedError, "forward pass is not wired"):
+                run_tencent_texture_stage(
+                    context=context,
+                    probe_runner=_fake_available_probe,
+                )
+
+    def test_format_report_includes_bindings(self) -> None:
         report = probe_tencent_pipeline_modules()
         text = format_tencent_pipeline_report(report)
         self.assertIn("hunyuan_tencent_pipeline_probe_ok=True", text)
-        self.assertIn("shape_ready=", text)
+        self.assertIn("bindings_ready=", text)
 
     def test_pipeline_probe_script(self) -> None:
         result = subprocess.run(
@@ -58,6 +138,7 @@ class TencentHunyuanPipelineTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, msg=result.stderr or result.stdout)
         self.assertIn("hunyuan_tencent_pipeline_probe_ok=True", result.stdout)
+        self.assertIn("bindings_ready=", result.stdout)
 
     def test_pipeline_probe_script_json(self) -> None:
         result = subprocess.run(
@@ -70,17 +151,13 @@ class TencentHunyuanPipelineTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, msg=result.stderr or result.stdout)
         payload = json.loads(result.stdout)
         self.assertIn("missing_shape", payload)
+        self.assertIn("bindings_ready", payload)
 
     @patch("imageezgen3d.tencent_hunyuan_runner.ensure_tencent_pipeline_ready")
     def test_runner_reports_missing_pipeline_modules(
         self,
         ensure_ready: object,
     ) -> None:
-        from pathlib import Path
-        import tempfile
-
-        from PIL import Image
-
         from imageezgen3d.adapters.base import GenerationRequest
         from imageezgen3d.generation_pipeline import PipelineStageTracker
         from imageezgen3d.tencent_hunyuan_runner import TencentHunyuanInferenceRunner
