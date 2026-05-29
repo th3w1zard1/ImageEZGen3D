@@ -5,14 +5,15 @@ from pathlib import Path
 from .adapters.base import GenerationRequest
 from .generation_pipeline import PipelineStageTracker
 from .hunyuan_inference import HUNYUAN_ADAPTER, HunyuanMeshResult
-
-_TENCENT_INTEGRATION_NOTE = (
-    "Tencent Hunyuan3D shape+texture pipeline is not integrated yet."
+from .tencent_hunyuan_pipeline import (
+    TencentPipelineReadinessError,
+    ensure_tencent_pipeline_ready,
+    run_tencent_shape_stage,
 )
 
 
 class TencentHunyuanInferenceRunner:
-    """Tier-C Tencent runner shell: validates weights, stops before neural inference."""
+    """Tier-C Tencent runner shell: validates weights and pipeline probes, stops before neural inference."""
 
     def run_shape_texture(
         self,
@@ -30,9 +31,19 @@ class TencentHunyuanInferenceRunner:
             tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=message)
             raise FileNotFoundError(message)
 
+        try:
+            ensure_tencent_pipeline_ready()
+        except TencentPipelineReadinessError as exc:
+            tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=str(exc))
+            raise NotImplementedError(str(exc)) from exc
+
         tracker.mark_shape_running(HUNYUAN_ADAPTER)
-        message = (
-            f"{_TENCENT_INTEGRATION_NOTE} Checkpoint verified at {shape_checkpoint}."
-        )
+        try:
+            run_tencent_shape_stage()
+        except NotImplementedError as exc:
+            tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=str(exc))
+            raise
+
+        message = "Tencent Hunyuan3D shape stage completed without mesh output."
         tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=message)
         raise NotImplementedError(message)
