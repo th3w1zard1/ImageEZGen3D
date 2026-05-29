@@ -29,7 +29,8 @@
 ## Recommended next execution slice
 
 1. Run `python scripts/hunyuan_preflight_bundle.py` locally (do not commit output JSON).
-2. Wire Hunyuan GPU inference in `_run_hunyuan_inference_on_gpu` (separate plan/PR).
+2. On tier-C workstation: `PYTHONPATH=src python scripts/hunyuan_g7_enablement_preflight_bundle.py --record-dir . --strict` until `g7_enablement_ready=true`.
+3. Wire Hunyuan GPU inference in `_run_hunyuan_inference_on_gpu` when tier-C evidence exists (separate plan/PR).
 3. Follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR (`IMAGEEZ_HUNYUAN_CONFIGURED=true` on Space only with G7 evidence).
 4. Deploy Space; run Block/Vase; update `hosted-validation-2026-05-23.md` with `## G7 validation` only after real neural path is proven.
 5. Re-run scheduled smoke; confirm manifests and downloads.

@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–AF)
+# Hunyuan pre-G7 stack (Phases J–AG)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -29,6 +29,7 @@
 | **AD** | #105 | `hunyuan_g9_workstation_bundle.py` | Admission preflight bundle + workstation enablement record |
 | **AE** | #106 | `hunyuan_g9_workstation_bundle_record`, `verify_g9_workstation_bundle_record.py` | G9 bundle attestation record + verify for tier-C evidence |
 | **AF** | #107 | `hunyuan_g9_preflight_bundle.py`, `verify_g9_workstation_artifact_parity.py` | G9 preflight bundle + cross-artifact parity |
+| **AG** | #108 | `hunyuan_g7_enablement_preflight_bundle.py` | G9 preflight + G7 readiness (G1–G6) for enablement operators |
 
 ## Operator commands
 
@@ -95,6 +96,9 @@ PYTHONPATH=src python scripts/hunyuan_g9_preflight_bundle.py --record-dir .
 PYTHONPATH=src python scripts/hunyuan_g9_preflight_bundle.py --record-dir . --strict
 PYTHONPATH=src python scripts/verify_g9_workstation_artifact_parity.py --record-dir .
 
+PYTHONPATH=src python scripts/hunyuan_g7_enablement_preflight_bundle.py --record-dir .
+PYTHONPATH=src python scripts/hunyuan_g7_enablement_preflight_bundle.py --record-dir . --strict
+
 # Admission + enablement bundle (adapter disabled)
 PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 ```
@@ -105,6 +109,6 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-AF)
+## Next slice (post-AG)
 
-Pre-G7 **code** automation is structurally complete through Phase AF. Next work is operational tier-C evidence (`hunyuan_g9_preflight_bundle.py --record-dir . --strict` until `ok=true`) and G7 hosted neural E2E per [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) — not another pre-G7 bundle slice unless inference wiring lands.
+G7 enablement operator preflight is on `main` through Phase AG. Next code slice: **GPU inference wiring** for configured adapter path (`_run_hunyuan_inference_on_gpu` → real Tencent forward on tier-C/ZeroGPU) per [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md). Do **not** set `IMAGEEZ_HUNYUAN_CONFIGURED=true` on Space without G7 hosted neural evidence.
