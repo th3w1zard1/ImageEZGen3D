@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .config import HunyuanSettings, load_config
+from .hunyuan_inference_runner import resolve_hunyuan_inference_runner
 from .hunyuan_runtime import probe_hunyuan_runtime
 from .hunyuan_weights import (
     describe_hunyuan_weight_pin,
@@ -49,7 +50,7 @@ def evaluate_tier_c_readiness(
         "weights_verified": False,
         "weight_root": "",
         "shape_checkpoint": "",
-        "inference_wired": False,
+        "inference_wired": resolve_hunyuan_inference_runner(cfg) is not None,
     }
     if skip_weight_warm or not runtime["tier_b_available"] or not runtime["tier_c_available"]:
         return report

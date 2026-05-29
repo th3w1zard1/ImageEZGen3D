@@ -11,6 +11,7 @@ from .exporters import SimpleMesh, make_box_mesh
 from .generation_pipeline import PipelineStageTracker
 from .config import HunyuanSettings
 from .hunyuan_inference import HUNYUAN_ADAPTER, HunyuanInferenceBackend, HunyuanMeshResult
+from .hunyuan_inference_runner import resolve_hunyuan_inference_runner
 from .hunyuan_tier_c_runtime import TierCReadinessError, prepare_tier_c_runtime
 from .mesh_decimation import subdivide_mesh
 
@@ -93,16 +94,26 @@ class WeightVerifiedHunyuanBackend:
         tracker: PipelineStageTracker,
     ) -> HunyuanMeshResult:
         try:
-            self._prepare_runtime(settings=self._settings)
+            report = self._prepare_runtime(settings=self._settings)
         except TierCReadinessError as exc:
             tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=str(exc))
             raise NotImplementedError(str(exc)) from exc
         except NotImplementedError as exc:
             tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=str(exc))
             raise
-        message = "Hunyuan inference runner is not wired yet."
-        tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=message)
-        raise NotImplementedError(message)
+
+        runner = resolve_hunyuan_inference_runner(self._settings)
+        if runner is None:
+            message = "Hunyuan inference runner is not wired yet."
+            tracker.mark_shape_failed(HUNYUAN_ADAPTER, notes=message)
+            raise NotImplementedError(message)
+
+        return runner.run_shape_texture(
+            request,
+            tracker=tracker,
+            weight_root=Path(report["weight_root"]),
+            shape_checkpoint=Path(report["shape_checkpoint"]),
+        )
 
 
 def resolve_hunyuan_dev_backend(*, dev_enabled: bool) -> HunyuanInferenceBackend | None:
