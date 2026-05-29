@@ -140,6 +140,9 @@ jobs:
       - name: Workstation evidence preflight (no record)
         run: PYTHONPATH=src python scripts/hunyuan_workstation_evidence_preflight.py /tmp/missing-gpu-forward-e2e.json
 
+      - name: Workstation enablement fixture verify
+        run: PYTHONPATH=src python scripts/verify_workstation_enablement_fixtures.py
+
       - name: Hunyuan G7 preflight readiness (G1-G6)
         run: PYTHONPATH=src python scripts/hunyuan_g7_preflight.py
 
