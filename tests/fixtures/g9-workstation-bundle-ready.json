@@ -1,0 +1,63 @@
+{
+  "enablement": {
+    "attempt_status": "succeeded",
+    "bundle": {
+      "attestation": {
+        "artifacts": {
+          "export_sidecar": 120,
+          "glb": 1200,
+          "manifest": 500,
+          "obj": 200
+        },
+        "attempt_status": "succeeded",
+        "blockers": [],
+        "issues": [],
+        "mesh_faces": 12,
+        "mesh_vertices": 8,
+        "ok": true,
+        "pipeline_stages": [
+          {
+            "adapter": "hunyuan-zerogpu",
+            "name": "shape",
+            "status": "succeeded"
+          },
+          {
+            "adapter": "hunyuan-zerogpu",
+            "name": "texture",
+            "status": "succeeded"
+          }
+        ],
+        "record_kind": "hunyuan_gpu_forward_e2e",
+        "with_exports": true,
+        "workstation_ready": true
+      },
+      "bundle_ok": true,
+      "evidence_ok": true,
+      "probe_blockers": [],
+      "workstation_ready": true
+    },
+    "bundle_ok": true,
+    "enablement_workstation_ready": true,
+    "evidence": {
+      "attempt_status": "succeeded",
+      "issues": [],
+      "record_kind": "hunyuan_gpu_forward_e2e",
+      "record_present": true,
+      "record_verify_ok": true,
+      "with_exports": true,
+      "workstation_evidence_ok": true
+    },
+    "issues": [],
+    "ok": true,
+    "record_kind": "hunyuan_workstation_enablement",
+    "workstation_evidence_ok": true,
+    "workstation_ready": true
+  },
+  "g9_workstation_bundle_ok": true,
+  "issues": [],
+  "ok": true,
+  "preflight_bundle_ok": true,
+  "record_kind": "hunyuan_g9_workstation_bundle",
+  "workstation_evidence_ready": true,
+  "workstation_record_verify_ok": true
+}
