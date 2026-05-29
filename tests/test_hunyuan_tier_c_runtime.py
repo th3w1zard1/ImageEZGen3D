@@ -7,9 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
 
-from imageezgen3d.config import HunyuanSettings
 from imageezgen3d.hunyuan_tier_c_runtime import (
     TierCReadinessError,
     evaluate_tier_c_readiness,
