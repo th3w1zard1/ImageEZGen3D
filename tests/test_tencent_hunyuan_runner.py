@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+from PIL import Image
+
 from imageezgen3d.config import HunyuanSettings
 from imageezgen3d.generation_pipeline import PipelineStageTracker
 from imageezgen3d.adapters.base import GenerationRequest
@@ -33,7 +35,7 @@ class TencentHunyuanRunnerTests(unittest.TestCase):
             checkpoint.mkdir(parents=True)
             (checkpoint / "model.fp16.ckpt").write_bytes(b"ckpt")
             image = root / "input.png"
-            image.write_bytes(b"not-a-real-png")
+            Image.new("RGB", (8, 8), color=(10, 20, 30)).save(image)
             request = GenerationRequest(
                 run_dir=root,
                 processed_image=image,
@@ -43,7 +45,10 @@ class TencentHunyuanRunnerTests(unittest.TestCase):
             )
             runner = TencentHunyuanInferenceRunner()
             tracker = PipelineStageTracker()
-            with self.assertRaisesRegex(NotImplementedError, "not integrated yet"):
+            with self.assertRaisesRegex(
+                NotImplementedError,
+                "Missing Tencent shape pipeline modules",
+            ):
                 runner.run_shape_texture(
                     request,
                     tracker=tracker,
