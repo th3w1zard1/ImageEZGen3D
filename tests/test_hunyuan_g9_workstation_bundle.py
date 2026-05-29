@@ -27,6 +27,7 @@ class HunyuanG9WorkstationBundleTests(unittest.TestCase):
             self.assertTrue(result.g9_workstation_bundle_ok)
             self.assertFalse(result.workstation_evidence_ready)
             self.assertTrue(result.record_path.is_file())
+            self.assertTrue(result.bundle_record_path.is_file())
 
     def test_format_report(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

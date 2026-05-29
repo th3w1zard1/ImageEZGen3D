@@ -1,0 +1,76 @@
+{
+  "enablement": {
+    "attempt_status": "skipped",
+    "bundle": {
+      "attestation": {
+        "artifacts": {},
+        "attempt_status": "skipped",
+        "blockers": [
+          "gpu_forward_disabled",
+          "tier_b",
+          "tier_c",
+          "inference_runner",
+          "tencent_pipeline",
+          "torch",
+          "cuda"
+        ],
+        "issues": [
+          "attempt_status='skipped' (expected 'succeeded' for ok=True)"
+        ],
+        "mesh_faces": null,
+        "mesh_vertices": null,
+        "ok": false,
+        "pipeline_stages": [],
+        "record_kind": "hunyuan_gpu_forward_e2e",
+        "run_dir": null,
+        "sample_path": null,
+        "skip_reason": "workstation_not_ready",
+        "with_exports": false,
+        "workstation_ready": false
+      },
+      "bundle_ok": true,
+      "evidence_ok": false,
+      "probe_blockers": [
+        "gpu_forward_disabled",
+        "tier_b",
+        "tier_c",
+        "inference_runner",
+        "tencent_pipeline",
+        "torch",
+        "cuda"
+      ],
+      "record_path": null,
+      "verify_issues": [],
+      "workstation_ready": false
+    },
+    "bundle_ok": true,
+    "enablement_workstation_ready": false,
+    "evidence": {
+      "attempt_status": "skipped",
+      "issues": [
+        "workstation_evidence_ok=false (attempt_status='skipped', ok=False)"
+      ],
+      "record_kind": "hunyuan_gpu_forward_e2e",
+      "record_path": "/tmp/gpu-forward-e2e.json",
+      "record_present": true,
+      "record_verify_ok": true,
+      "with_exports": false,
+      "workstation_evidence_ok": false
+    },
+    "issues": [
+      "enablement_workstation_ready=false (bundle_ok=True, workstation_evidence_ok=False)",
+      "workstation_evidence_ok=false (attempt_status='skipped', ok=False)"
+    ],
+    "ok": false,
+    "record_kind": "hunyuan_workstation_enablement",
+    "workstation_evidence_ok": false,
+    "workstation_ready": false
+  },
+  "g9_workstation_bundle_ok": true,
+  "issues": [],
+  "ok": false,
+  "preflight_bundle_ok": true,
+  "record_kind": "hunyuan_g9_workstation_bundle",
+  "workstation_evidence_ready": false,
+  "workstation_record_verify_ok": true
+}

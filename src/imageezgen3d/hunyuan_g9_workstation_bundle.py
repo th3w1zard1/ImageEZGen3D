@@ -8,6 +8,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .hunyuan_g9_workstation_bundle_record import (
+    DEFAULT_G9_BUNDLE_RECORD,
+    G9WorkstationBundleAttestation,
+    attestation_from_enablement,
+    verify_g9_workstation_bundle_record_file,
+    write_g9_workstation_bundle_record,
+)
 from .hunyuan_workstation_enablement_record import (
     DEFAULT_ENABLEMENT_RECORD,
     WorkstationEnablementAttestation,
@@ -27,7 +34,9 @@ class G9WorkstationBundleResult:
     g9_workstation_bundle_ok: bool
     workstation_evidence_ready: bool
     record_path: Path
+    bundle_record_path: Path
     attestation: WorkstationEnablementAttestation
+    bundle_attestation: G9WorkstationBundleAttestation
     issues: tuple[str, ...]
 
     def to_dict(self) -> dict[str, Any]:
@@ -37,7 +46,9 @@ class G9WorkstationBundleResult:
             "g9_workstation_bundle_ok": self.g9_workstation_bundle_ok,
             "workstation_evidence_ready": self.workstation_evidence_ready,
             "record_path": str(self.record_path),
+            "bundle_record_path": str(self.bundle_record_path),
             "attestation": self.attestation.to_dict(),
+            "bundle_attestation": self.bundle_attestation.to_dict(),
             "issues": list(self.issues),
         }
 
@@ -73,6 +84,7 @@ def run_g9_workstation_bundle(
     directory = (record_dir or Path(".")).resolve()
     directory.mkdir(parents=True, exist_ok=True)
     record_path = directory / DEFAULT_ENABLEMENT_RECORD
+    bundle_record_path = directory / DEFAULT_G9_BUNDLE_RECORD
 
     preflight_ok = _run_preflight_bundle(directory)
     attestation = run_workstation_enablement_attestation(
@@ -89,13 +101,38 @@ def run_g9_workstation_bundle(
 
     record_verify_ok = not verify_issues
     bundle_ok = preflight_ok and record_verify_ok
+
+    bundle_attestation = attestation_from_enablement(
+        preflight_bundle_ok=preflight_ok,
+        workstation_record_verify_ok=record_verify_ok,
+        g9_workstation_bundle_ok=bundle_ok,
+        workstation_evidence_ready=attestation.ok,
+        issues=tuple(issues),
+        attestation=attestation,
+    )
+    write_g9_workstation_bundle_record(bundle_record_path, bundle_attestation)
+    issues.extend(verify_g9_workstation_bundle_record_file(bundle_record_path))
+    bundle_ok = preflight_ok and record_verify_ok and not issues
+
+    bundle_attestation = attestation_from_enablement(
+        preflight_bundle_ok=preflight_ok,
+        workstation_record_verify_ok=record_verify_ok,
+        g9_workstation_bundle_ok=bundle_ok,
+        workstation_evidence_ready=attestation.ok,
+        issues=tuple(issues),
+        attestation=attestation,
+    )
+    write_g9_workstation_bundle_record(bundle_record_path, bundle_attestation)
+
     return G9WorkstationBundleResult(
         preflight_bundle_ok=preflight_ok,
         workstation_record_verify_ok=record_verify_ok,
         g9_workstation_bundle_ok=bundle_ok,
         workstation_evidence_ready=attestation.ok,
         record_path=record_path,
+        bundle_record_path=bundle_record_path,
         attestation=attestation,
+        bundle_attestation=bundle_attestation,
         issues=tuple(issues),
     )
 
@@ -108,6 +145,7 @@ def format_g9_workstation_bundle_report(result: G9WorkstationBundleResult) -> st
         f"g9_workstation_bundle_ok={result.g9_workstation_bundle_ok}",
         f"workstation_evidence_ready={result.workstation_evidence_ready}",
         f"record_path={result.record_path}",
+        f"bundle_record_path={result.bundle_record_path}",
         f"audit_record={result.record_path.parent / _AUDIT_JSON}",
         f"enablement_preflight_record={result.record_path.parent / _PREFLIGHT_JSON}",
     ]
