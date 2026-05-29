@@ -51,6 +51,7 @@ class TencentHunyuanPipelineTests(unittest.TestCase):
         self.assertIn("bindings", report)
         self.assertIn("bindings_ready", report)
         self.assertIn("forward_contract", report)
+        self.assertIn("gpu_forward", report)
         self.assertIn("pipeline_ready", report)
         self.assertFalse(report["pipeline_ready"])
 
@@ -174,6 +175,7 @@ class TencentHunyuanPipelineTests(unittest.TestCase):
         self.assertIn("hunyuan_tencent_pipeline_probe_ok=True", text)
         self.assertIn("bindings_ready=", text)
         self.assertIn("forward_contract=", text)
+        self.assertIn("gpu_forward_enabled=", text)
 
     def test_pipeline_probe_script(self) -> None:
         result = subprocess.run(

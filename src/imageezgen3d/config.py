@@ -206,6 +206,7 @@ class HunyuanSettings:
     dev_backend: bool = False
     weight_backend: bool = False
     inference_runner: str = ""
+    gpu_forward: bool = False
 
 
 @dataclass(frozen=True)
@@ -470,6 +471,12 @@ def load_config(path: str | Path | None = None) -> AppConfig:
                     hunyuan_raw.get(
                         "inference_runner", HunyuanSettings.inference_runner
                     )
+                ),
+            ),
+            gpu_forward=_env_bool(
+                "IMAGEEZ_HUNYUAN_GPU_FORWARD",
+                _bool_value(
+                    hunyuan_raw, "gpu_forward", HunyuanSettings.gpu_forward
                 ),
             ),
         ),
