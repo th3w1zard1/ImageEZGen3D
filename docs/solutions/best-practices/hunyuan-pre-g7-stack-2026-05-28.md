@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–AC)
+# Hunyuan pre-G7 stack (Phases J–AD)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -26,6 +26,7 @@
 | **AA** | #102 | `hunyuan_workstation_evidence_preflight.py` | Optional local `gpu-forward-e2e.json` evidence preflight |
 | **AB** | #103 | `hunyuan_workstation_enablement_preflight.py` | Bundle + evidence preflight in one operator command |
 | **AC** | #104 | `hunyuan_workstation_enablement_record`, `verify_workstation_enablement_record.py` | Enablement attestation record + verify for G9 evidence |
+| **AD** | #105 | `hunyuan_g9_workstation_bundle.py` | Admission preflight bundle + workstation enablement record |
 
 ## Operator commands
 
@@ -83,6 +84,10 @@ PYTHONPATH=src python scripts/hunyuan_workstation_enablement_preflight.py --reco
 PYTHONPATH=src python scripts/hunyuan_workstation_enablement_preflight.py --record workstation-enablement-preflight.json
 PYTHONPATH=src python scripts/verify_workstation_enablement_record.py workstation-enablement-preflight.json
 
+# G9 operator bundle (admission preflight + workstation enablement record)
+PYTHONPATH=src python scripts/hunyuan_g9_workstation_bundle.py --record-dir .
+PYTHONPATH=src python scripts/hunyuan_g9_workstation_bundle.py --record-dir . --strict
+
 # Admission + enablement bundle (adapter disabled)
 PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 ```
@@ -93,6 +98,6 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-AC)
+## Next slice (post-AD)
 
-On a tier-C workstation: `hunyuan_workstation_enablement_preflight.py --record workstation-enablement-preflight.json --strict` until `ok=true`, verify with `verify_workstation_enablement_record.py`, then follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md).
+On a tier-C workstation: `hunyuan_g9_workstation_bundle.py --record-dir . --strict` until `workstation_evidence_ready=true`, then follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md).
