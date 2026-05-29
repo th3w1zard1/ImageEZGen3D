@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–V)
+# Hunyuan pre-G7 stack (Phases J–W)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -19,6 +19,7 @@
 | **T** | #95 | `tencent_mesh_convert`, forward executors | Mesh conversion + injectable executors; default stops before GPU |
 | **U** | #96 | `gpu_*_forward_executor`, `IMAGEEZ_HUNYUAN_GPU_FORWARD` | Opt-in GPU upstream forward; default off for CI/Space |
 | **V** | #97 | `hunyuan_gpu_forward_smoke`, `hunyuan_gpu_forward_probe.py` | Workstation readiness probe (tier-C + pipeline + CUDA) |
+| **W** | #98 | `attempt_gpu_forward_workstation_e2e`, `hunyuan_gpu_forward_e2e.py` | Weight-verified GPU forward attempt when gates pass |
 
 ## Operator commands
 
@@ -47,6 +48,13 @@ PYTHONPATH=src python scripts/hunyuan_tencent_pipeline_probe.py
 PYTHONPATH=src python scripts/hunyuan_gpu_forward_probe.py
 PYTHONPATH=src python scripts/hunyuan_gpu_forward_probe.py --json --skip-weight-warm
 
+# GPU forward E2E attempt (skips on CI; tier-C workstation + env below)
+export IMAGEEZ_HUNYUAN_GPU_FORWARD=true
+export IMAGEEZ_HUNYUAN_INFERENCE_RUNNER=tencent
+export IMAGEEZ_HUNYUAN_WEIGHT_BACKEND=true
+PYTHONPATH=src python scripts/hunyuan_gpu_forward_e2e.py
+PYTHONPATH=src python scripts/hunyuan_gpu_forward_e2e.py --json --skip-weight-warm
+
 # Admission + enablement bundle (adapter disabled)
 PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 ```
@@ -57,6 +65,6 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-V)
+## Next slice (post-W)
 
-Run end-to-end GPU forward on a tier-C workstation (`IMAGEEZ_HUNYUAN_GPU_FORWARD=true` with warmed weights), then follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR and G7 Block/Vase hosted attestation.
+Collect real tier-C workstation evidence from `hunyuan_gpu_forward_e2e.py` (succeeded + mesh counts), then follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR and G7 Block/Vase hosted attestation.
