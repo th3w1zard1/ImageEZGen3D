@@ -14,6 +14,11 @@ from imageezgen3d.hunyuan_workstation_enablement_preflight import (  # noqa: E40
     run_workstation_enablement_preflight,
     workstation_enablement_preflight_exit_code,
 )
+from imageezgen3d.hunyuan_workstation_enablement_record import (  # noqa: E402
+    DEFAULT_ENABLEMENT_RECORD,
+    attestation_from_enablement_result,
+    write_enablement_attestation_record,
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -40,12 +45,26 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Exit 1 when enablement_workstation_ready is false.",
     )
+    parser.add_argument(
+        "--record",
+        type=Path,
+        default=None,
+        help=(
+            "Write workstation enablement attestation JSON "
+            f"(default under --record-dir: {DEFAULT_ENABLEMENT_RECORD.name})."
+        ),
+    )
     args = parser.parse_args(argv)
 
     result = run_workstation_enablement_preflight(
         record_dir=args.record_dir,
         skip_weight_warm=args.skip_weight_warm,
     )
+    if args.record is not None:
+        write_enablement_attestation_record(
+            args.record,
+            attestation_from_enablement_result(result),
+        )
 
     if args.as_json:
         print(enablement_preflight_json(result), end="")
