@@ -33,7 +33,8 @@
 | **AH** | #109 | `hunyuan_configured_inference_probe.py` | Configured-adapter inference path report (`generate` → GPU shell → `run_hunyuan_shape_texture`) |
 | **AI** | #110 | `hunyuan_neural_enablement_preflight_bundle.py` | G7 enablement preflight + configured neural path for tier-C operators |
 | **AJ** | #111 | `hunyuan_neural_enablement_record`, `verify_neural_enablement_record.py` | Neural enablement attestation record + verify for tier-C evidence |
-| **AK** | — | `verify_neural_enablement_artifact_parity.py` | Cross-artifact parity between neural and G9 workstation JSON |
+| **AK** | #112 | `verify_neural_enablement_artifact_parity.py` | Cross-artifact parity between neural and G9 workstation JSON |
+| **AL** | — | `verify_enablement_neural_artifact_parity` (in artifact parity module) | Cross-artifact `g7_readiness` parity between enablement and neural JSON |
 
 ## Operator commands
 
@@ -123,9 +124,9 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-AK)
+## Next slice (post-AL)
 
-Neural enablement artifact parity is on `main` through Phase AK. Next execution slices:
+Pre-G7 bundle automation is structurally complete through Phase AL (neural ↔ G9 ↔ enablement artifact parity). Next execution slices:
 
 1. **Tier-C workstation:** `PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --strict` until `neural_enablement_ready=true`, record `ok=true`, and artifact parity passes.
 2. **Hosted G7:** live Space Block/Vase neural run; update hosted-validation with `G7_STATUS: PASS` — still **OPEN**.
