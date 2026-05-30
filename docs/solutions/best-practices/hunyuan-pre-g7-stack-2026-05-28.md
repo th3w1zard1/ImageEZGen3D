@@ -36,7 +36,7 @@
 | **AK** | #112 | `verify_neural_enablement_artifact_parity.py` | Cross-artifact parity between neural and G9 workstation JSON |
 | **AL** | #113 | `verify_enablement_neural_artifact_parity` (in artifact parity module) | Cross-artifact `g7_readiness` parity between enablement and neural JSON |
 | **AM** | #114 | `verify_g7_live_probe_neural_artifact_parity` (in artifact parity module) | Optional cross-artifact `g7_readiness` parity when `hunyuan-g7-live-probe.json` present |
-| **AN** | — | `--live-probe` on `hunyuan_neural_enablement_preflight_bundle.py` | One-shot neural capstone + hosted G7 live-probe record for parity |
+| **AN** | #115 | `--live-probe` on `hunyuan_neural_enablement_preflight_bundle.py` | One-shot neural capstone + hosted G7 live-probe record for parity |
 
 ## Operator commands
 
