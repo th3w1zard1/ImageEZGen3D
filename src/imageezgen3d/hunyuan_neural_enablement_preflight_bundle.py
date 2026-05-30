@@ -10,6 +10,9 @@ from .hunyuan_g7_enablement_preflight_bundle import (
     G7EnablementPreflightBundleResult,
     run_g7_enablement_preflight_bundle,
 )
+from .hunyuan_neural_enablement_artifact_parity import (
+    verify_neural_enablement_artifact_files,
+)
 from .hunyuan_neural_enablement_record import (
     DEFAULT_NEURAL_ENABLEMENT_RECORD,
     NeuralEnablementAttestation,
@@ -31,6 +34,7 @@ class NeuralEnablementPreflightBundleResult:
     issues: tuple[str, ...]
     record_path: Path
     record_verify_ok: bool
+    parity_ok: bool
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -42,6 +46,7 @@ class NeuralEnablementPreflightBundleResult:
             "record_dir": str(self.record_dir),
             "record_path": str(self.record_path),
             "record_verify_ok": self.record_verify_ok,
+            "parity_ok": self.parity_ok,
             "g7_enablement": self.g7_enablement.to_dict(),
             "configured_inference": self.configured_inference,
             "issues": list(self.issues),
@@ -100,6 +105,7 @@ def run_neural_enablement_preflight_bundle(
         issues=tuple(issues),
         record_path=record_path,
         record_verify_ok=True,
+        parity_ok=True,
     )
     write_neural_enablement_record(
         record_path,
@@ -109,9 +115,15 @@ def run_neural_enablement_preflight_bundle(
     if verify_issues:
         issues = list(base_result.issues) + verify_issues
 
+    parity_issues = verify_neural_enablement_artifact_files(directory)
+    if parity_issues:
+        issues = list(issues) + parity_issues
+
+    preflight_ok_final = preflight_ok and not verify_issues and not parity_issues
+
     final_result = NeuralEnablementPreflightBundleResult(
         g7_enablement_preflight_ok=g7_result.g7_enablement_preflight_ok,
-        neural_enablement_preflight_ok=preflight_ok and not verify_issues,
+        neural_enablement_preflight_ok=preflight_ok_final,
         neural_enablement_ready=enablement_ready,
         g7_enablement_ready=g7_result.g7_enablement_ready,
         neural_forward_ready=neural_forward_ready,
@@ -121,6 +133,7 @@ def run_neural_enablement_preflight_bundle(
         issues=tuple(issues),
         record_path=record_path,
         record_verify_ok=not verify_issues,
+        parity_ok=not parity_issues,
     )
     write_neural_enablement_record(
         record_path,
@@ -142,6 +155,7 @@ def format_neural_enablement_preflight_bundle_report(
         f"record_dir={result.record_dir}",
         f"record_path={result.record_path}",
         f"record_verify_ok={result.record_verify_ok}",
+        f"parity_ok={result.parity_ok}",
     ]
     for issue in result.issues:
         lines.append(f"issue={issue}")
