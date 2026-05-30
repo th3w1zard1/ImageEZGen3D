@@ -1,0 +1,61 @@
+{
+  "ok": true,
+  "issues": [],
+  "readiness": {
+    "gates": [
+      {
+        "gate_id": "G1",
+        "status": "pass",
+        "title": "Legal review"
+      },
+      {
+        "gate_id": "G2",
+        "status": "pass",
+        "title": "Weight access"
+      },
+      {
+        "gate_id": "G3",
+        "status": "pass",
+        "title": "Dependency audit"
+      },
+      {
+        "gate_id": "G4",
+        "status": "pass",
+        "title": "ZeroGPU wiring"
+      },
+      {
+        "gate_id": "G5",
+        "status": "pass",
+        "title": "Resource fit"
+      },
+      {
+        "gate_id": "G6",
+        "status": "pass",
+        "title": "Manifest parity"
+      },
+      {
+        "gate_id": "G7",
+        "status": "open",
+        "title": "Hosted E2E"
+      },
+      {
+        "gate_id": "G8",
+        "status": "open",
+        "title": "UX honesty"
+      },
+      {
+        "gate_id": "G9",
+        "status": "pass",
+        "title": "Enablement PR"
+      }
+    ],
+    "issues": [],
+    "ready": true
+  },
+  "hosted_probe": {
+    "ok": true,
+    "issues": [],
+    "space_url": "https://example.hf.space/",
+    "probe_note": "Hosted probe did not report false G7 success (adapter still disabled)"
+  }
+}
