@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–AM)
+# Hunyuan pre-G7 stack (Phases J–AN)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -36,6 +36,7 @@
 | **AK** | #112 | `verify_neural_enablement_artifact_parity.py` | Cross-artifact parity between neural and G9 workstation JSON |
 | **AL** | #113 | `verify_enablement_neural_artifact_parity` (in artifact parity module) | Cross-artifact `g7_readiness` parity between enablement and neural JSON |
 | **AM** | #114 | `verify_g7_live_probe_neural_artifact_parity` (in artifact parity module) | Optional cross-artifact `g7_readiness` parity when `hunyuan-g7-live-probe.json` present |
+| **AN** | — | `--live-probe` on `hunyuan_neural_enablement_preflight_bundle.py` | One-shot neural capstone + hosted G7 live-probe record for parity |
 
 ## Operator commands
 
@@ -110,6 +111,7 @@ PYTHONPATH=src python scripts/hunyuan_configured_inference_probe.py --skip-weigh
 PYTHONPATH=src python scripts/hunyuan_configured_inference_probe.py --json
 
 PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir .
+PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --live-probe
 PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --strict
 PYTHONPATH=src python scripts/verify_neural_enablement_record.py neural-enablement-preflight.json
 PYTHONPATH=src python scripts/verify_neural_enablement_record_fixtures.py
@@ -125,9 +127,9 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-AM)
+## Next slice (post-AN)
 
-Pre-G7 bundle automation is structurally complete through Phase AM (neural ↔ G9 ↔ enablement ↔ optional G7 live-probe artifact parity). Next execution slices:
+Pre-G7 operator automation is structurally complete through Phase AN (neural capstone can record hosted G7 live probe in one command). Next execution slices:
 
 1. **Tier-C workstation:** `PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --strict` until `neural_enablement_ready=true`, record `ok=true`, and artifact parity passes.
 2. **Hosted G7:** live Space Block/Vase neural run; update hosted-validation with `G7_STATUS: PASS` — still **OPEN**.

@@ -77,6 +77,9 @@ class HunyuanNeuralEnablementRecordTests(unittest.TestCase):
             record_path=Path("/tmp/neural-enablement-preflight.json"),
             record_verify_ok=True,
             parity_ok=True,
+            live_probe_requested=False,
+            live_probe_ok=None,
+            live_probe_path=None,
         )
         attestation = attestation_from_preflight_bundle(result)
         self.assertFalse(attestation.ok)

@@ -16,6 +16,7 @@ from .hunyuan_admission import GateResult, evaluate_admission_gates
 
 _G7_PREREQUISITE_GATES = ("G1", "G2", "G3", "G4", "G5", "G6")
 _HUNYUAN_ADAPTER = "hunyuan-zerogpu"
+DEFAULT_G7_LIVE_PROBE_RECORD = "hunyuan-g7-live-probe.json"
 
 
 @dataclass(frozen=True)
@@ -37,6 +38,14 @@ class G7ReadinessResult:
                 for gate in self.gates
             ],
         }
+
+
+@dataclass(frozen=True)
+class G7LiveProbeRecordResult:
+    ok: bool
+    issues: tuple[str, ...]
+    record_path: Path
+    payload: dict[str, Any]
 
 
 @dataclass(frozen=True)
@@ -173,6 +182,57 @@ def probe_hosted_hunyuan_not_enabled(
         issues=(),
         space_url=space_url,
         probe_note="Hosted probe did not report false G7 success (adapter still disabled)",
+    )
+
+
+def build_g7_live_probe_payload(
+    *,
+    space_url: str = DEFAULT_SPACE_URL,
+    sample_path: Path | None = None,
+    readiness: G7ReadinessResult | None = None,
+) -> tuple[dict[str, Any], tuple[str, ...], bool]:
+    """Build hosted G7 live-probe JSON payload without writing a file."""
+    readiness_result = readiness or evaluate_g7_readiness()
+    payload: dict[str, Any] = {"readiness": readiness_result.to_dict()}
+    issues: list[str] = list(readiness_result.issues)
+
+    probe = probe_hosted_hunyuan_not_enabled(
+        space_url=space_url,
+        sample_path=sample_path,
+    )
+    payload["hosted_probe"] = probe.to_dict()
+    if not probe.ok:
+        issues.extend(probe.issues)
+
+    ok = not issues
+    payload["ok"] = ok
+    payload["issues"] = issues
+    return payload, tuple(issues), ok
+
+
+def write_g7_live_probe_record(
+    record_path: Path,
+    *,
+    space_url: str = DEFAULT_SPACE_URL,
+    sample_path: Path | None = None,
+    readiness: G7ReadinessResult | None = None,
+) -> G7LiveProbeRecordResult:
+    """Run hosted G7 live probe and write JSON attestation to ``record_path``."""
+    payload, issues, ok = build_g7_live_probe_payload(
+        space_url=space_url,
+        sample_path=sample_path,
+        readiness=readiness,
+    )
+    record_path.parent.mkdir(parents=True, exist_ok=True)
+    record_path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return G7LiveProbeRecordResult(
+        ok=ok,
+        issues=issues,
+        record_path=record_path,
+        payload=payload,
     )
 
 

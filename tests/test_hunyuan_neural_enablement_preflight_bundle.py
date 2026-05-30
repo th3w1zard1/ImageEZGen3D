@@ -71,6 +71,35 @@ class HunyuanNeuralEnablementPreflightBundleTests(unittest.TestCase):
         self.assertIn("neural_enablement_ready=False", text)
 
     @mock.patch(
+        "imageezgen3d.hunyuan_neural_enablement_preflight_bundle.write_g7_live_probe_record"
+    )
+    def test_live_probe_writes_record_and_sets_flags(
+        self,
+        live_probe_record: mock.MagicMock,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            live_probe_record.return_value = mock.MagicMock(
+                ok=True,
+                issues=(),
+                record_path=record_dir / "hunyuan-g7-live-probe.json",
+                payload={"ok": True, "issues": [], "readiness": {}, "hosted_probe": {}},
+            )
+            result = run_neural_enablement_preflight_bundle(
+                record_dir=record_dir,
+                skip_weight_warm=True,
+                live_probe=True,
+            )
+            self.assertTrue(result.live_probe_requested)
+            self.assertTrue(result.live_probe_ok)
+            self.assertEqual(
+                result.live_probe_path,
+                record_dir / "hunyuan-g7-live-probe.json",
+            )
+            live_probe_record.assert_called_once()
+            self.assertTrue(result.parity_ok)
+
+    @mock.patch(
         "imageezgen3d.hunyuan_neural_enablement_preflight_bundle."
         "describe_configured_adapter_inference_path"
     )
