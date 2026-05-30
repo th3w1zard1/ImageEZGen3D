@@ -149,6 +149,9 @@ jobs:
       - name: Neural enablement record fixture verify
         run: PYTHONPATH=src python scripts/verify_neural_enablement_record_fixtures.py
 
+      - name: Neural enablement artifact parity (record dir from preflight)
+        run: PYTHONPATH=src python scripts/verify_neural_enablement_artifact_parity.py --record-dir .
+
       - name: G9 workstation bundle fixture verify
         run: PYTHONPATH=src python scripts/verify_g9_workstation_bundle_fixtures.py
 

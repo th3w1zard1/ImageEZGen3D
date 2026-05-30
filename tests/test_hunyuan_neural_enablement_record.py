@@ -76,6 +76,7 @@ class HunyuanNeuralEnablementRecordTests(unittest.TestCase):
             issues=("configured_adapter_neural_forward_not_ready",),
             record_path=Path("/tmp/neural-enablement-preflight.json"),
             record_verify_ok=True,
+            parity_ok=True,
         )
         attestation = attestation_from_preflight_bundle(result)
         self.assertFalse(attestation.ok)
