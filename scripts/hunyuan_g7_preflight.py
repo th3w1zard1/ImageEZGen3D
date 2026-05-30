@@ -5,9 +5,10 @@ import json
 from pathlib import Path
 
 from imageezgen3d.hunyuan_g7_preflight import (
+    build_g7_live_probe_payload,
     evaluate_g7_readiness,
     format_g7_readiness_report,
-    probe_hosted_hunyuan_not_enabled,
+    write_g7_live_probe_record,
 )
 
 
@@ -35,30 +36,35 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     readiness = evaluate_g7_readiness()
-    payload: dict[str, object] = {"readiness": readiness.to_dict()}
-    issues: list[str] = list(readiness.issues)
 
     if args.live_probe:
         from imageezgen3d.hosted_golden_smoke import DEFAULT_SPACE_URL
 
-        probe = probe_hosted_hunyuan_not_enabled(
-            space_url=args.space_url or DEFAULT_SPACE_URL,
+        space_url = args.space_url or DEFAULT_SPACE_URL
+        payload, issues, ok = build_g7_live_probe_payload(
+            space_url=space_url,
             sample_path=args.sample,
+            readiness=readiness,
         )
-        payload["hosted_probe"] = probe.to_dict()
-        if not probe.ok:
-            issues.extend(probe.issues)
-
-    ok = not issues
-    payload["ok"] = ok
-    payload["issues"] = issues
-
-    if args.record is not None:
-        args.record.parent.mkdir(parents=True, exist_ok=True)
-        args.record.write_text(
-            json.dumps(payload, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
+        if args.record is not None:
+            write_g7_live_probe_record(
+                args.record,
+                space_url=space_url,
+                sample_path=args.sample,
+                readiness=readiness,
+            )
+    else:
+        payload = {"readiness": readiness.to_dict()}
+        issues = list(readiness.issues)
+        ok = not issues
+        payload["ok"] = ok
+        payload["issues"] = issues
+        if args.record is not None:
+            args.record.parent.mkdir(parents=True, exist_ok=True)
+            args.record.write_text(
+                json.dumps(payload, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
 
     if args.as_json:
         print(json.dumps(payload, indent=2, sort_keys=True))

@@ -38,12 +38,34 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Exit 1 when neural_enablement_ready is false.",
     )
+    parser.add_argument(
+        "--live-probe",
+        action="store_true",
+        help=(
+            "Run hosted G7 live probe and write hunyuan-g7-live-probe.json "
+            "under --record-dir (network)."
+        ),
+    )
+    parser.add_argument(
+        "--space-url",
+        default=None,
+        help="Space URL for --live-probe (default: IMAGEEZ hosted Space).",
+    )
+    parser.add_argument(
+        "--sample",
+        type=Path,
+        default=None,
+        help="Sample image path for --live-probe.",
+    )
     parser.add_argument("--json", action="store_true", dest="as_json")
     args = parser.parse_args(argv)
 
     result = run_neural_enablement_preflight_bundle(
         record_dir=args.record_dir,
         skip_weight_warm=args.skip_weight_warm,
+        live_probe=args.live_probe,
+        space_url=args.space_url,
+        sample_path=args.sample,
     )
 
     if args.as_json:

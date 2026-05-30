@@ -8,14 +8,16 @@ from .hunyuan_g9_workstation_bundle_record import (
     DEFAULT_G9_BUNDLE_RECORD,
     verify_g9_workstation_bundle_record,
 )
-from .hunyuan_g7_preflight import validate_hunyuan_g7_live_probe_record
+from .hunyuan_g7_preflight import (
+    DEFAULT_G7_LIVE_PROBE_RECORD,
+    validate_hunyuan_g7_live_probe_record,
+)
 from .hunyuan_neural_enablement_record import (
     DEFAULT_NEURAL_ENABLEMENT_RECORD,
     verify_neural_enablement_record,
 )
 
 _ENABLEMENT_PREFLIGHT_JSON = "hunyuan-enablement-preflight.json"
-_G7_LIVE_PROBE_JSON = "hunyuan-g7-live-probe.json"
 
 
 def _load_json(path: Path) -> dict[str, Any] | None:
@@ -176,7 +178,7 @@ def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
         )
     )
 
-    live_probe_path = directory / _G7_LIVE_PROBE_JSON
+    live_probe_path = directory / DEFAULT_G7_LIVE_PROBE_RECORD
     if live_probe_path.is_file():
         live_probe_payload = _load_json(live_probe_path)
         if live_probe_payload is None:
