@@ -56,6 +56,13 @@ PYTHONPATH=src python scripts/verify_hosted_smoke_artifacts.py
 2. Wire weights/secrets per [hunyuan-weight-access.md](hunyuan-weight-access.md) and [hunyuan-dependencies.md](hunyuan-dependencies.md).
 3. Deploy Space: `PYTHONPATH=src python scripts/hf_space_sync.py --execute`
 4. Run Block or Vase `/generate`; status must pass `validate_g7_hosted_generate_status()`.
+   Record evidence locally:
+   ```bash
+   PYTHONPATH=src python scripts/hunyuan_g7_hosted_neural_record.py \
+     --status-file status.md --sample Block --record hunyuan-g7-hosted-neural.json
+   PYTHONPATH=src python scripts/verify_hunyuan_g7_hosted_neural_record.py \
+     hunyuan-g7-hosted-neural.json
+   ```
 5. Update [hosted-validation-2026-05-23.md](40-operational-risk/hosted-validation-2026-05-23.md):
    - `## G7 validation` → `G7_STATUS: PASS` + run id + artifacts
    - `## G8 validation` → `G8_STATUS: PASS` after UX re-verify
