@@ -8,6 +8,10 @@ from .hunyuan_g9_workstation_bundle_record import (
     DEFAULT_G9_BUNDLE_RECORD,
     verify_g9_workstation_bundle_record,
 )
+from .hunyuan_g7_hosted_neural_record import (
+    DEFAULT_G7_HOSTED_NEURAL_RECORD,
+    verify_g7_hosted_neural_record,
+)
 from .hunyuan_g7_preflight import (
     DEFAULT_G7_LIVE_PROBE_RECORD,
     validate_hunyuan_g7_live_probe_record,
@@ -130,6 +134,36 @@ def verify_g7_live_probe_neural_artifact_parity(
     return issues
 
 
+def verify_g7_hosted_neural_enablement_artifact_parity(
+    *,
+    hosted_neural_payload: dict[str, Any],
+    neural_payload: dict[str, Any],
+) -> list[str]:
+    """Return issues when post-enablement hosted G7 and neural JSON diverge."""
+    issues: list[str] = []
+    issues.extend(verify_g7_hosted_neural_record(hosted_neural_payload))
+
+    if hosted_neural_payload.get("ok") is not True:
+        return issues
+
+    if neural_payload.get("neural_enablement_ready") is not True:
+        issues.append(
+            "hunyuan-g7-hosted-neural.json ok=true requires "
+            "neural_enablement_ready=true in neural-enablement-preflight.json"
+        )
+    if neural_payload.get("neural_enablement_preflight_ok") is not True:
+        issues.append(
+            "hunyuan-g7-hosted-neural.json ok=true requires "
+            "neural_enablement_preflight_ok=true in neural-enablement-preflight.json"
+        )
+    if neural_payload.get("ok") is not True:
+        issues.append(
+            "hunyuan-g7-hosted-neural.json ok=true requires ok=true in "
+            "neural-enablement-preflight.json"
+        )
+    return issues
+
+
 def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
     directory = record_dir.resolve()
     neural_path = directory / DEFAULT_NEURAL_ENABLEMENT_RECORD
@@ -192,6 +226,24 @@ def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
             issues.extend(
                 verify_g7_live_probe_neural_artifact_parity(
                     live_probe_payload=live_probe_payload,
+                    neural_payload=neural_payload,
+                )
+            )
+
+    hosted_neural_path = directory / DEFAULT_G7_HOSTED_NEURAL_RECORD
+    if hosted_neural_path.is_file():
+        hosted_neural_payload = _load_json(hosted_neural_path)
+        if hosted_neural_payload is None:
+            issues.append(f"missing file: {hosted_neural_path}")
+        elif isinstance(hosted_neural_payload.get("__parse_error__"), str):
+            issues.append(
+                f"invalid JSON in {hosted_neural_path}: "
+                f"{hosted_neural_payload['__parse_error__']}"
+            )
+        else:
+            issues.extend(
+                verify_g7_hosted_neural_enablement_artifact_parity(
+                    hosted_neural_payload=hosted_neural_payload,
                     neural_payload=neural_payload,
                 )
             )

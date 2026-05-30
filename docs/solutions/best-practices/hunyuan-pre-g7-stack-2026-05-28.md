@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–AO)
+# Hunyuan pre-G7 stack (Phases J–AP)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 

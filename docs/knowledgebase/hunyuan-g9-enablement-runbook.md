@@ -20,7 +20,7 @@ PYTHONPATH=src python scripts/verify_neural_enablement_record.py neural-enableme
 PYTHONPATH=src python scripts/verify_neural_enablement_artifact_parity.py --record-dir .
 ```
 
-Writes admission, enablement, workstation, G9 bundle, neural enablement, and (with `--live-probe`) `hunyuan-g7-live-probe.json` under `--record-dir`, then verifies record + cross-artifact parity. Expect `workstation_evidence_ready=false` and `neural_enablement_ready=false` on CI; on tier-C GPU workstation re-run with `--strict` until `ok=true` in `neural-enablement-preflight.json`.
+Writes admission, enablement, workstation, G9 bundle, neural enablement, and (with `--live-probe`) `hunyuan-g7-live-probe.json` under `--record-dir`, then verifies record + cross-artifact parity. When `hunyuan-g7-hosted-neural.json` is also present with `ok=true`, parity requires `neural_enablement_ready=true` in the neural record. Expect `workstation_evidence_ready=false` and `neural_enablement_ready=false` on CI; on tier-C GPU workstation re-run with `--strict` until `ok=true` in `neural-enablement-preflight.json`.
 
 **Legacy G9-only bundle (subset of the neural capstone):**
 
