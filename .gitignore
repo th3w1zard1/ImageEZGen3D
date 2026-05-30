@@ -19,6 +19,7 @@ build/
 hunyuan-admission-audit.json
 hunyuan-enablement-preflight.json
 g9-workstation-bundle.json
+neural-enablement-preflight.json
 workstation-enablement-preflight.json
 gpu-forward-e2e.json
 *.glb

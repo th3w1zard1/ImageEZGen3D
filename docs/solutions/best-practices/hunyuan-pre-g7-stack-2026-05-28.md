@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–AI)
+# Hunyuan pre-G7 stack (Phases J–AJ)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -31,7 +31,8 @@
 | **AF** | #107 | `hunyuan_g9_preflight_bundle.py`, `verify_g9_workstation_artifact_parity.py` | G9 preflight bundle + cross-artifact parity |
 | **AG** | #108 | `hunyuan_g7_enablement_preflight_bundle.py` | G9 preflight + G7 readiness (G1–G6) for enablement operators |
 | **AH** | #109 | `hunyuan_configured_inference_probe.py` | Configured-adapter inference path report (`generate` → GPU shell → `run_hunyuan_shape_texture`) |
-| **AI** | — | `hunyuan_neural_enablement_preflight_bundle.py` | G7 enablement preflight + configured neural path for tier-C operators |
+| **AI** | #110 | `hunyuan_neural_enablement_preflight_bundle.py` | G7 enablement preflight + configured neural path for tier-C operators |
+| **AJ** | — | `hunyuan_neural_enablement_record`, `verify_neural_enablement_record.py` | Neural enablement attestation record + verify for tier-C evidence |
 
 ## Operator commands
 
@@ -107,6 +108,8 @@ PYTHONPATH=src python scripts/hunyuan_configured_inference_probe.py --json
 
 PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir .
 PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --strict
+PYTHONPATH=src python scripts/verify_neural_enablement_record.py neural-enablement-preflight.json
+PYTHONPATH=src python scripts/verify_neural_enablement_record_fixtures.py
 
 # Admission + enablement bundle (adapter disabled)
 PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
@@ -118,11 +121,11 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-AI)
+## Next slice (post-AJ)
 
-Neural enablement operator preflight is on `main` through Phase AI. Next execution slices:
+Neural enablement attestation record is on `main` through Phase AJ. Next execution slices:
 
-1. **Tier-C workstation:** `PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --strict` until `neural_enablement_ready=true`.
+1. **Tier-C workstation:** `PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --strict` until `neural_enablement_ready=true` and `verify_neural_enablement_record.py` passes with `ok=true`.
 2. **Hosted G7:** live Space Block/Vase neural run; update hosted-validation with `G7_STATUS: PASS` — still **OPEN**.
 3. **G9 enablement PR** only after G7 evidence per [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md).
 
