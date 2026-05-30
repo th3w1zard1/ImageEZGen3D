@@ -143,11 +143,8 @@ jobs:
       - name: Workstation enablement fixture verify
         run: PYTHONPATH=src python scripts/verify_workstation_enablement_fixtures.py
 
-      - name: G7 enablement preflight bundle (CI-like skip path)
-        run: PYTHONPATH=src python scripts/hunyuan_g7_enablement_preflight_bundle.py --skip-weight-warm
-
-      - name: Configured adapter inference path probe
-        run: PYTHONPATH=src python scripts/hunyuan_configured_inference_probe.py --skip-weight-warm
+      - name: Neural enablement preflight bundle (CI-like skip path)
+        run: PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --skip-weight-warm
 
       - name: G9 workstation bundle fixture verify
         run: PYTHONPATH=src python scripts/verify_g9_workstation_bundle_fixtures.py
