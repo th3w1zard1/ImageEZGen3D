@@ -13,6 +13,8 @@ from .hunyuan_neural_enablement_record import (
     verify_neural_enablement_record,
 )
 
+_ENABLEMENT_PREFLIGHT_JSON = "hunyuan-enablement-preflight.json"
+
 
 def _load_json(path: Path) -> dict[str, Any] | None:
     if not path.is_file():
@@ -68,10 +70,38 @@ def verify_neural_enablement_artifact_parity(
     return issues
 
 
+def verify_enablement_neural_artifact_parity(
+    *,
+    enablement_payload: dict[str, Any],
+    neural_payload: dict[str, Any],
+) -> list[str]:
+    """Return issues when admission enablement and neural JSON artifacts diverge."""
+    issues: list[str] = []
+    enablement_g7 = enablement_payload.get("g7_readiness")
+    preflight = neural_payload.get("preflight")
+    if not isinstance(preflight, dict):
+        issues.append("neural record missing preflight object")
+        return issues
+
+    nested_g7 = preflight.get("g7_enablement")
+    if not isinstance(nested_g7, dict):
+        issues.append("neural preflight missing g7_enablement object")
+        return issues
+
+    neural_g7 = nested_g7.get("g7_readiness")
+    if enablement_g7 != neural_g7:
+        issues.append(
+            "g7_readiness mismatch between hunyuan-enablement-preflight.json "
+            "and neural-enablement-preflight.json"
+        )
+    return issues
+
+
 def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
     directory = record_dir.resolve()
     neural_path = directory / DEFAULT_NEURAL_ENABLEMENT_RECORD
     g9_path = directory / DEFAULT_G9_BUNDLE_RECORD
+    enablement_path = directory / _ENABLEMENT_PREFLIGHT_JSON
 
     issues: list[str] = []
     neural_payload = _load_json(neural_path)
@@ -92,10 +122,26 @@ def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
         issues.append(f"invalid JSON in {g9_path}: {g9_payload['__parse_error__']}")
         return issues
 
+    enablement_payload = _load_json(enablement_path)
+    if enablement_payload is None:
+        issues.append(f"missing file: {enablement_path}")
+        return issues
+    if isinstance(enablement_payload.get("__parse_error__"), str):
+        issues.append(
+            f"invalid JSON in {enablement_path}: {enablement_payload['__parse_error__']}"
+        )
+        return issues
+
     issues.extend(
         verify_neural_enablement_artifact_parity(
             neural_payload=neural_payload,
             g9_bundle_payload=g9_payload,
+        )
+    )
+    issues.extend(
+        verify_enablement_neural_artifact_parity(
+            enablement_payload=enablement_payload,
+            neural_payload=neural_payload,
         )
     )
     return issues

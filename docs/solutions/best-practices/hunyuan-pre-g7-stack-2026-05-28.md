@@ -33,7 +33,8 @@
 | **AH** | #109 | `hunyuan_configured_inference_probe.py` | Configured-adapter inference path report (`generate` → GPU shell → `run_hunyuan_shape_texture`) |
 | **AI** | #110 | `hunyuan_neural_enablement_preflight_bundle.py` | G7 enablement preflight + configured neural path for tier-C operators |
 | **AJ** | #111 | `hunyuan_neural_enablement_record`, `verify_neural_enablement_record.py` | Neural enablement attestation record + verify for tier-C evidence |
-| **AK** | — | `verify_neural_enablement_artifact_parity.py` | Cross-artifact parity between neural and G9 workstation JSON |
+| **AK** | #112 | `verify_neural_enablement_artifact_parity.py` | Cross-artifact parity between neural and G9 workstation JSON |
+| **AL** | — | `verify_enablement_neural_artifact_parity` (in artifact parity module) | Cross-artifact `g7_readiness` parity between enablement and neural JSON |
 
 ## Operator commands
 

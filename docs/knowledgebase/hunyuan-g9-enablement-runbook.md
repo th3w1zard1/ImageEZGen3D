@@ -13,10 +13,19 @@ python scripts/hunyuan_preflight_bundle.py
 **Tier-C workstation (after admission preflight passes):**
 
 ```bash
-PYTHONPATH=src python scripts/hunyuan_g9_preflight_bundle.py --record-dir . --strict
+PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir .
+PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --strict
+PYTHONPATH=src python scripts/verify_neural_enablement_record.py neural-enablement-preflight.json
+PYTHONPATH=src python scripts/verify_neural_enablement_artifact_parity.py --record-dir .
 ```
 
-Writes admission, enablement, workstation, and G9 bundle JSON under `--record-dir` and verifies record + parity. Expect `workstation_evidence_ready=false` on CI; on tier-C GPU workstation re-run until `ok=true` in `g9-workstation-bundle.json`.
+Writes admission, enablement, workstation, G9 bundle, and neural enablement JSON under `--record-dir` and verifies record + cross-artifact parity (neural ↔ G9 ↔ enablement). Expect `workstation_evidence_ready=false` and `neural_enablement_ready=false` on CI; on tier-C GPU workstation re-run with `--strict` until `ok=true` in `neural-enablement-preflight.json`.
+
+**Legacy G9-only bundle (subset of the neural capstone):**
+
+```bash
+PYTHONPATH=src python scripts/hunyuan_g9_preflight_bundle.py --record-dir . --strict
+```
 
 **Individual steps (same contract):**
 
