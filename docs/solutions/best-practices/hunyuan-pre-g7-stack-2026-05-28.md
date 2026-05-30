@@ -38,6 +38,7 @@
 | **AM** | #114 | `verify_g7_live_probe_neural_artifact_parity` (in artifact parity module) | Optional cross-artifact `g7_readiness` parity when `hunyuan-g7-live-probe.json` present |
 | **AN** | #115 | `--live-probe` on `hunyuan_neural_enablement_preflight_bundle.py` | One-shot neural capstone + hosted G7 live-probe record for parity |
 | **AO** | #116 | `hunyuan_g7_hosted_neural_record`, `verify_hunyuan_g7_hosted_neural_record.py` | Post-enablement G7 Block/Vase status attestation JSON + verify |
+| **AP** | — | `verify_g7_hosted_neural_enablement_artifact_parity` (in artifact parity module) | Optional hosted G7 PASS ↔ neural enablement-ready parity when both JSON present |
 
 ## Operator commands
 
@@ -132,9 +133,9 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-AO)
+## Next slice (post-AP)
 
-Pre-G7 operator automation is complete through Phase AN; Phase AO adds post-enablement G7 status attestation for the G7 closure path. Next execution slices:
+Enablement evidence automation is structurally complete through Phase AP (hosted G7 PASS requires neural enablement-ready when both JSON coexist). Next execution slices:
 
 1. **Tier-C workstation:** `PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --strict` until `neural_enablement_ready=true`, record `ok=true`, and artifact parity passes.
 2. **Hosted G7:** live Space Block/Vase neural run; update hosted-validation with `G7_STATUS: PASS` — still **OPEN**.
