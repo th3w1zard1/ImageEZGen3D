@@ -146,6 +146,9 @@ jobs:
       - name: Neural enablement preflight bundle (CI-like skip path)
         run: PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --skip-weight-warm
 
+      - name: Neural enablement record fixture verify
+        run: PYTHONPATH=src python scripts/verify_neural_enablement_record_fixtures.py
+
       - name: G9 workstation bundle fixture verify
         run: PYTHONPATH=src python scripts/verify_g9_workstation_bundle_fixtures.py
 

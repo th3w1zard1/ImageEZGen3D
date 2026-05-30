@@ -1,0 +1,160 @@
+{
+  "g7_enablement_ready": false,
+  "issues": [
+    "configured_adapter_neural_forward_not_ready"
+  ],
+  "neural_enablement_preflight_ok": true,
+  "neural_enablement_ready": false,
+  "neural_forward_ready": false,
+  "ok": false,
+  "preflight": {
+    "configured_inference": {
+      "adapter_configured": false,
+      "backend_kind": "none",
+      "dev_backend": false,
+      "entrypoint": "HunyuanPlaceholderAdapter.generate \u2192 _run_hunyuan_inference_on_gpu \u2192 run_hunyuan_shape_texture",
+      "expected_outcome": "adapter_disabled",
+      "gpu_forward": false,
+      "gpu_workstation": {
+        "blockers": [
+          "gpu_forward_disabled",
+          "tier_b",
+          "tier_c",
+          "inference_runner",
+          "tencent_pipeline",
+          "torch",
+          "cuda"
+        ],
+        "gpu_executors_registered": false,
+        "gpu_forward": {
+          "cuda_available": false,
+          "gpu_forward_enabled": false,
+          "gpu_forward_ready": false,
+          "torch_available": false
+        },
+        "gpu_forward_enabled": false,
+        "tencent_bindings_ready": false,
+        "tencent_pipeline_ready": false,
+        "tier_c": {
+          "inference_wired": false,
+          "missing_tier_b": [
+            "transformers",
+            "diffusers",
+            "accelerate",
+            "safetensors",
+            "einops",
+            "omegaconf"
+          ],
+          "missing_tier_c": [
+            "open3d",
+            "pymeshlab",
+            "cupy",
+            "bpy",
+            "deepspeed",
+            "basicsr",
+            "realesrgan",
+            "rembg"
+          ],
+          "shape_checkpoint": "",
+          "tier_b_ready": false,
+          "tier_c_ready": false,
+          "weight_pin": {
+            "cache_dir": "",
+            "repo_id": "tencent/Hunyuan3D-2.1",
+            "revision": "0b94677654c57bb9a6b6845cd7b704ccf551d327",
+            "shape_checkpoint": "hunyuan3d-dit-v2-1/model.fp16.ckpt"
+          },
+          "weight_root": "",
+          "weights_verified": false
+        },
+        "workstation_ready": false
+      },
+      "inference_runner": {
+        "configured_runner": "",
+        "inference_wired": false,
+        "note": "No Hunyuan inference runner is registered. Tier-C Tencent wiring remains future work.",
+        "runner_id": ""
+      },
+      "neural_forward_eligible": false,
+      "neural_forward_ready": false,
+      "weight_backend": false
+    },
+    "g7_enablement": {
+      "g7_enablement_preflight_ok": true,
+      "g7_enablement_ready": false,
+      "g7_readiness": {
+        "gates": [
+          {
+            "gate_id": "G1",
+            "status": "pass",
+            "title": "Legal review"
+          },
+          {
+            "gate_id": "G2",
+            "status": "pass",
+            "title": "Weight access"
+          },
+          {
+            "gate_id": "G3",
+            "status": "pass",
+            "title": "Dependency audit"
+          },
+          {
+            "gate_id": "G4",
+            "status": "pass",
+            "title": "ZeroGPU wiring"
+          },
+          {
+            "gate_id": "G5",
+            "status": "pass",
+            "title": "Resource fit"
+          },
+          {
+            "gate_id": "G6",
+            "status": "pass",
+            "title": "Manifest parity"
+          },
+          {
+            "gate_id": "G7",
+            "status": "open",
+            "title": "Hosted E2E"
+          },
+          {
+            "gate_id": "G8",
+            "status": "open",
+            "title": "UX honesty"
+          },
+          {
+            "gate_id": "G9",
+            "status": "pass",
+            "title": "Enablement PR"
+          }
+        ],
+        "issues": [],
+        "ready": true
+      },
+      "g7_readiness_ok": true,
+      "g9_preflight": {
+        "g9_preflight_bundle_ok": true,
+        "issues": [],
+        "workstation_evidence_ready": false
+      },
+      "g9_preflight_bundle_ok": true,
+      "issues": [],
+      "record_dir": "/tmp/tmpdp6roeag",
+      "workstation_evidence_ready": false
+    },
+    "g7_enablement_preflight_ok": true,
+    "g7_enablement_ready": false,
+    "issues": [
+      "configured_adapter_neural_forward_not_ready"
+    ],
+    "neural_enablement_preflight_ok": true,
+    "neural_enablement_ready": false,
+    "neural_forward_ready": false,
+    "record_dir": "/tmp/tmpdp6roeag",
+    "record_path": "/tmp/tmpdp6roeag/neural-enablement-preflight.json",
+    "record_verify_ok": true
+  },
+  "record_kind": "hunyuan_neural_enablement"
+}

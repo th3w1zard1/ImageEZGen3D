@@ -55,6 +55,8 @@ class HunyuanNeuralEnablementPreflightBundleTests(unittest.TestCase):
             )
             self.assertTrue(result.neural_enablement_preflight_ok)
             self.assertFalse(result.neural_enablement_ready)
+            self.assertTrue(result.record_verify_ok)
+            self.assertTrue(result.record_path.is_file())
             self.assertFalse(result.neural_forward_ready)
 
     def test_format_report(self) -> None:
