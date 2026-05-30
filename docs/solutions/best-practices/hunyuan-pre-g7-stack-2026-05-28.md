@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–AK)
+# Hunyuan pre-G7 stack (Phases J–AL)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -34,7 +34,7 @@
 | **AI** | #110 | `hunyuan_neural_enablement_preflight_bundle.py` | G7 enablement preflight + configured neural path for tier-C operators |
 | **AJ** | #111 | `hunyuan_neural_enablement_record`, `verify_neural_enablement_record.py` | Neural enablement attestation record + verify for tier-C evidence |
 | **AK** | #112 | `verify_neural_enablement_artifact_parity.py` | Cross-artifact parity between neural and G9 workstation JSON |
-| **AL** | — | `verify_enablement_neural_artifact_parity` (in artifact parity module) | Cross-artifact `g7_readiness` parity between enablement and neural JSON |
+| **AL** | #113 | `verify_enablement_neural_artifact_parity` (in artifact parity module) | Cross-artifact `g7_readiness` parity between enablement and neural JSON |
 
 ## Operator commands
 
