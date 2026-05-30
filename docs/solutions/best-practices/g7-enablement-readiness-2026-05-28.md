@@ -32,8 +32,9 @@
 2. On tier-C workstation: `PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --strict` until `ok=true` in `neural-enablement-preflight.json`.
 3. Optional drill-down: `hunyuan_configured_inference_probe.py` and `hunyuan_g7_enablement_preflight_bundle.py` for sub-gate detail.
 4. Follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR (`IMAGEEZ_HUNYUAN_CONFIGURED=true` on Space only with G7 evidence).
-5. Deploy Space; run Block/Vase; update `hosted-validation-2026-05-23.md` with `## G7 validation` only after real neural path is proven.
-6. Re-run scheduled smoke; confirm manifests and downloads.
+5. Deploy Space; run Block/Vase; record status with `hunyuan_g7_hosted_neural_record.py` and verify with `verify_hunyuan_g7_hosted_neural_record.py`.
+6. Update `hosted-validation-2026-05-23.md` with `## G7 validation` only after real neural path is proven (`G7_STATUS: PASS` + run id).
+7. Re-run scheduled smoke; confirm manifests and downloads.
 
 ## Mode reporting (honesty)
 

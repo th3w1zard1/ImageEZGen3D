@@ -1,0 +1,11 @@
+{
+  "adapter": "hunyuan-zerogpu",
+  "g7_status_valid": true,
+  "issues": [],
+  "ok": true,
+  "record_kind": "hunyuan_g7_hosted_neural",
+  "run_id": "20260527-120000-abcdef01",
+  "sample": "Block",
+  "space_url": "https://example.hf.space/",
+  "status_markdown": "Run `20260527-120000-abcdef01` complete.\n- **Export budget:** up to 25,000 faces\n- **Backend used:** Hosted ZeroGPU (hunyuan-zerogpu)\nDownloads: manifest, glb, obj\n"
+}
