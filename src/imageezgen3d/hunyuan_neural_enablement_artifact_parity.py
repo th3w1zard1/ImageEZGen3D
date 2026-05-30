@@ -8,12 +8,14 @@ from .hunyuan_g9_workstation_bundle_record import (
     DEFAULT_G9_BUNDLE_RECORD,
     verify_g9_workstation_bundle_record,
 )
+from .hunyuan_g7_preflight import validate_hunyuan_g7_live_probe_record
 from .hunyuan_neural_enablement_record import (
     DEFAULT_NEURAL_ENABLEMENT_RECORD,
     verify_neural_enablement_record,
 )
 
 _ENABLEMENT_PREFLIGHT_JSON = "hunyuan-enablement-preflight.json"
+_G7_LIVE_PROBE_JSON = "hunyuan-g7-live-probe.json"
 
 
 def _load_json(path: Path) -> dict[str, Any] | None:
@@ -97,6 +99,35 @@ def verify_enablement_neural_artifact_parity(
     return issues
 
 
+def verify_g7_live_probe_neural_artifact_parity(
+    *,
+    live_probe_payload: dict[str, Any],
+    neural_payload: dict[str, Any],
+) -> list[str]:
+    """Return issues when G7 live-probe and neural JSON artifacts diverge."""
+    issues: list[str] = []
+    issues.extend(validate_hunyuan_g7_live_probe_record(live_probe_payload))
+
+    live_readiness = live_probe_payload.get("readiness")
+    preflight = neural_payload.get("preflight")
+    if not isinstance(preflight, dict):
+        issues.append("neural record missing preflight object")
+        return issues
+
+    nested_g7 = preflight.get("g7_enablement")
+    if not isinstance(nested_g7, dict):
+        issues.append("neural preflight missing g7_enablement object")
+        return issues
+
+    neural_g7 = nested_g7.get("g7_readiness")
+    if live_readiness != neural_g7:
+        issues.append(
+            "g7_readiness mismatch between hunyuan-g7-live-probe.json "
+            "and neural-enablement-preflight.json"
+        )
+    return issues
+
+
 def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
     directory = record_dir.resolve()
     neural_path = directory / DEFAULT_NEURAL_ENABLEMENT_RECORD
@@ -144,4 +175,23 @@ def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
             neural_payload=neural_payload,
         )
     )
+
+    live_probe_path = directory / _G7_LIVE_PROBE_JSON
+    if live_probe_path.is_file():
+        live_probe_payload = _load_json(live_probe_path)
+        if live_probe_payload is None:
+            issues.append(f"missing file: {live_probe_path}")
+        elif isinstance(live_probe_payload.get("__parse_error__"), str):
+            issues.append(
+                f"invalid JSON in {live_probe_path}: "
+                f"{live_probe_payload['__parse_error__']}"
+            )
+        else:
+            issues.extend(
+                verify_g7_live_probe_neural_artifact_parity(
+                    live_probe_payload=live_probe_payload,
+                    neural_payload=neural_payload,
+                )
+            )
+
     return issues
