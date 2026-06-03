@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–AZ)
+# Hunyuan pre-G7 stack (Phases J–BA)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -49,6 +49,7 @@
 | **AX** | #125 | `verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity.py`, `verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_fixtures.py` | Dedicated bundle↔evidence parity CLI + aligned skipped fixtures + CI smoke |
 | **AY** | #126 | `--strict` on G9/admission capstone CLIs | Exit 1 when `parity_ok` is false under `--strict` |
 | **AZ** | #127 | `--strict` on `hunyuan_neural_enablement_preflight_bundle.py` | Exit 1 when `parity_ok` is false under `--strict` |
+| **BA** | — | `verify_admission_g9_enablement_evidence_bundle.py` | One verify command for admission capstone JSON + bundle↔evidence parity |
 
 ## Operator commands
 
@@ -128,6 +129,7 @@ PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --re
 PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --strict
 PYTHONPATH=src python scripts/hunyuan_admission_g9_enablement_evidence_bundle.py --record-dir .
 PYTHONPATH=src python scripts/hunyuan_admission_g9_enablement_evidence_bundle.py --record-dir . --strict
+PYTHONPATH=src python scripts/verify_admission_g9_enablement_evidence_bundle.py --record-dir .
 PYTHONPATH=src python scripts/verify_admission_g9_enablement_evidence_bundle_record.py admission-g9-enablement-evidence-bundle.json
 PYTHONPATH=src python scripts/verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity.py --record-dir .
 PYTHONPATH=src python scripts/hunyuan_g9_enablement_evidence_bundle.py --record-dir .
@@ -151,9 +153,9 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-AZ)
+## Next slice (post-BA)
 
-Enablement evidence automation is structurally complete through Phase AZ (neural capstone `--strict` requires `parity_ok`). Next execution slices:
+Enablement evidence automation is structurally complete through Phase BA (admission capstone verify bundle). Next execution slices:
 
 1. **Tier-C workstation:** `PYTHONPATH=src python scripts/hunyuan_g9_enablement_evidence_bundle.py --record-dir . --strict` until `g9_enablement_evidence_ready=true` and `parity_ok=true`.
 2. **Hosted G7:** live Space Block/Vase neural run; re-run with `--require-hosted-neural --hosted-neural --status-file status.md`; update hosted-validation with `G7_STATUS: PASS` — still **OPEN**.
