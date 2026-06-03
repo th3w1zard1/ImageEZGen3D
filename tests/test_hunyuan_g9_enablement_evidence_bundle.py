@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import subprocess
 import sys
@@ -9,6 +10,7 @@ from pathlib import Path
 from unittest import mock
 
 from imageezgen3d.hunyuan_g9_enablement_evidence_bundle import (
+    G9EnablementEvidenceBundleResult,
     format_g9_enablement_evidence_bundle_report,
     run_g9_enablement_evidence_bundle,
 )
@@ -226,6 +228,44 @@ class HunyuanG9EnablementEvidenceBundleTests(unittest.TestCase):
         text = format_g9_enablement_evidence_bundle_report(result)
         self.assertIn("g9_enablement_preflight_ok=", text)
         self.assertIn("g9_enablement_evidence_ready=", text)
+
+    @mock.patch(
+        "imageezgen3d.hunyuan_g9_enablement_evidence_bundle.run_g9_enablement_evidence_bundle"
+    )
+    def test_strict_script_fails_when_parity_not_ok(
+        self,
+        bundle_fn: mock.MagicMock,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            record_path = record_dir / "g9-enablement-evidence.json"
+            record_path.write_text("{}", encoding="utf-8")
+            neural = _neural_result(directory=record_dir, ready=True)
+            bundle_fn.return_value = G9EnablementEvidenceBundleResult(
+                g9_enablement_preflight_ok=True,
+                g9_enablement_evidence_ready=True,
+                neural_enablement_ready=True,
+                neural_enablement_preflight_ok=True,
+                hosted_neural_required=False,
+                hosted_neural_ok=None,
+                record_dir=record_dir,
+                neural_enablement=neural,
+                issues=("artifact_parity_mismatch",),
+                record_path=record_path,
+                record_verify_ok=True,
+                parity_ok=False,
+            )
+            repo_root = Path(__file__).resolve().parents[1]
+            script_path = repo_root / "scripts" / "hunyuan_g9_enablement_evidence_bundle.py"
+            spec = importlib.util.spec_from_file_location(
+                "hunyuan_g9_enablement_evidence_bundle_cli",
+                script_path,
+            )
+            assert spec is not None and spec.loader is not None
+            cli_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(cli_module)
+            exit_code = cli_module.main(["--record-dir", str(record_dir), "--strict"])
+        self.assertEqual(exit_code, 1)
 
     def test_g9_enablement_evidence_bundle_script(self) -> None:
         result = subprocess.run(

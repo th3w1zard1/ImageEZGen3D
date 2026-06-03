@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import subprocess
 import sys
 import tempfile
@@ -8,6 +9,7 @@ from pathlib import Path
 from unittest import mock
 
 from imageezgen3d.hunyuan_admission_g9_enablement_evidence_bundle import (
+    AdmissionG9EnablementEvidenceBundleResult,
     format_admission_g9_enablement_evidence_bundle_report,
     run_admission_g9_enablement_evidence_bundle,
 )
@@ -143,6 +145,42 @@ class HunyuanAdmissionG9EnablementEvidenceBundleTests(unittest.TestCase):
         self.assertTrue(
             any("evidence mismatch between admission-g9-enablement-evidence-bundle.json" in issue for issue in result.issues)
         )
+
+    @mock.patch(
+        "imageezgen3d.hunyuan_admission_g9_enablement_evidence_bundle."
+        "run_admission_g9_enablement_evidence_bundle"
+    )
+    def test_strict_script_fails_when_parity_not_ok(
+        self,
+        bundle_fn: mock.MagicMock,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            g9_result = _skipped_g9_evidence_result(directory=record_dir)
+            bundle_fn.return_value = AdmissionG9EnablementEvidenceBundleResult(
+                admission_preflight_ok=True,
+                admission_g9_enablement_evidence_ok=True,
+                g9_enablement_evidence_ready=True,
+                g9_enablement_preflight_ok=True,
+                parity_ok=False,
+                record_dir=record_dir,
+                bundle_record_path=record_dir / "admission-g9-enablement-evidence-bundle.json",
+                g9_enablement_evidence=g9_result,
+                issues=("artifact_parity_mismatch",),
+            )
+            repo_root = Path(__file__).resolve().parents[1]
+            script_path = repo_root / "scripts" / "hunyuan_admission_g9_enablement_evidence_bundle.py"
+            spec = importlib.util.spec_from_file_location(
+                "hunyuan_admission_g9_enablement_evidence_bundle_cli",
+                script_path,
+            )
+            assert spec is not None and spec.loader is not None
+            cli_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(cli_module)
+            exit_code = cli_module.main(
+                ["--record-dir", str(record_dir), "--strict"],
+            )
+        self.assertEqual(exit_code, 1)
 
     def test_admission_g9_enablement_evidence_bundle_script(self) -> None:
         result = subprocess.run(
