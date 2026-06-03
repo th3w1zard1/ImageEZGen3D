@@ -112,6 +112,38 @@ class HunyuanAdmissionG9EnablementEvidenceBundleTests(unittest.TestCase):
         self.assertFalse(result.admission_g9_enablement_evidence_ok)
         self.assertTrue(any("hunyuan_preflight_bundle failed" in issue for issue in result.issues))
 
+    @mock.patch(
+        "imageezgen3d.hunyuan_admission_g9_enablement_evidence_bundle."
+        "verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity"
+    )
+    @mock.patch(
+        "imageezgen3d.hunyuan_admission_g9_enablement_evidence_bundle."
+        "run_g9_enablement_evidence_bundle"
+    )
+    @mock.patch(
+        "imageezgen3d.hunyuan_admission_g9_enablement_evidence_bundle."
+        "_run_preflight_bundle"
+    )
+    def test_bundle_sets_parity_false_on_evidence_mismatch(
+        self,
+        preflight_fn: mock.MagicMock,
+        g9_fn: mock.MagicMock,
+        parity_fn: mock.MagicMock,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            preflight_fn.return_value = True
+            g9_fn.return_value = _skipped_g9_evidence_result(directory=record_dir)
+            parity_fn.return_value = [
+                "evidence mismatch between admission-g9-enablement-evidence-bundle.json "
+                "and g9-enablement-evidence.json"
+            ]
+            result = run_admission_g9_enablement_evidence_bundle(record_dir=record_dir)
+        self.assertFalse(result.parity_ok)
+        self.assertTrue(
+            any("evidence mismatch between admission-g9-enablement-evidence-bundle.json" in issue for issue in result.issues)
+        )
+
     def test_admission_g9_enablement_evidence_bundle_script(self) -> None:
         result = subprocess.run(
             [
