@@ -41,7 +41,7 @@
 | **AP** | #117 | `verify_g7_hosted_neural_enablement_artifact_parity` (in artifact parity module) | Optional hosted G7 PASS ↔ neural enablement-ready parity when both JSON present |
 | **AQ** | #118 | `--hosted-neural` on `hunyuan_neural_enablement_preflight_bundle.py` | One-shot neural capstone + post-enablement G7 hosted-neural record for parity |
 | **AR** | #119 | `hunyuan_g9_enablement_evidence_bundle.py` | G9 enablement PR evidence capstone + `g9-enablement-evidence.json` attestation |
-| **AS** | — | `verify_g9_enablement_evidence_neural_artifact_parity` (in artifact parity module) | Optional G9 evidence ↔ neural enablement-ready parity when both JSON present |
+| **AS** | #120 | `verify_g9_enablement_evidence_neural_artifact_parity` (in artifact parity module) | Optional G9 evidence ↔ neural enablement-ready parity when both JSON present |
 
 ## Operator commands
 
