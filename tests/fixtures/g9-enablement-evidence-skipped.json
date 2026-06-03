@@ -1,0 +1,27 @@
+{
+  "g9_enablement_evidence_ready": false,
+  "g9_enablement_preflight_ok": true,
+  "hosted_neural_ok": null,
+  "hosted_neural_required": false,
+  "issues": [
+    "configured_adapter_neural_forward_not_ready"
+  ],
+  "neural_enablement_preflight_ok": true,
+  "neural_enablement_ready": false,
+  "ok": false,
+  "preflight": {
+    "g9_enablement_evidence_ready": false,
+    "g9_enablement_preflight_ok": true,
+    "hosted_neural_ok": null,
+    "hosted_neural_required": false,
+    "issues": [
+      "configured_adapter_neural_forward_not_ready"
+    ],
+    "neural_enablement_preflight_ok": true,
+    "neural_enablement_ready": false,
+    "record_dir": "/tmp",
+    "record_path": "/tmp/g9-enablement-evidence.json",
+    "record_verify_ok": true
+  },
+  "record_kind": "hunyuan_g9_enablement_evidence"
+}
