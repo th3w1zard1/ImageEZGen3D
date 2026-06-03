@@ -18,6 +18,8 @@ from imageezgen3d.hunyuan_neural_enablement_preflight_bundle import (
     NeuralEnablementPreflightBundleResult,
 )
 
+FIXTURES = Path(__file__).resolve().parent / "fixtures"
+
 
 def _neural_result(*, directory: Path) -> NeuralEnablementPreflightBundleResult:
     g7_enablement = mock.MagicMock()
@@ -45,6 +47,11 @@ def _neural_result(*, directory: Path) -> NeuralEnablementPreflightBundleResult:
 
 
 def _skipped_g9_evidence_result(*, directory: Path) -> G9EnablementEvidenceBundleResult:
+    record_path = directory / "g9-enablement-evidence.json"
+    record_path.write_text(
+        (FIXTURES / "g9-enablement-evidence-skipped.json").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
     return G9EnablementEvidenceBundleResult(
         g9_enablement_preflight_ok=True,
         g9_enablement_evidence_ready=False,
@@ -55,7 +62,7 @@ def _skipped_g9_evidence_result(*, directory: Path) -> G9EnablementEvidenceBundl
         record_dir=directory,
         neural_enablement=_neural_result(directory=directory),
         issues=(),
-        record_path=directory / "g9-enablement-evidence.json",
+        record_path=record_path,
         record_verify_ok=True,
         parity_ok=True,
     )
@@ -72,6 +79,7 @@ class HunyuanAdmissionG9EnablementEvidenceBundleTests(unittest.TestCase):
             self.assertTrue(result.admission_g9_enablement_evidence_ok)
             self.assertFalse(result.g9_enablement_evidence_ready)
             self.assertTrue(result.g9_enablement_evidence.record_path.is_file())
+            self.assertTrue(result.bundle_record_path.is_file())
 
     def test_format_report(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
