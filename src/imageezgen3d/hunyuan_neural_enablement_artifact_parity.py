@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .hunyuan_ci_artifact_parity import verify_hunyuan_ci_artifact_parity
 from .hunyuan_g9_enablement_evidence_record import (
     DEFAULT_G9_ENABLEMENT_EVIDENCE_RECORD,
     verify_g9_enablement_evidence_record,
@@ -26,6 +27,7 @@ from .hunyuan_neural_enablement_record import (
 )
 
 _ENABLEMENT_PREFLIGHT_JSON = "hunyuan-enablement-preflight.json"
+_ADMISSION_AUDIT_JSON = "hunyuan-admission-audit.json"
 
 
 def _load_json(path: Path) -> dict[str, Any] | None:
@@ -219,6 +221,33 @@ def verify_g9_enablement_evidence_neural_artifact_parity(
     return issues
 
 
+def verify_g9_enablement_evidence_admission_artifact_parity(
+    *,
+    evidence_payload: dict[str, Any],
+    audit_payload: dict[str, Any],
+    admission_preflight_payload: dict[str, Any] | None = None,
+) -> list[str]:
+    """Return issues when G9 enablement evidence and admission audit JSON diverge."""
+    issues: list[str] = []
+    issues.extend(verify_g9_enablement_evidence_record(evidence_payload))
+
+    if audit_payload.get("adapter_configured") is True:
+        issues.append(
+            "adapter_configured=true in admission audit while G9 enablement "
+            "evidence parity verify runs (enablement PR safety guard)"
+        )
+
+    if admission_preflight_payload is not None:
+        issues.extend(
+            verify_hunyuan_ci_artifact_parity(
+                audit_payload,
+                admission_preflight_payload,
+            )
+        )
+
+    return issues
+
+
 def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
     directory = record_dir.resolve()
     neural_path = directory / DEFAULT_NEURAL_ENABLEMENT_RECORD
@@ -304,6 +333,7 @@ def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
             )
 
     evidence_path = directory / DEFAULT_G9_ENABLEMENT_EVIDENCE_RECORD
+    evidence_payload: dict[str, Any] | None = None
     if evidence_path.is_file():
         evidence_payload = _load_json(evidence_path)
         if evidence_payload is None:
@@ -313,11 +343,30 @@ def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
                 f"invalid JSON in {evidence_path}: "
                 f"{evidence_payload['__parse_error__']}"
             )
+            evidence_payload = None
         else:
             issues.extend(
                 verify_g9_enablement_evidence_neural_artifact_parity(
                     evidence_payload=evidence_payload,
                     neural_payload=neural_payload,
+                )
+            )
+
+    audit_path = directory / _ADMISSION_AUDIT_JSON
+    if evidence_payload is not None and audit_path.is_file():
+        audit_payload = _load_json(audit_path)
+        if audit_payload is None:
+            issues.append(f"missing file: {audit_path}")
+        elif isinstance(audit_payload.get("__parse_error__"), str):
+            issues.append(
+                f"invalid JSON in {audit_path}: {audit_payload['__parse_error__']}"
+            )
+        else:
+            issues.extend(
+                verify_g9_enablement_evidence_admission_artifact_parity(
+                    evidence_payload=evidence_payload,
+                    audit_payload=audit_payload,
+                    admission_preflight_payload=enablement_payload,
                 )
             )
 
