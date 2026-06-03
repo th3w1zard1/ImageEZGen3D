@@ -44,7 +44,7 @@
 | **AS** | #120 | `verify_g9_enablement_evidence_neural_artifact_parity` (in artifact parity module) | Optional G9 evidence ↔ neural enablement-ready parity when both JSON present |
 | **AT** | #121 | `verify_g9_enablement_evidence_admission_artifact_parity` (in artifact parity module) | Optional G9 evidence ↔ admission audit parity when both JSON present |
 | **AU** | #122 | `hunyuan_admission_g9_enablement_evidence_bundle.py` | Admission preflight + G9 enablement evidence capstone in one operator command |
-| **AV** | — | `hunyuan_admission_g9_enablement_evidence_bundle_record`, `verify_admission_g9_enablement_evidence_bundle_record.py` | Bundle attestation record + verify for enablement PR evidence chain |
+| **AV** | #123 | `hunyuan_admission_g9_enablement_evidence_bundle_record`, `verify_admission_g9_enablement_evidence_bundle_record.py` | Bundle attestation record + verify for enablement PR evidence chain |
 
 ## Operator commands
 
