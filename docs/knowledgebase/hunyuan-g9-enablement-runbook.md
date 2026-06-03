@@ -10,7 +10,16 @@ Gate **G9** closes when an explicit enablement PR merges with rollback steps doc
 python scripts/hunyuan_preflight_bundle.py
 ```
 
-**Tier-C workstation (after admission preflight passes):**
+**One command (preferred, G9 evidence capstone):**
+
+```bash
+PYTHONPATH=src python scripts/hunyuan_g9_enablement_evidence_bundle.py --record-dir .
+PYTHONPATH=src python scripts/hunyuan_g9_enablement_evidence_bundle.py --record-dir . --strict
+PYTHONPATH=src python scripts/hunyuan_g9_enablement_evidence_bundle.py --record-dir . --strict --require-hosted-neural --hosted-neural --status-file status.md --hosted-sample Block
+PYTHONPATH=src python scripts/verify_g9_enablement_evidence_record.py g9-enablement-evidence.json
+```
+
+**Tier-C workstation (neural capstone subset):**
 
 ```bash
 PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir .
