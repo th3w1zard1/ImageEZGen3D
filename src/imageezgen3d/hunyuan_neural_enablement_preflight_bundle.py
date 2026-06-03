@@ -11,6 +11,11 @@ from .hunyuan_g7_enablement_preflight_bundle import (
     G7EnablementPreflightBundleResult,
     run_g7_enablement_preflight_bundle,
 )
+from .hunyuan_g7_hosted_neural_record import (
+    DEFAULT_G7_HOSTED_NEURAL_RECORD,
+    attestation_from_status_markdown,
+    write_g7_hosted_neural_record,
+)
 from .hunyuan_g7_preflight import DEFAULT_G7_LIVE_PROBE_RECORD, write_g7_live_probe_record
 from .hunyuan_neural_enablement_artifact_parity import (
     verify_neural_enablement_artifact_files,
@@ -40,6 +45,9 @@ class NeuralEnablementPreflightBundleResult:
     live_probe_requested: bool
     live_probe_ok: bool | None
     live_probe_path: Path | None
+    hosted_neural_requested: bool
+    hosted_neural_ok: bool | None
+    hosted_neural_path: Path | None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -56,6 +64,13 @@ class NeuralEnablementPreflightBundleResult:
             "live_probe_ok": self.live_probe_ok,
             "live_probe_path": (
                 str(self.live_probe_path) if self.live_probe_path is not None else None
+            ),
+            "hosted_neural_requested": self.hosted_neural_requested,
+            "hosted_neural_ok": self.hosted_neural_ok,
+            "hosted_neural_path": (
+                str(self.hosted_neural_path)
+                if self.hosted_neural_path is not None
+                else None
             ),
             "g7_enablement": self.g7_enablement.to_dict(),
             "configured_inference": self.configured_inference,
@@ -84,6 +99,11 @@ def run_neural_enablement_preflight_bundle(
     live_probe: bool = False,
     space_url: str | None = None,
     sample_path: Path | None = None,
+    hosted_neural: bool = False,
+    hosted_neural_status_file: Path | None = None,
+    hosted_neural_status_text: str | None = None,
+    hosted_neural_sample: str | None = None,
+    hosted_neural_space_url: str | None = None,
 ) -> NeuralEnablementPreflightBundleResult:
     directory = (record_dir or Path(".")).resolve()
     g7_result = run_g7_enablement_preflight_bundle(
@@ -116,10 +136,37 @@ def run_neural_enablement_preflight_bundle(
             issues.append("g7_live_probe_failed")
             issues.extend(live_result.issues)
 
+    hosted_neural_path: Path | None = None
+    hosted_neural_ok: bool | None = None
+    if hosted_neural:
+        if (
+            hosted_neural_status_file is not None
+            and hosted_neural_status_text is not None
+        ):
+            issues.append("hosted_neural_status_file_and_text_mutually_exclusive")
+        elif hosted_neural_status_file is None and hosted_neural_status_text is None:
+            issues.append("hosted_neural_status_required")
+        else:
+            if hosted_neural_status_file is not None:
+                status_markdown = hosted_neural_status_file.read_text(encoding="utf-8")
+            else:
+                status_markdown = hosted_neural_status_text or ""
+            hosted_neural_path = directory / DEFAULT_G7_HOSTED_NEURAL_RECORD
+            attestation = attestation_from_status_markdown(
+                status_markdown,
+                sample=hosted_neural_sample,
+                space_url=hosted_neural_space_url,
+            )
+            write_g7_hosted_neural_record(hosted_neural_path, attestation)
+            hosted_neural_ok = attestation.ok
+            if not attestation.ok:
+                issues.append("g7_hosted_neural_failed")
+                issues.extend(attestation.issues)
+
     neural_forward_ready = bool(configured["neural_forward_ready"])
     preflight_ok = g7_result.g7_enablement_preflight_ok and (
         live_probe_ok is not False if live_probe else True
-    )
+    ) and (hosted_neural_ok is not False if hosted_neural else True)
     enablement_ready = g7_result.g7_enablement_ready and neural_forward_ready
     record_path = directory / DEFAULT_NEURAL_ENABLEMENT_RECORD
 
@@ -139,6 +186,9 @@ def run_neural_enablement_preflight_bundle(
         live_probe_requested=live_probe,
         live_probe_ok=live_probe_ok,
         live_probe_path=live_probe_path,
+        hosted_neural_requested=hosted_neural,
+        hosted_neural_ok=hosted_neural_ok,
+        hosted_neural_path=hosted_neural_path,
     )
     write_neural_enablement_record(
         record_path,
@@ -170,6 +220,9 @@ def run_neural_enablement_preflight_bundle(
         live_probe_requested=live_probe,
         live_probe_ok=live_probe_ok,
         live_probe_path=live_probe_path,
+        hosted_neural_requested=hosted_neural,
+        hosted_neural_ok=hosted_neural_ok,
+        hosted_neural_path=hosted_neural_path,
     )
     write_neural_enablement_record(
         record_path,
@@ -196,6 +249,9 @@ def format_neural_enablement_preflight_bundle_report(
     if result.live_probe_requested:
         lines.append(f"live_probe_ok={result.live_probe_ok}")
         lines.append(f"live_probe_path={result.live_probe_path}")
+    if result.hosted_neural_requested:
+        lines.append(f"hosted_neural_ok={result.hosted_neural_ok}")
+        lines.append(f"hosted_neural_path={result.hosted_neural_path}")
     for issue in result.issues:
         lines.append(f"issue={issue}")
     return "\n".join(lines) + "\n"

@@ -15,12 +15,13 @@ python scripts/hunyuan_preflight_bundle.py
 ```bash
 PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir .
 PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --live-probe
+PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --hosted-neural --status-file status.md --hosted-sample Block
 PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --strict
 PYTHONPATH=src python scripts/verify_neural_enablement_record.py neural-enablement-preflight.json
 PYTHONPATH=src python scripts/verify_neural_enablement_artifact_parity.py --record-dir .
 ```
 
-Writes admission, enablement, workstation, G9 bundle, neural enablement, and (with `--live-probe`) `hunyuan-g7-live-probe.json` under `--record-dir`, then verifies record + cross-artifact parity. When `hunyuan-g7-hosted-neural.json` is also present with `ok=true`, parity requires `neural_enablement_ready=true` in the neural record. Expect `workstation_evidence_ready=false` and `neural_enablement_ready=false` on CI; on tier-C GPU workstation re-run with `--strict` until `ok=true` in `neural-enablement-preflight.json`.
+Writes admission, enablement, workstation, G9 bundle, neural enablement, and (with `--live-probe`) `hunyuan-g7-live-probe.json` under `--record-dir`, then verifies record + cross-artifact parity. With `--hosted-neural --status-file`, also writes `hunyuan-g7-hosted-neural.json` for post-enablement G7 evidence parity (Phase AP). When `hunyuan-g7-hosted-neural.json` is also present with `ok=true`, parity requires `neural_enablement_ready=true` in the neural record. Expect `workstation_evidence_ready=false` and `neural_enablement_ready=false` on CI; on tier-C GPU workstation re-run with `--strict` until `ok=true` in `neural-enablement-preflight.json`.
 
 **Legacy G9-only bundle (subset of the neural capstone):**
 
@@ -56,10 +57,13 @@ PYTHONPATH=src python scripts/verify_hosted_smoke_artifacts.py
 2. Wire weights/secrets per [hunyuan-weight-access.md](hunyuan-weight-access.md) and [hunyuan-dependencies.md](hunyuan-dependencies.md).
 3. Deploy Space: `PYTHONPATH=src python scripts/hf_space_sync.py --execute`
 4. Run Block or Vase `/generate`; status must pass `validate_g7_hosted_generate_status()`.
-   Record evidence locally:
+   Record evidence locally (standalone or via neural capstone):
    ```bash
    PYTHONPATH=src python scripts/hunyuan_g7_hosted_neural_record.py \
      --status-file status.md --sample Block --record hunyuan-g7-hosted-neural.json
+   # Or one-shot with neural capstone + parity:
+   PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py \
+     --record-dir . --hosted-neural --status-file status.md --hosted-sample Block --strict
    PYTHONPATH=src python scripts/verify_hunyuan_g7_hosted_neural_record.py \
      hunyuan-g7-hosted-neural.json
    ```

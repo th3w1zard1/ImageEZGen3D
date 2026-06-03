@@ -57,8 +57,37 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Sample image path for --live-probe.",
     )
+    parser.add_argument(
+        "--hosted-neural",
+        action="store_true",
+        help=(
+            "Record hunyuan-g7-hosted-neural.json from hosted /generate status "
+            "under --record-dir (requires --status-file or --status-text)."
+        ),
+    )
+    parser.add_argument(
+        "--status-file",
+        type=Path,
+        default=None,
+        help="Generation status markdown for --hosted-neural.",
+    )
+    parser.add_argument(
+        "--status-text",
+        default=None,
+        help="Generation status markdown inline for --hosted-neural.",
+    )
+    parser.add_argument(
+        "--hosted-sample",
+        default=None,
+        help="Sample label or path for --hosted-neural record.",
+    )
     parser.add_argument("--json", action="store_true", dest="as_json")
     args = parser.parse_args(argv)
+
+    if args.hosted_neural and args.status_file is None and args.status_text is None:
+        parser.error("--hosted-neural requires --status-file or --status-text")
+    if args.status_file is not None and args.status_text is not None:
+        parser.error("use only one of --status-file or --status-text")
 
     result = run_neural_enablement_preflight_bundle(
         record_dir=args.record_dir,
@@ -66,6 +95,11 @@ def main(argv: list[str] | None = None) -> int:
         live_probe=args.live_probe,
         space_url=args.space_url,
         sample_path=args.sample,
+        hosted_neural=args.hosted_neural,
+        hosted_neural_status_file=args.status_file,
+        hosted_neural_status_text=args.status_text,
+        hosted_neural_sample=args.hosted_sample,
+        hosted_neural_space_url=args.space_url,
     )
 
     if args.as_json:
