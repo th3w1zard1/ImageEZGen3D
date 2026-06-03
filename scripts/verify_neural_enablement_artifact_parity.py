@@ -18,8 +18,9 @@ def main(argv: list[str] | None = None) -> int:
         description=(
             "Verify neural-enablement-preflight.json parity with "
             "g9-workstation-bundle.json, hunyuan-enablement-preflight.json, "
-            "optional hunyuan-g7-live-probe.json, and optional "
-            "hunyuan-g7-hosted-neural.json in a record directory."
+            "optional hunyuan-g7-live-probe.json, optional "
+            "hunyuan-g7-hosted-neural.json, and optional "
+            "g9-enablement-evidence.json in a record directory."
         )
     )
     parser.add_argument(

@@ -4,6 +4,10 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .hunyuan_g9_enablement_evidence_record import (
+    DEFAULT_G9_ENABLEMENT_EVIDENCE_RECORD,
+    verify_g9_enablement_evidence_record,
+)
 from .hunyuan_g9_workstation_bundle_record import (
     DEFAULT_G9_BUNDLE_RECORD,
     verify_g9_workstation_bundle_record,
@@ -164,6 +168,57 @@ def verify_g7_hosted_neural_enablement_artifact_parity(
     return issues
 
 
+def verify_g9_enablement_evidence_neural_artifact_parity(
+    *,
+    evidence_payload: dict[str, Any],
+    neural_payload: dict[str, Any],
+) -> list[str]:
+    """Return issues when G9 enablement evidence and neural JSON diverge."""
+    issues: list[str] = []
+    issues.extend(verify_g9_enablement_evidence_record(evidence_payload))
+
+    for key in (
+        "neural_enablement_ready",
+        "neural_enablement_preflight_ok",
+    ):
+        if evidence_payload.get(key) != neural_payload.get(key):
+            issues.append(
+                f"{key} mismatch between g9-enablement-evidence.json and "
+                "neural-enablement-preflight.json"
+            )
+
+    if evidence_payload.get("ok") is not True:
+        return issues
+
+    if neural_payload.get("neural_enablement_ready") is not True:
+        issues.append(
+            "g9-enablement-evidence.json ok=true requires "
+            "neural_enablement_ready=true in neural-enablement-preflight.json"
+        )
+    if neural_payload.get("neural_enablement_preflight_ok") is not True:
+        issues.append(
+            "g9-enablement-evidence.json ok=true requires "
+            "neural_enablement_preflight_ok=true in neural-enablement-preflight.json"
+        )
+    if neural_payload.get("ok") is not True:
+        issues.append(
+            "g9-enablement-evidence.json ok=true requires ok=true in "
+            "neural-enablement-preflight.json"
+        )
+    if evidence_payload.get("g9_enablement_evidence_ready") is not True:
+        issues.append(
+            "g9-enablement-evidence.json ok=true requires "
+            "g9_enablement_evidence_ready=true"
+        )
+    if evidence_payload.get("hosted_neural_required") is True:
+        if evidence_payload.get("hosted_neural_ok") is not True:
+            issues.append(
+                "g9-enablement-evidence.json ok=true requires hosted_neural_ok=true "
+                "when hosted_neural_required=true"
+            )
+    return issues
+
+
 def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
     directory = record_dir.resolve()
     neural_path = directory / DEFAULT_NEURAL_ENABLEMENT_RECORD
@@ -244,6 +299,24 @@ def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
             issues.extend(
                 verify_g7_hosted_neural_enablement_artifact_parity(
                     hosted_neural_payload=hosted_neural_payload,
+                    neural_payload=neural_payload,
+                )
+            )
+
+    evidence_path = directory / DEFAULT_G9_ENABLEMENT_EVIDENCE_RECORD
+    if evidence_path.is_file():
+        evidence_payload = _load_json(evidence_path)
+        if evidence_payload is None:
+            issues.append(f"missing file: {evidence_path}")
+        elif isinstance(evidence_payload.get("__parse_error__"), str):
+            issues.append(
+                f"invalid JSON in {evidence_path}: "
+                f"{evidence_payload['__parse_error__']}"
+            )
+        else:
+            issues.extend(
+                verify_g9_enablement_evidence_neural_artifact_parity(
+                    evidence_payload=evidence_payload,
                     neural_payload=neural_payload,
                 )
             )
