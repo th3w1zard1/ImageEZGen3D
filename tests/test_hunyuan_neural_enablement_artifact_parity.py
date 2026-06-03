@@ -9,12 +9,38 @@ from pathlib import Path
 
 from imageezgen3d.hunyuan_neural_enablement_artifact_parity import (
     verify_enablement_neural_artifact_parity,
+    verify_g7_hosted_neural_enablement_artifact_parity,
     verify_g7_live_probe_neural_artifact_parity,
     verify_neural_enablement_artifact_files,
     verify_neural_enablement_artifact_parity,
 )
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
+
+
+def _ready_neural_payload() -> dict:
+    payload = json.loads(
+        (FIXTURES / "neural-enablement-preflight-skipped.json").read_text(encoding="utf-8")
+    )
+    payload["ok"] = True
+    payload["neural_enablement_ready"] = True
+    payload["neural_enablement_preflight_ok"] = True
+    payload["neural_forward_ready"] = True
+    payload["g7_enablement_ready"] = True
+    payload["issues"] = []
+    preflight = payload["preflight"]
+    preflight["neural_enablement_ready"] = True
+    preflight["neural_enablement_preflight_ok"] = True
+    preflight["neural_forward_ready"] = True
+    preflight["g7_enablement_ready"] = True
+    preflight["issues"] = []
+    preflight["configured_inference"]["neural_forward_ready"] = True
+    preflight["configured_inference"]["expected_outcome"] = "neural_forward_attempt"
+    nested_g7 = preflight["g7_enablement"]
+    nested_g7["g7_enablement_ready"] = True
+    nested_g7["workstation_evidence_ready"] = True
+    nested_g7["g9_preflight"]["workstation_evidence_ready"] = True
+    return payload
 
 
 class HunyuanNeuralEnablementArtifactParityTests(unittest.TestCase):
@@ -157,6 +183,69 @@ class HunyuanNeuralEnablementArtifactParityTests(unittest.TestCase):
             )
             (record_dir / "hunyuan-g7-live-probe.json").write_text(
                 (FIXTURES / "hunyuan-g7-live-probe-skipped.json").read_text(
+                    encoding="utf-8"
+                ),
+                encoding="utf-8",
+            )
+            issues = verify_neural_enablement_artifact_files(record_dir)
+            self.assertEqual(issues, [])
+
+    def test_verify_hosted_neural_enablement_passes_when_ready(self) -> None:
+        hosted_payload = json.loads(
+            (FIXTURES / "hunyuan-g7-hosted-neural-pass.json").read_text(encoding="utf-8")
+        )
+        neural_payload = _ready_neural_payload()
+        issues = verify_g7_hosted_neural_enablement_artifact_parity(
+            hosted_neural_payload=hosted_payload,
+            neural_payload=neural_payload,
+        )
+        self.assertEqual(issues, [])
+
+    def test_verify_hosted_neural_enablement_fails_when_neural_not_ready(
+        self,
+    ) -> None:
+        hosted_payload = json.loads(
+            (FIXTURES / "hunyuan-g7-hosted-neural-pass.json").read_text(encoding="utf-8")
+        )
+        neural_payload = json.loads(
+            (FIXTURES / "neural-enablement-preflight-skipped.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        issues = verify_g7_hosted_neural_enablement_artifact_parity(
+            hosted_neural_payload=hosted_payload,
+            neural_payload=neural_payload,
+        )
+        self.assertTrue(
+            any("neural_enablement_ready=true" in issue for issue in issues)
+        )
+
+    def test_verify_files_includes_optional_hosted_neural(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            neural_payload = _ready_neural_payload()
+            (record_dir / "neural-enablement-preflight.json").write_text(
+                json.dumps(neural_payload),
+                encoding="utf-8",
+            )
+            (record_dir / "g9-workstation-bundle.json").write_text(
+                (FIXTURES / "g9-workstation-bundle-ready.json").read_text(
+                    encoding="utf-8"
+                ),
+                encoding="utf-8",
+            )
+            (record_dir / "hunyuan-enablement-preflight.json").write_text(
+                json.dumps(
+                    {
+                        "g7_readiness": neural_payload["preflight"]["g7_enablement"][
+                            "g7_readiness"
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (record_dir / "hunyuan-g7-hosted-neural.json").write_text(
+                (FIXTURES / "hunyuan-g7-hosted-neural-pass.json").read_text(
                     encoding="utf-8"
                 ),
                 encoding="utf-8",
