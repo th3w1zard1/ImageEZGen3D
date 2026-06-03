@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import subprocess
 import sys
 import tempfile
@@ -13,6 +14,7 @@ from imageezgen3d.hunyuan_g7_enablement_preflight_bundle import (
 from imageezgen3d.hunyuan_g7_preflight import G7ReadinessResult
 from imageezgen3d.hunyuan_g9_preflight_bundle import G9PreflightBundleResult
 from imageezgen3d.hunyuan_neural_enablement_preflight_bundle import (
+    NeuralEnablementPreflightBundleResult,
     format_neural_enablement_preflight_bundle_report,
     run_neural_enablement_preflight_bundle,
 )
@@ -201,6 +203,52 @@ class HunyuanNeuralEnablementPreflightBundleTests(unittest.TestCase):
         )
         result = run_neural_enablement_preflight_bundle(record_dir=Path("/tmp"))
         self.assertFalse(result.neural_enablement_preflight_ok)
+
+    @mock.patch(
+        "imageezgen3d.hunyuan_neural_enablement_preflight_bundle."
+        "run_neural_enablement_preflight_bundle"
+    )
+    def test_strict_script_fails_when_parity_not_ok(
+        self,
+        bundle_fn: mock.MagicMock,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            g7_result = _g7_enablement_result(directory=record_dir, enablement_ready=True)
+            bundle_fn.return_value = NeuralEnablementPreflightBundleResult(
+                g7_enablement_preflight_ok=True,
+                neural_enablement_preflight_ok=True,
+                neural_enablement_ready=True,
+                g7_enablement_ready=True,
+                neural_forward_ready=True,
+                record_dir=record_dir,
+                g7_enablement=g7_result,
+                configured_inference={
+                    "neural_forward_ready": True,
+                    "expected_outcome": "neural_forward_attempt",
+                },
+                issues=("artifact_parity_mismatch",),
+                record_path=record_dir / "neural-enablement-preflight.json",
+                record_verify_ok=True,
+                parity_ok=False,
+                live_probe_requested=False,
+                live_probe_ok=None,
+                live_probe_path=None,
+                hosted_neural_requested=False,
+                hosted_neural_ok=None,
+                hosted_neural_path=None,
+            )
+            repo_root = Path(__file__).resolve().parents[1]
+            script_path = repo_root / "scripts" / "hunyuan_neural_enablement_preflight_bundle.py"
+            spec = importlib.util.spec_from_file_location(
+                "hunyuan_neural_enablement_preflight_bundle_cli",
+                script_path,
+            )
+            assert spec is not None and spec.loader is not None
+            cli_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(cli_module)
+            exit_code = cli_module.main(["--record-dir", str(record_dir), "--strict"])
+        self.assertEqual(exit_code, 1)
 
     def test_neural_enablement_preflight_bundle_script(self) -> None:
         result = subprocess.run(
