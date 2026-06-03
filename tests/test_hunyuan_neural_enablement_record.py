@@ -80,6 +80,9 @@ class HunyuanNeuralEnablementRecordTests(unittest.TestCase):
             live_probe_requested=False,
             live_probe_ok=None,
             live_probe_path=None,
+            hosted_neural_requested=False,
+            hosted_neural_ok=None,
+            hosted_neural_path=None,
         )
         attestation = attestation_from_preflight_bundle(result)
         self.assertFalse(attestation.ok)

@@ -101,6 +101,50 @@ class HunyuanNeuralEnablementPreflightBundleTests(unittest.TestCase):
 
     @mock.patch(
         "imageezgen3d.hunyuan_neural_enablement_preflight_bundle."
+        "attestation_from_status_markdown"
+    )
+    @mock.patch(
+        "imageezgen3d.hunyuan_neural_enablement_preflight_bundle."
+        "write_g7_hosted_neural_record"
+    )
+    def test_hosted_neural_writes_record_and_sets_flags(
+        self,
+        write_record: mock.MagicMock,
+        attestation_from_status: mock.MagicMock,
+    ) -> None:
+        attestation = mock.MagicMock(ok=True, issues=())
+        attestation_from_status.return_value = attestation
+        status = (
+            "Run `20260527-120000-abcdef01` complete.\n"
+            "- **Backend used:** Hosted ZeroGPU (hunyuan-zerogpu)\n"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            status_file = record_dir / "status.md"
+            status_file.write_text(status, encoding="utf-8")
+            result = run_neural_enablement_preflight_bundle(
+                record_dir=record_dir,
+                skip_weight_warm=True,
+                hosted_neural=True,
+                hosted_neural_status_file=status_file,
+                hosted_neural_sample="Block",
+            )
+            self.assertTrue(result.hosted_neural_requested)
+            self.assertTrue(result.hosted_neural_ok)
+            self.assertEqual(
+                result.hosted_neural_path,
+                record_dir / "hunyuan-g7-hosted-neural.json",
+            )
+            attestation_from_status.assert_called_once_with(
+                status,
+                sample="Block",
+                space_url=None,
+            )
+            write_record.assert_called_once()
+            self.assertTrue(result.parity_ok)
+
+    @mock.patch(
+        "imageezgen3d.hunyuan_neural_enablement_preflight_bundle."
         "describe_configured_adapter_inference_path"
     )
     @mock.patch(
