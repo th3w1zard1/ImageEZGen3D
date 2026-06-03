@@ -39,7 +39,7 @@
 | **AN** | #115 | `--live-probe` on `hunyuan_neural_enablement_preflight_bundle.py` | One-shot neural capstone + hosted G7 live-probe record for parity |
 | **AO** | #116 | `hunyuan_g7_hosted_neural_record`, `verify_hunyuan_g7_hosted_neural_record.py` | Post-enablement G7 Block/Vase status attestation JSON + verify |
 | **AP** | #117 | `verify_g7_hosted_neural_enablement_artifact_parity` (in artifact parity module) | Optional hosted G7 PASS ↔ neural enablement-ready parity when both JSON present |
-| **AQ** | — | `--hosted-neural` on `hunyuan_neural_enablement_preflight_bundle.py` | One-shot neural capstone + post-enablement G7 hosted-neural record for parity |
+| **AQ** | #118 | `--hosted-neural` on `hunyuan_neural_enablement_preflight_bundle.py` | One-shot neural capstone + post-enablement G7 hosted-neural record for parity |
 
 ## Operator commands
 
