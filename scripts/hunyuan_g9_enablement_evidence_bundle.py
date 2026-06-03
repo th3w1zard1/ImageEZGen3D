@@ -36,7 +36,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="Exit 1 when g9_enablement_evidence_ready is false.",
+        help=(
+            "Exit 1 when g9_enablement_evidence_ready is false or parity_ok is false."
+        ),
     )
     parser.add_argument(
         "--require-hosted-neural",
@@ -111,6 +113,8 @@ def main(argv: list[str] | None = None) -> int:
         print(format_g9_enablement_evidence_bundle_report(result), end="")
 
     if args.strict and not result.g9_enablement_evidence_ready:
+        return 1
+    if args.strict and not result.parity_ok:
         return 1
     if not result.g9_enablement_preflight_ok:
         return 1
