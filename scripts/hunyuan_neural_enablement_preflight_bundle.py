@@ -36,7 +36,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="Exit 1 when neural_enablement_ready is false.",
+        help=(
+            "Exit 1 when neural_enablement_ready is false or parity_ok is false."
+        ),
     )
     parser.add_argument(
         "--live-probe",
@@ -108,6 +110,8 @@ def main(argv: list[str] | None = None) -> int:
         print(format_neural_enablement_preflight_bundle_report(result), end="")
 
     if args.strict and not result.neural_enablement_ready:
+        return 1
+    if args.strict and not result.parity_ok:
         return 1
     if not result.neural_enablement_preflight_ok:
         return 1
