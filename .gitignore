@@ -21,6 +21,8 @@ hunyuan-enablement-preflight.json
 g9-workstation-bundle.json
 neural-enablement-preflight.json
 workstation-enablement-preflight.json
+g9-enablement-evidence.json
+admission-g9-enablement-evidence-bundle.json
 gpu-forward-e2e.json
 *.glb
 *.obj

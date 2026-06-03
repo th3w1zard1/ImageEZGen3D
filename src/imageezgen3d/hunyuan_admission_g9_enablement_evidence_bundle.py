@@ -14,6 +14,9 @@ from .hunyuan_admission_g9_enablement_evidence_bundle_record import (
     verify_admission_g9_enablement_evidence_bundle_record_file,
     write_admission_g9_enablement_evidence_bundle_record,
 )
+from .hunyuan_neural_enablement_artifact_parity import (
+    verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity,
+)
 from .hunyuan_g9_enablement_evidence_bundle import (
     G9EnablementEvidenceBundleResult,
     run_g9_enablement_evidence_bundle,
@@ -145,13 +148,25 @@ def run_admission_g9_enablement_evidence_bundle(
     if verify_issues:
         issues = list(base_result.issues) + verify_issues
 
-    bundle_ok_final = bundle_ok and not verify_issues
+    bundle_parity_issues = (
+        verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity(
+            bundle_payload=json.loads(bundle_record_path.read_text(encoding="utf-8")),
+            evidence_payload=evidence_payload,
+        )
+    )
+    if bundle_parity_issues:
+        issues = list(issues) + bundle_parity_issues
+
+    bundle_ok_final = bundle_ok and not verify_issues and not bundle_parity_issues
+    parity_ok_final = (
+        g9_result.parity_ok and not verify_issues and not bundle_parity_issues
+    )
     final_result = AdmissionG9EnablementEvidenceBundleResult(
         admission_preflight_ok=admission_ok,
         admission_g9_enablement_evidence_ok=bundle_ok_final,
         g9_enablement_evidence_ready=g9_result.g9_enablement_evidence_ready,
         g9_enablement_preflight_ok=g9_result.g9_enablement_preflight_ok,
-        parity_ok=g9_result.parity_ok and not verify_issues,
+        parity_ok=parity_ok_final,
         record_dir=directory,
         bundle_record_path=bundle_record_path,
         g9_enablement_evidence=g9_result,

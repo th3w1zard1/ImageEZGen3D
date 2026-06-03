@@ -8,6 +8,7 @@ import unittest
 from pathlib import Path
 
 from imageezgen3d.hunyuan_neural_enablement_artifact_parity import (
+    verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity,
     verify_enablement_neural_artifact_parity,
     verify_g7_hosted_neural_enablement_artifact_parity,
     verify_g7_live_probe_neural_artifact_parity,
@@ -354,6 +355,48 @@ class HunyuanNeuralEnablementArtifactParityTests(unittest.TestCase):
         )
         self.assertTrue(any("adapter_configured=true" in issue for issue in issues))
 
+    def test_verify_admission_g9_bundle_evidence_passes_when_nested_matches(self) -> None:
+        evidence_payload = json.loads(
+            (FIXTURES / "g9-enablement-evidence-skipped.json").read_text(encoding="utf-8")
+        )
+        bundle_payload = json.loads(
+            (
+                FIXTURES / "admission-g9-enablement-evidence-bundle-skipped.json"
+            ).read_text(encoding="utf-8")
+        )
+        bundle_payload["evidence"] = evidence_payload
+        bundle_payload["g9_enablement_evidence_ready"] = evidence_payload[
+            "g9_enablement_evidence_ready"
+        ]
+        bundle_payload["g9_enablement_preflight_ok"] = evidence_payload[
+            "g9_enablement_preflight_ok"
+        ]
+        issues = verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity(
+            bundle_payload=bundle_payload,
+            evidence_payload=evidence_payload,
+        )
+        self.assertEqual(issues, [])
+
+    def test_verify_admission_g9_bundle_evidence_fails_when_nested_differs(self) -> None:
+        evidence_payload = json.loads(
+            (FIXTURES / "g9-enablement-evidence-skipped.json").read_text(encoding="utf-8")
+        )
+        bundle_payload = json.loads(
+            (
+                FIXTURES / "admission-g9-enablement-evidence-bundle-skipped.json"
+            ).read_text(encoding="utf-8")
+        )
+        mismatched_evidence = dict(evidence_payload)
+        mismatched_evidence["g9_enablement_evidence_ready"] = True
+        bundle_payload["evidence"] = mismatched_evidence
+        issues = verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity(
+            bundle_payload=bundle_payload,
+            evidence_payload=evidence_payload,
+        )
+        self.assertTrue(
+            any("evidence mismatch between admission-g9-enablement-evidence-bundle.json" in issue for issue in issues)
+        )
+
     def test_verify_files_includes_optional_g9_evidence_and_audit(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             record_dir = Path(directory)
@@ -385,6 +428,22 @@ class HunyuanNeuralEnablementArtifactParityTests(unittest.TestCase):
                         "g8_enablement": {},
                     }
                 ),
+                encoding="utf-8",
+            )
+            evidence_payload = _ready_evidence_payload(neural_payload=neural_payload)
+            bundle_payload = {
+                "record_kind": "hunyuan_admission_g9_enablement_evidence_bundle",
+                "ok": evidence_payload["ok"],
+                "admission_preflight_ok": True,
+                "admission_g9_enablement_evidence_ok": True,
+                "g9_enablement_evidence_ready": evidence_payload["g9_enablement_evidence_ready"],
+                "g9_enablement_preflight_ok": evidence_payload["g9_enablement_preflight_ok"],
+                "parity_ok": True,
+                "issues": evidence_payload["issues"],
+                "evidence": evidence_payload,
+            }
+            (record_dir / "admission-g9-enablement-evidence-bundle.json").write_text(
+                json.dumps(bundle_payload),
                 encoding="utf-8",
             )
             issues = verify_neural_enablement_artifact_files(record_dir)
