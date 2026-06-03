@@ -100,9 +100,18 @@ class HunyuanG9EnablementEvidenceRecordTests(unittest.TestCase):
 class HunyuanG9EnablementEvidenceBundleTests(unittest.TestCase):
     @mock.patch(
         "imageezgen3d.hunyuan_g9_enablement_evidence_bundle."
+        "verify_neural_enablement_artifact_files"
+    )
+    @mock.patch(
+        "imageezgen3d.hunyuan_g9_enablement_evidence_bundle."
         "run_neural_enablement_preflight_bundle"
     )
-    def test_ci_like_bundle(self, neural_bundle: mock.MagicMock) -> None:
+    def test_ci_like_bundle(
+        self,
+        neural_bundle: mock.MagicMock,
+        artifact_parity: mock.MagicMock,
+    ) -> None:
+        artifact_parity.return_value = []
         with tempfile.TemporaryDirectory() as directory:
             record_dir = Path(directory)
             neural_bundle.return_value = _neural_result(directory=record_dir)
@@ -110,8 +119,13 @@ class HunyuanG9EnablementEvidenceBundleTests(unittest.TestCase):
             self.assertTrue(result.g9_enablement_preflight_ok)
             self.assertFalse(result.g9_enablement_evidence_ready)
             self.assertTrue(result.record_verify_ok)
+            self.assertTrue(result.parity_ok)
             self.assertTrue(result.record_path.is_file())
 
+    @mock.patch(
+        "imageezgen3d.hunyuan_g9_enablement_evidence_bundle."
+        "verify_neural_enablement_artifact_files"
+    )
     @mock.patch(
         "imageezgen3d.hunyuan_g9_enablement_evidence_bundle."
         "run_neural_enablement_preflight_bundle"
@@ -119,7 +133,9 @@ class HunyuanG9EnablementEvidenceBundleTests(unittest.TestCase):
     def test_evidence_ready_when_neural_and_hosted_pass(
         self,
         neural_bundle: mock.MagicMock,
+        artifact_parity: mock.MagicMock,
     ) -> None:
+        artifact_parity.return_value = []
         with tempfile.TemporaryDirectory() as directory:
             record_dir = Path(directory)
             neural_bundle.return_value = _neural_result(
@@ -139,12 +155,18 @@ class HunyuanG9EnablementEvidenceBundleTests(unittest.TestCase):
 
     @mock.patch(
         "imageezgen3d.hunyuan_g9_enablement_evidence_bundle."
+        "verify_neural_enablement_artifact_files"
+    )
+    @mock.patch(
+        "imageezgen3d.hunyuan_g9_enablement_evidence_bundle."
         "run_neural_enablement_preflight_bundle"
     )
     def test_require_hosted_neural_fails_without_record(
         self,
         neural_bundle: mock.MagicMock,
+        artifact_parity: mock.MagicMock,
     ) -> None:
+        artifact_parity.return_value = []
         with tempfile.TemporaryDirectory() as directory:
             record_dir = Path(directory)
             neural_bundle.return_value = _neural_result(
@@ -160,12 +182,18 @@ class HunyuanG9EnablementEvidenceBundleTests(unittest.TestCase):
 
     @mock.patch(
         "imageezgen3d.hunyuan_g9_enablement_evidence_bundle."
+        "verify_neural_enablement_artifact_files"
+    )
+    @mock.patch(
+        "imageezgen3d.hunyuan_g9_enablement_evidence_bundle."
         "run_neural_enablement_preflight_bundle"
     )
     def test_existing_hosted_neural_record_is_detected(
         self,
         neural_bundle: mock.MagicMock,
+        artifact_parity: mock.MagicMock,
     ) -> None:
+        artifact_parity.return_value = []
         with tempfile.TemporaryDirectory() as directory:
             record_dir = Path(directory)
             neural_bundle.return_value = _neural_result(
@@ -184,7 +212,12 @@ class HunyuanG9EnablementEvidenceBundleTests(unittest.TestCase):
             self.assertTrue(result.hosted_neural_ok)
             self.assertTrue(result.g9_enablement_evidence_ready)
 
-    def test_format_report(self) -> None:
+    @mock.patch(
+        "imageezgen3d.hunyuan_g9_enablement_evidence_bundle."
+        "verify_neural_enablement_artifact_files"
+    )
+    def test_format_report(self, artifact_parity: mock.MagicMock) -> None:
+        artifact_parity.return_value = []
         with tempfile.TemporaryDirectory() as directory:
             result = run_g9_enablement_evidence_bundle(
                 record_dir=Path(directory),

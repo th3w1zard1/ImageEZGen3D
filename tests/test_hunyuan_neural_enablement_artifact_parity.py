@@ -11,6 +11,7 @@ from imageezgen3d.hunyuan_neural_enablement_artifact_parity import (
     verify_enablement_neural_artifact_parity,
     verify_g7_hosted_neural_enablement_artifact_parity,
     verify_g7_live_probe_neural_artifact_parity,
+    verify_g9_enablement_evidence_neural_artifact_parity,
     verify_neural_enablement_artifact_files,
     verify_neural_enablement_artifact_parity,
 )
@@ -41,6 +42,21 @@ def _ready_neural_payload() -> dict:
     nested_g7["workstation_evidence_ready"] = True
     nested_g7["g9_preflight"]["workstation_evidence_ready"] = True
     return payload
+
+
+def _ready_evidence_payload(*, neural_payload: dict) -> dict:
+    return {
+        "record_kind": "hunyuan_g9_enablement_evidence",
+        "ok": True,
+        "g9_enablement_evidence_ready": True,
+        "g9_enablement_preflight_ok": True,
+        "neural_enablement_ready": neural_payload["neural_enablement_ready"],
+        "neural_enablement_preflight_ok": neural_payload["neural_enablement_preflight_ok"],
+        "hosted_neural_required": False,
+        "hosted_neural_ok": None,
+        "issues": [],
+        "preflight": {},
+    }
 
 
 class HunyuanNeuralEnablementArtifactParityTests(unittest.TestCase):
@@ -248,6 +264,63 @@ class HunyuanNeuralEnablementArtifactParityTests(unittest.TestCase):
                 (FIXTURES / "hunyuan-g7-hosted-neural-pass.json").read_text(
                     encoding="utf-8"
                 ),
+                encoding="utf-8",
+            )
+            issues = verify_neural_enablement_artifact_files(record_dir)
+            self.assertEqual(issues, [])
+
+    def test_verify_g9_evidence_neural_passes_when_ready(self) -> None:
+        neural_payload = _ready_neural_payload()
+        evidence_payload = _ready_evidence_payload(neural_payload=neural_payload)
+        issues = verify_g9_enablement_evidence_neural_artifact_parity(
+            evidence_payload=evidence_payload,
+            neural_payload=neural_payload,
+        )
+        self.assertEqual(issues, [])
+
+    def test_verify_g9_evidence_neural_fails_when_neural_not_ready(self) -> None:
+        evidence_payload = _ready_evidence_payload(
+            neural_payload=_ready_neural_payload()
+        )
+        neural_payload = json.loads(
+            (FIXTURES / "neural-enablement-preflight-skipped.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        issues = verify_g9_enablement_evidence_neural_artifact_parity(
+            evidence_payload=evidence_payload,
+            neural_payload=neural_payload,
+        )
+        self.assertTrue(
+            any("neural_enablement_ready=true" in issue for issue in issues)
+        )
+
+    def test_verify_files_includes_optional_g9_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            neural_payload = _ready_neural_payload()
+            (record_dir / "neural-enablement-preflight.json").write_text(
+                json.dumps(neural_payload),
+                encoding="utf-8",
+            )
+            (record_dir / "g9-workstation-bundle.json").write_text(
+                (FIXTURES / "g9-workstation-bundle-ready.json").read_text(
+                    encoding="utf-8"
+                ),
+                encoding="utf-8",
+            )
+            (record_dir / "hunyuan-enablement-preflight.json").write_text(
+                json.dumps(
+                    {
+                        "g7_readiness": neural_payload["preflight"]["g7_enablement"][
+                            "g7_readiness"
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (record_dir / "g9-enablement-evidence.json").write_text(
+                json.dumps(_ready_evidence_payload(neural_payload=neural_payload)),
                 encoding="utf-8",
             )
             issues = verify_neural_enablement_artifact_files(record_dir)

@@ -15,6 +15,9 @@ from .hunyuan_g9_enablement_evidence_record import (
     verify_g9_enablement_evidence_record_file,
     write_g9_enablement_evidence_record,
 )
+from .hunyuan_neural_enablement_artifact_parity import (
+    verify_neural_enablement_artifact_files,
+)
 from .hunyuan_neural_enablement_preflight_bundle import (
     NeuralEnablementPreflightBundleResult,
     run_neural_enablement_preflight_bundle,
@@ -34,6 +37,7 @@ class G9EnablementEvidenceBundleResult:
     issues: tuple[str, ...]
     record_path: Path
     record_verify_ok: bool
+    parity_ok: bool
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -46,6 +50,7 @@ class G9EnablementEvidenceBundleResult:
             "record_dir": str(self.record_dir),
             "record_path": str(self.record_path),
             "record_verify_ok": self.record_verify_ok,
+            "parity_ok": self.parity_ok,
             "neural_enablement": self.neural_enablement.to_dict(),
             "issues": list(self.issues),
         }
@@ -155,6 +160,7 @@ def run_g9_enablement_evidence_bundle(
         issues=tuple(issues),
         record_path=record_path,
         record_verify_ok=True,
+        parity_ok=True,
     )
     write_g9_enablement_evidence_record(
         record_path,
@@ -165,8 +171,12 @@ def run_g9_enablement_evidence_bundle(
     if verify_issues:
         issues = list(base_result.issues) + verify_issues
 
-    preflight_ok_final = preflight_ok and not verify_issues
-    evidence_ready_final = evidence_ready and not verify_issues
+    parity_issues = verify_neural_enablement_artifact_files(directory)
+    if parity_issues:
+        issues = list(issues) + parity_issues
+
+    preflight_ok_final = preflight_ok and not verify_issues and not parity_issues
+    evidence_ready_final = evidence_ready and not verify_issues and not parity_issues
 
     final_result = G9EnablementEvidenceBundleResult(
         g9_enablement_preflight_ok=preflight_ok_final,
@@ -180,6 +190,7 @@ def run_g9_enablement_evidence_bundle(
         issues=tuple(issues),
         record_path=record_path,
         record_verify_ok=not verify_issues,
+        parity_ok=not parity_issues,
     )
     write_g9_enablement_evidence_record(
         record_path,
@@ -202,6 +213,7 @@ def format_g9_enablement_evidence_bundle_report(
         f"record_dir={result.record_dir}",
         f"record_path={result.record_path}",
         f"record_verify_ok={result.record_verify_ok}",
+        f"parity_ok={result.parity_ok}",
     ]
     for issue in result.issues:
         lines.append(f"issue={issue}")

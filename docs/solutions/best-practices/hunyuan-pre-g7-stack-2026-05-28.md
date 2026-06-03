@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–AR)
+# Hunyuan pre-G7 stack (Phases J–AS)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -41,6 +41,7 @@
 | **AP** | #117 | `verify_g7_hosted_neural_enablement_artifact_parity` (in artifact parity module) | Optional hosted G7 PASS ↔ neural enablement-ready parity when both JSON present |
 | **AQ** | #118 | `--hosted-neural` on `hunyuan_neural_enablement_preflight_bundle.py` | One-shot neural capstone + post-enablement G7 hosted-neural record for parity |
 | **AR** | #119 | `hunyuan_g9_enablement_evidence_bundle.py` | G9 enablement PR evidence capstone + `g9-enablement-evidence.json` attestation |
+| **AS** | — | `verify_g9_enablement_evidence_neural_artifact_parity` (in artifact parity module) | Optional G9 evidence ↔ neural enablement-ready parity when both JSON present |
 
 ## Operator commands
 
@@ -139,11 +140,11 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-AR)
+## Next slice (post-AS)
 
-Enablement evidence automation is structurally complete through Phase AR (G9 evidence capstone + attestation JSON). Next execution slices:
+Enablement evidence automation is structurally complete through Phase AS (G9 evidence ↔ neural parity when both JSON coexist). Next execution slices:
 
-1. **Tier-C workstation:** `PYTHONPATH=src python scripts/hunyuan_g9_enablement_evidence_bundle.py --record-dir . --strict` until `g9_enablement_evidence_ready=true`.
+1. **Tier-C workstation:** `PYTHONPATH=src python scripts/hunyuan_g9_enablement_evidence_bundle.py --record-dir . --strict` until `g9_enablement_evidence_ready=true` and `parity_ok=true`.
 2. **Hosted G7:** live Space Block/Vase neural run; re-run with `--require-hosted-neural --hosted-neural --status-file status.md`; update hosted-validation with `G7_STATUS: PASS` — still **OPEN**.
 3. **G9 enablement PR** only after G7 evidence per [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md).
 
