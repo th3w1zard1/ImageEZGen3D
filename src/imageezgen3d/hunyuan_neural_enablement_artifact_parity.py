@@ -292,6 +292,85 @@ def verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity(
     return issues
 
 
+def verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_files(
+    record_dir: Path,
+) -> list[str]:
+    """Return issues when bundle and G9 evidence JSON in a record directory diverge."""
+    directory = record_dir.resolve()
+    bundle_path = directory / DEFAULT_ADMISSION_G9_ENABLEMENT_EVIDENCE_BUNDLE_RECORD
+    evidence_path = directory / DEFAULT_G9_ENABLEMENT_EVIDENCE_RECORD
+
+    issues: list[str] = []
+    if not bundle_path.is_file():
+        issues.append(f"missing file: {bundle_path}")
+        return issues
+    if not evidence_path.is_file():
+        issues.append(f"missing file: {evidence_path}")
+        return issues
+
+    bundle_payload = _load_json(bundle_path)
+    if bundle_payload is None:
+        issues.append(f"missing file: {bundle_path}")
+        return issues
+    if isinstance(bundle_payload.get("__parse_error__"), str):
+        issues.append(
+            f"invalid JSON in {bundle_path}: {bundle_payload['__parse_error__']}"
+        )
+        return issues
+
+    evidence_payload = _load_json(evidence_path)
+    if evidence_payload is None:
+        issues.append(f"missing file: {evidence_path}")
+        return issues
+    if isinstance(evidence_payload.get("__parse_error__"), str):
+        issues.append(
+            f"invalid JSON in {evidence_path}: {evidence_payload['__parse_error__']}"
+        )
+        return issues
+
+    issues.extend(
+        verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity(
+            bundle_payload=bundle_payload,
+            evidence_payload=evidence_payload,
+        )
+    )
+    return issues
+
+
+def verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_fixture_files(
+    fixtures_dir: Path,
+) -> list[str]:
+    """Verify aligned skipped bundle and G9 evidence fixtures pass parity checks."""
+    directory = fixtures_dir.resolve()
+    bundle_path = directory / "admission-g9-enablement-evidence-bundle-skipped.json"
+    evidence_path = directory / "g9-enablement-evidence-skipped.json"
+    if not bundle_path.is_file():
+        return [f"missing file: {bundle_path}"]
+    if not evidence_path.is_file():
+        return [f"missing file: {evidence_path}"]
+
+    bundle_payload = _load_json(bundle_path)
+    if bundle_payload is None:
+        return [f"missing file: {bundle_path}"]
+    if isinstance(bundle_payload.get("__parse_error__"), str):
+        return [
+            f"invalid JSON in {bundle_path}: {bundle_payload['__parse_error__']}"
+        ]
+
+    evidence_payload = _load_json(evidence_path)
+    if evidence_payload is None:
+        return [f"missing file: {evidence_path}"]
+    if isinstance(evidence_payload.get("__parse_error__"), str):
+        return [
+            f"invalid JSON in {evidence_path}: {evidence_payload['__parse_error__']}"
+        ]
+
+    return verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity(
+        bundle_payload=bundle_payload,
+        evidence_payload=evidence_payload,
+    )
+
+
 def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
     directory = record_dir.resolve()
     neural_path = directory / DEFAULT_NEURAL_ENABLEMENT_RECORD
@@ -415,20 +494,11 @@ def verify_neural_enablement_artifact_files(record_dir: Path) -> list[str]:
             )
 
     bundle_path = directory / DEFAULT_ADMISSION_G9_ENABLEMENT_EVIDENCE_BUNDLE_RECORD
-    if evidence_payload is not None and bundle_path.is_file():
-        bundle_payload = _load_json(bundle_path)
-        if bundle_payload is None:
-            issues.append(f"missing file: {bundle_path}")
-        elif isinstance(bundle_payload.get("__parse_error__"), str):
-            issues.append(
-                f"invalid JSON in {bundle_path}: {bundle_payload['__parse_error__']}"
+    if evidence_path.is_file() and bundle_path.is_file():
+        issues.extend(
+            verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_files(
+                directory
             )
-        else:
-            issues.extend(
-                verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity(
-                    bundle_payload=bundle_payload,
-                    evidence_payload=evidence_payload,
-                )
-            )
+        )
 
     return issues

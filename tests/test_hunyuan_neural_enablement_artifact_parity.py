@@ -9,6 +9,8 @@ from pathlib import Path
 
 from imageezgen3d.hunyuan_neural_enablement_artifact_parity import (
     verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity,
+    verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_files,
+    verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_fixture_files,
     verify_enablement_neural_artifact_parity,
     verify_g7_hosted_neural_enablement_artifact_parity,
     verify_g7_live_probe_neural_artifact_parity,
@@ -396,6 +398,97 @@ class HunyuanNeuralEnablementArtifactParityTests(unittest.TestCase):
         self.assertTrue(
             any("evidence mismatch between admission-g9-enablement-evidence-bundle.json" in issue for issue in issues)
         )
+
+    def test_verify_admission_g9_bundle_evidence_files_passes_when_aligned(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            evidence_payload = json.loads(
+                (FIXTURES / "g9-enablement-evidence-skipped.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            bundle_payload = json.loads(
+                (
+                    FIXTURES / "admission-g9-enablement-evidence-bundle-skipped.json"
+                ).read_text(encoding="utf-8")
+            )
+            (record_dir / "g9-enablement-evidence.json").write_text(
+                json.dumps(evidence_payload),
+                encoding="utf-8",
+            )
+            (record_dir / "admission-g9-enablement-evidence-bundle.json").write_text(
+                json.dumps(bundle_payload),
+                encoding="utf-8",
+            )
+            issues = verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_files(
+                record_dir
+            )
+            self.assertEqual(issues, [])
+
+    def test_verify_admission_g9_bundle_evidence_files_fails_when_bundle_missing(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            (record_dir / "g9-enablement-evidence.json").write_text("{}", encoding="utf-8")
+            issues = verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_files(
+                record_dir
+            )
+            self.assertTrue(any("missing file" in issue for issue in issues))
+
+    def test_verify_admission_g9_bundle_evidence_fixture_files(self) -> None:
+        issues = verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_fixture_files(
+            FIXTURES
+        )
+        self.assertEqual(issues, [])
+
+    def test_verify_admission_g9_bundle_evidence_parity_fixtures_script(self) -> None:
+        result = subprocess.run(
+            [
+                sys.executable,
+                "scripts/verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_fixtures.py",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            env={**__import__("os").environ, "PYTHONPATH": "src"},
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr or result.stdout)
+
+    def test_verify_admission_g9_bundle_evidence_parity_script(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            evidence_payload = json.loads(
+                (FIXTURES / "g9-enablement-evidence-skipped.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            bundle_payload = json.loads(
+                (
+                    FIXTURES / "admission-g9-enablement-evidence-bundle-skipped.json"
+                ).read_text(encoding="utf-8")
+            )
+            (record_dir / "g9-enablement-evidence.json").write_text(
+                json.dumps(evidence_payload),
+                encoding="utf-8",
+            )
+            (record_dir / "admission-g9-enablement-evidence-bundle.json").write_text(
+                json.dumps(bundle_payload),
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity.py",
+                    "--record-dir",
+                    str(record_dir),
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+                env={**__import__("os").environ, "PYTHONPATH": "src"},
+            )
+            self.assertEqual(result.returncode, 0, msg=result.stderr or result.stdout)
 
     def test_verify_files_includes_optional_g9_evidence_and_audit(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

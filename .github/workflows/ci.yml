@@ -164,6 +164,9 @@ jobs:
       - name: Admission G9 enablement evidence bundle record fixture verify
         run: PYTHONPATH=src python scripts/verify_admission_g9_enablement_evidence_bundle_record_fixtures.py
 
+      - name: Admission G9 bundle evidence artifact parity fixture verify
+        run: PYTHONPATH=src python scripts/verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_fixtures.py
+
       - name: Neural enablement artifact parity (record dir from preflight)
         run: PYTHONPATH=src python scripts/verify_neural_enablement_artifact_parity.py --record-dir .
 
