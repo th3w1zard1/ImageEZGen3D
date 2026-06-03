@@ -47,7 +47,7 @@
 | **AV** | #123 | `hunyuan_admission_g9_enablement_evidence_bundle_record`, `verify_admission_g9_enablement_evidence_bundle_record.py` | Bundle attestation record + verify for enablement PR evidence chain |
 | **AW** | #124 | `verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity` (in artifact parity module) | Optional bundle record ↔ standalone G9 evidence parity when both JSON present |
 | **AX** | #125 | `verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity.py`, `verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_fixtures.py` | Dedicated bundle↔evidence parity CLI + aligned skipped fixtures + CI smoke |
-| **AY** | — | `--strict` on G9/admission capstone CLIs | Exit 1 when `parity_ok` is false under `--strict` |
+| **AY** | #126 | `--strict` on G9/admission capstone CLIs | Exit 1 when `parity_ok` is false under `--strict` |
 
 ## Operator commands
 
