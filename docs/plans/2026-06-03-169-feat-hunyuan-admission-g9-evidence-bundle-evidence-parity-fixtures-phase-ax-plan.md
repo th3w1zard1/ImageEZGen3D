@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan admission G9 bundle ↔ evidence parity fixtures + verify CLI (Phase AX)"
 type: feat
-status: active
+status: completed
 date: 2026-06-03
 origin: docs/brainstorms/2026-06-03-hunyuan-admission-g9-evidence-bundle-evidence-parity-fixtures-phase-ax-requirements.md
 ---

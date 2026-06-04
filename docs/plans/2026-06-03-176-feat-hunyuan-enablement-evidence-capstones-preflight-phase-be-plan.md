@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan enablement evidence capstones preflight (Phase BE)"
 type: feat
-status: active
+status: completed
 date: 2026-06-03
 origin: docs/brainstorms/2026-06-03-hunyuan-enablement-evidence-capstones-preflight-phase-be-requirements.md
 ---

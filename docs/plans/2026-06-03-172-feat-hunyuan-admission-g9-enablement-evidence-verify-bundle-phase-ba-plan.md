@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan admission G9 enablement evidence verify bundle (Phase BA)"
 type: feat
-status: active
+status: completed
 date: 2026-06-03
 origin: docs/brainstorms/2026-06-03-hunyuan-admission-g9-enablement-evidence-verify-bundle-phase-ba-requirements.md
 ---

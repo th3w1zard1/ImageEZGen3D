@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan neural capstone --strict parity gate (Phase AZ)"
 type: feat
-status: active
+status: completed
 date: 2026-06-03
 origin: docs/brainstorms/2026-06-03-hunyuan-neural-capstone-strict-parity-phase-az-requirements.md
 ---
