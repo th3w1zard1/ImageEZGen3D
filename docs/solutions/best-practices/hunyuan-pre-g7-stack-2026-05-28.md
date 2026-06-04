@@ -54,7 +54,7 @@
 | **BC** | #130 | `verify_neural_enablement_preflight_bundle.py` | One verify command for neural capstone JSON + record-dir artifact parity |
 | **BD** | #131 | `verify_enablement_evidence_capstones.py` | One verify command for all enablement capstones under `--record-dir` |
 | **BE** | #132 | `hunyuan_enablement_evidence_capstones.py` | One run+verify command for admission capstone + umbrella capstone verify |
-| **BF** | — | (CI dedup) | Drop redundant neural artifact parity CI step subsumed by Phase BE capstones preflight |
+| **BF** | #133 | (CI dedup) | Drop redundant neural artifact parity CI step subsumed by Phase BE capstones preflight |
 
 ## Operator commands
 
