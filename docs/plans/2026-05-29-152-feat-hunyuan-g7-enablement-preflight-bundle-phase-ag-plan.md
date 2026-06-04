@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan G7 enablement preflight bundle (Phase AG)"
 type: feat
-status: active
+status: completed
 date: 2026-05-29
 origin: docs/brainstorms/2026-05-29-hunyuan-g7-enablement-preflight-bundle-phase-ag-requirements.md
 ---

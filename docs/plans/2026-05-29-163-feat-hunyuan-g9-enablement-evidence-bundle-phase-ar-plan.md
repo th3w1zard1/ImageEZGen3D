@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan G9 enablement evidence bundle (Phase AR)"
 type: feat
-status: active
+status: completed
 date: 2026-05-29
 origin: docs/brainstorms/2026-05-29-hunyuan-g9-enablement-evidence-bundle-phase-ar-requirements.md
 ---

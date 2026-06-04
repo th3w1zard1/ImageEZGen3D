@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan neural capstone hosted-neural wiring (Phase AQ)"
 type: feat
-status: active
+status: completed
 date: 2026-05-29
 origin: docs/brainstorms/2026-05-29-hunyuan-neural-capstone-hosted-neural-phase-aq-requirements.md
 ---

@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan G7 hosted neural ↔ enablement artifact parity (Phase AP)"
 type: feat
-status: active
+status: completed
 date: 2026-05-29
 origin: docs/brainstorms/2026-05-29-hunyuan-g7-hosted-neural-enablement-parity-phase-ap-requirements.md
 ---

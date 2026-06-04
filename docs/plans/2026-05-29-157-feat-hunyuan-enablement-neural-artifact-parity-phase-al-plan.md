@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan enablement-neural artifact parity (Phase AL)"
 type: feat
-status: active
+status: completed
 date: 2026-05-29
 origin: docs/brainstorms/2026-05-29-hunyuan-enablement-neural-artifact-parity-phase-al-requirements.md
 ---

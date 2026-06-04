@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan G7 live-probe ↔ neural artifact parity (Phase AM)"
 type: feat
-status: active
+status: completed
 date: 2026-05-29
 origin: docs/brainstorms/2026-05-29-hunyuan-g7-live-probe-neural-artifact-parity-phase-am-requirements.md
 ---
