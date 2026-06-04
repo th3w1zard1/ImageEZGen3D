@@ -199,6 +199,17 @@ def run_g9_enablement_evidence_bundle(
     return final_result
 
 
+def verify_g9_enablement_evidence_bundle_files(record_dir: Path) -> list[str]:
+    """Verify G9 evidence record and record-dir artifact parity."""
+    directory = record_dir.resolve()
+    evidence_path = directory / DEFAULT_G9_ENABLEMENT_EVIDENCE_RECORD
+
+    issues: list[str] = []
+    issues.extend(verify_g9_enablement_evidence_record_file(evidence_path))
+    issues.extend(verify_neural_enablement_artifact_files(directory))
+    return issues
+
+
 def format_g9_enablement_evidence_bundle_report(
     result: G9EnablementEvidenceBundleResult,
 ) -> str:
