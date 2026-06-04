@@ -52,7 +52,7 @@
 | **BA** | #128 | `verify_admission_g9_enablement_evidence_bundle.py` | One verify command for admission capstone JSON + bundle↔evidence parity |
 | **BB** | #129 | `verify_g9_enablement_evidence_bundle.py` | One verify command for G9 evidence capstone JSON + record-dir artifact parity |
 | **BC** | #130 | `verify_neural_enablement_preflight_bundle.py` | One verify command for neural capstone JSON + record-dir artifact parity |
-| **BD** | — | `verify_enablement_evidence_capstones.py` | One verify command for all enablement capstones under `--record-dir` |
+| **BD** | #131 | `verify_enablement_evidence_capstones.py` | One verify command for all enablement capstones under `--record-dir` |
 
 ## Operator commands
 
