@@ -14,6 +14,9 @@ from imageezgen3d.hunyuan_enablement_evidence_capstones import (
     run_enablement_evidence_capstones,
     verify_enablement_evidence_capstones_files,
 )
+from imageezgen3d.hunyuan_neural_enablement_artifact_parity import (
+    verify_neural_enablement_artifact_files,
+)
 
 
 class HunyuanEnablementEvidenceCapstonesTests(unittest.TestCase):
@@ -95,6 +98,19 @@ class HunyuanEnablementEvidenceCapstonesTests(unittest.TestCase):
             env={**__import__("os").environ, "PYTHONPATH": "src"},
         )
         self.assertEqual(result.returncode, 1, msg=result.stderr or result.stdout)
+
+    def test_capstones_verify_subsumes_neural_artifact_parity(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            result = run_enablement_evidence_capstones(
+                record_dir=record_dir,
+                skip_weight_warm=True,
+            )
+            capstone_issues = verify_enablement_evidence_capstones_files(record_dir)
+            parity_issues = verify_neural_enablement_artifact_files(record_dir)
+        self.assertTrue(result.enablement_evidence_capstones_ok)
+        self.assertEqual(capstone_issues, [])
+        self.assertEqual(parity_issues, [])
 
 
 if __name__ == "__main__":
