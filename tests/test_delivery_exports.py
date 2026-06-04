@@ -8,6 +8,7 @@ from pathlib import Path
 from imageezgen3d.delivery_exports import (
     build_delivery_formats_block,
     usd_core_available,
+    validate_delivery_formats_manifest,
     write_fbx,
     write_usdz,
 )
@@ -99,6 +100,29 @@ class DeliveryExportTests(unittest.TestCase):
             self.assertTrue(block["usdz"]["available"])
         else:
             self.assertFalse(block["usdz"]["available"])
+
+    def test_validate_delivery_formats_manifest_requires_exported_artifact(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fbx_path = Path(directory) / "mesh.fbx"
+            fbx_path.write_text("FBXVersion", encoding="utf-8")
+            issues = validate_delivery_formats_manifest(
+                {"fbx": str(fbx_path)},
+                {"delivery_formats": {"fbx": {"exported": True}}},
+            )
+            self.assertEqual(issues, [])
+
+    def test_validate_delivery_formats_manifest_rejects_missing_file(self) -> None:
+        issues = validate_delivery_formats_manifest(
+            {"fbx": "/tmp/missing-mesh.fbx"},
+            {"delivery_formats": {"fbx": {"exported": True}}},
+        )
+        self.assertTrue(any("missing on disk" in issue for issue in issues))
+
+    def test_validate_delivery_formats_manifest_ignores_legacy_sidecar(self) -> None:
+        self.assertEqual(
+            validate_delivery_formats_manifest({"glb": "/tmp/mesh.glb"}, {}),
+            [],
+        )
 
 
 if __name__ == "__main__":

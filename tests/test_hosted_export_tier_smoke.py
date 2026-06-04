@@ -277,6 +277,48 @@ class HostedExportTierSmokeTests(unittest.TestCase):
             )
             self.assertTrue(any("quadric" in issue for issue in issues))
 
+    def test_validate_run_manifest_checks_delivery_formats(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            manifest_path = Path(directory) / "manifest.json"
+            sidecar_path = Path(directory) / "mesh.export.json"
+            fbx_path = Path(directory) / "mesh.fbx"
+            fbx_path.write_text("FBXVersion: 7400", encoding="utf-8")
+            sidecar_path.write_text(
+                json.dumps(
+                    {
+                        "delivery_formats": {
+                            "fbx": {"exported": True, "available": True},
+                            "usdz": {"exported": False, "available": False},
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "artifacts": {
+                            "export_sidecar": str(sidecar_path),
+                            "glb": str(Path(directory) / "mesh.glb"),
+                            "fbx": str(fbx_path),
+                        },
+                        "parameters": {
+                            "decimation_target": 25_000,
+                            "raw_exported": False,
+                            "decimation_applied": False,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            issues = validate_run_manifest(
+                manifest_path,
+                quality="draft",
+                expect_raw=False,
+                sidecar_path=sidecar_path,
+            )
+            self.assertEqual(issues, [])
+
 
 if __name__ == "__main__":
     unittest.main()

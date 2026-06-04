@@ -14,6 +14,9 @@ from unittest.mock import patch
 
 from imageezgen3d.hosted_golden_smoke import (
     HostedGoldenSmokeResult,
+    _GENERATE_EXPORT_SIDECAR_INDEX,
+    _GENERATE_FBX_INDEX,
+    _GENERATE_USDZ_INDEX,
     parse_run_id,
     run_hosted_golden_smoke,
     validate_backend_rail_html,
@@ -40,6 +43,28 @@ def _valid_status(run_id: str = "20260524-184255-f0ce0436") -> str:
 
 
 class HostedGoldenSmokeTests(unittest.TestCase):
+    def test_generate_click_export_sidecar_index_matches_app(self) -> None:
+        import app
+
+        source = Path(app.__file__).read_text(encoding="utf-8")
+        generate_outputs = source.split('api_name="generate"')[0].split(
+            "generate.click("
+        )[-1]
+        outputs_section = generate_outputs.split("outputs=[", maxsplit=1)[1].split(
+            "],", maxsplit=1
+        )[0]
+        output_tokens = [
+            line.strip().rstrip(",")
+            for line in outputs_section.splitlines()
+            if line.strip()
+        ]
+        self.assertEqual(output_tokens[_GENERATE_FBX_INDEX], "fbx_file")
+        self.assertEqual(output_tokens[_GENERATE_USDZ_INDEX], "usdz_file")
+        self.assertEqual(
+            output_tokens[_GENERATE_EXPORT_SIDECAR_INDEX],
+            "export_sidecar_file",
+        )
+
     def test_parse_run_id(self) -> None:
         self.assertEqual(
             parse_run_id("Done. Run `20260524-184255-f0ce0436`."),
