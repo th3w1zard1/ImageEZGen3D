@@ -47,4 +47,17 @@ def inspect_artifacts(paths: dict[str, Path]) -> MeshHealthReport:
         if metrics["obj_faces"] == 0:
             warnings.append("OBJ has no faces.")
 
+    fbx_path = paths.get("fbx")
+    if fbx_path and fbx_path.exists():
+        header = fbx_path.read_text(encoding="utf-8", errors="replace")[:256]
+        if "FBXVersion" not in header:
+            warnings.append("FBX header is invalid.")
+
+    usdz_path = paths.get("usdz")
+    if usdz_path and usdz_path.exists():
+        with usdz_path.open("rb") as handle:
+            magic = handle.read(2)
+        if magic != b"PK":
+            warnings.append("USDZ package is not ZIP-based.")
+
     return MeshHealthReport(status="warning" if warnings else "ok", warnings=warnings, metrics=metrics)

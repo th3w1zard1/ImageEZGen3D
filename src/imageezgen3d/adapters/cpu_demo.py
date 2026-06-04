@@ -6,6 +6,7 @@ import io
 from PIL import Image, ImageStat
 
 from .base import AdapterCapabilities, GenerationRequest, GenerationResult
+from ..config import load_config
 from ..export_tiers import build_export_sidecar
 from ..exporters import export_all, make_box_mesh, mesh_topology
 from ..mesh_decimation import decimate_mesh, subdivide_mesh
@@ -24,7 +25,7 @@ class CpuDemoAdapter:
         zerogpu_ready=True,
         configured=True,
         supports_multi_view=True,
-        outputs=("glb", "obj", "ply", "stl"),
+        outputs=("glb", "obj", "ply", "stl", "fbx", "usdz"),
         notes="Procedural draft mesh for local development, CI, and no-CUDA workflows.",
     )
 
@@ -80,6 +81,7 @@ class CpuDemoAdapter:
             stem="cpu_demo_mesh",
             export_sidecar=sidecar,
             raw_mesh=raw_mesh,
+            formats=load_config().exports.formats,
         )
         return GenerationResult(
             adapter=self.capabilities.name,

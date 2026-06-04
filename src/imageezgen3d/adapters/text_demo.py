@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 
 from .base import AdapterCapabilities, GenerationRequest, GenerationResult
+from ..config import load_config
 from ..export_tiers import build_export_sidecar
 from ..exporters import export_all, make_box_mesh, mesh_topology
 from ..generation_pipeline import TEXT_STUB_DISCLAIMER
@@ -20,7 +21,7 @@ class TextDemoAdapter:
         zerogpu_ready=False,
         configured=True,
         supports_multi_view=False,
-        outputs=("glb", "obj", "ply", "stl"),
+        outputs=("glb", "obj", "ply", "stl", "fbx", "usdz"),
         notes="Procedural text-to-3D stub for workflow proof until a licensed neural adapter ships.",
     )
 
@@ -60,6 +61,7 @@ class TextDemoAdapter:
             request.run_dir / "exports",
             stem="text_demo_mesh",
             export_sidecar=sidecar,
+            formats=load_config().exports.formats,
         )
         return GenerationResult(
             adapter=self.capabilities.name,

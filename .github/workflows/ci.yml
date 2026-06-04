@@ -53,7 +53,7 @@ jobs:
         if: ${{ success() || failure() }}
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[app,dev,mesh]"
+          python -m pip install -e ".[app,dev,mesh,mesh-delivery]"
 
       - name: Run unit tests
         if: ${{ success() || failure() }}
@@ -84,7 +84,7 @@ jobs:
         if: ${{ success() || failure() }}
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[app,dev,mesh]"
+          python -m pip install -e ".[app,dev,mesh,mesh-delivery]"
 
       - name: Run release preflight tests
         if: ${{ success() || failure() }}
@@ -123,7 +123,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[app,dev,mesh]"
+          python -m pip install -e ".[app,dev,mesh,mesh-delivery]"
 
       - name: Verify Hunyuan G1 LICENSE at pin
         run: PYTHONPATH=src python scripts/hunyuan_g1_legal_verify.py
@@ -208,7 +208,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[app,dev,mesh]"
+          python -m pip install -e ".[app,dev,mesh,mesh-delivery]"
 
       - name: Run golden sample attestation
         run: |
