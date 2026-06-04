@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan neural enablement preflight bundle (Phase AI)"
 type: feat
-status: active
+status: completed
 date: 2026-05-29
 origin: docs/brainstorms/2026-05-29-hunyuan-neural-enablement-preflight-bundle-phase-ai-requirements.md
 ---

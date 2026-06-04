@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan neural capstone live-probe wiring (Phase AN)"
 type: feat
-status: active
+status: completed
 date: 2026-05-29
 origin: docs/brainstorms/2026-05-29-hunyuan-neural-capstone-live-probe-phase-an-requirements.md
 ---

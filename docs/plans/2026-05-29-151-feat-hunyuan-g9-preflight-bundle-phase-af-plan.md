@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan G9 preflight bundle (Phase AF, pre-G7)"
 type: feat
-status: active
+status: completed
 date: 2026-05-29
 origin: docs/brainstorms/2026-05-29-hunyuan-g9-preflight-bundle-phase-af-requirements.md
 ---
