@@ -16,8 +16,7 @@ python scripts/hunyuan_preflight_bundle.py
 PYTHONPATH=src python scripts/hunyuan_admission_g9_enablement_evidence_bundle.py --record-dir .
 PYTHONPATH=src python scripts/hunyuan_admission_g9_enablement_evidence_bundle.py --record-dir . --strict
 PYTHONPATH=src python scripts/hunyuan_admission_g9_enablement_evidence_bundle.py --record-dir . --strict --require-hosted-neural --hosted-neural --status-file status.md --hosted-sample Block
-PYTHONPATH=src python scripts/verify_admission_g9_enablement_evidence_bundle_record.py admission-g9-enablement-evidence-bundle.json
-PYTHONPATH=src python scripts/verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity.py --record-dir .
+PYTHONPATH=src python scripts/verify_admission_g9_enablement_evidence_bundle.py --record-dir .
 ```
 
 **G9 evidence capstone only (subset of admission + evidence bundle):**

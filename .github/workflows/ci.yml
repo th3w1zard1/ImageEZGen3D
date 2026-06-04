@@ -161,6 +161,9 @@ jobs:
       - name: Admission G9 enablement evidence bundle (CI-like skip path)
         run: PYTHONPATH=src python scripts/hunyuan_admission_g9_enablement_evidence_bundle.py --skip-weight-warm
 
+      - name: Admission G9 enablement evidence bundle verify (record dir)
+        run: PYTHONPATH=src python scripts/verify_admission_g9_enablement_evidence_bundle.py --record-dir .
+
       - name: Admission G9 enablement evidence bundle record fixture verify
         run: PYTHONPATH=src python scripts/verify_admission_g9_enablement_evidence_bundle_record_fixtures.py
 

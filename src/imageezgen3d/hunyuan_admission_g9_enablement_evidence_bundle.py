@@ -14,8 +14,13 @@ from .hunyuan_admission_g9_enablement_evidence_bundle_record import (
     verify_admission_g9_enablement_evidence_bundle_record_file,
     write_admission_g9_enablement_evidence_bundle_record,
 )
+from .hunyuan_g9_enablement_evidence_record import (
+    DEFAULT_G9_ENABLEMENT_EVIDENCE_RECORD,
+    verify_g9_enablement_evidence_record_file,
+)
 from .hunyuan_neural_enablement_artifact_parity import (
     verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity,
+    verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_files,
 )
 from .hunyuan_g9_enablement_evidence_bundle import (
     G9EnablementEvidenceBundleResult,
@@ -62,6 +67,26 @@ def _python_env() -> dict[str, str]:
     existing = env.get("PYTHONPATH", "")
     env["PYTHONPATH"] = src if not existing else f"{src}{os.pathsep}{existing}"
     return env
+
+
+def verify_admission_g9_enablement_evidence_bundle_files(record_dir: Path) -> list[str]:
+    """Verify admission capstone JSON records and bundle↔evidence parity."""
+    directory = record_dir.resolve()
+    bundle_path = directory / DEFAULT_ADMISSION_G9_ENABLEMENT_EVIDENCE_BUNDLE_RECORD
+    evidence_path = directory / DEFAULT_G9_ENABLEMENT_EVIDENCE_RECORD
+
+    issues: list[str] = []
+    issues.extend(verify_admission_g9_enablement_evidence_bundle_record_file(bundle_path))
+    if evidence_path.is_file():
+        issues.extend(verify_g9_enablement_evidence_record_file(evidence_path))
+    else:
+        issues.append(f"missing file: {evidence_path}")
+    issues.extend(
+        verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_files(
+            directory
+        )
+    )
+    return issues
 
 
 def _run_preflight_bundle(record_dir: Path) -> bool:

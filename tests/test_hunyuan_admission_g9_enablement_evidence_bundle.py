@@ -12,6 +12,7 @@ from imageezgen3d.hunyuan_admission_g9_enablement_evidence_bundle import (
     AdmissionG9EnablementEvidenceBundleResult,
     format_admission_g9_enablement_evidence_bundle_report,
     run_admission_g9_enablement_evidence_bundle,
+    verify_admission_g9_enablement_evidence_bundle_files,
 )
 from imageezgen3d.hunyuan_g9_enablement_evidence_bundle import (
     G9EnablementEvidenceBundleResult,
@@ -181,6 +182,43 @@ class HunyuanAdmissionG9EnablementEvidenceBundleTests(unittest.TestCase):
                 ["--record-dir", str(record_dir), "--strict"],
             )
         self.assertEqual(exit_code, 1)
+
+    def test_verify_files_passes_after_ci_like_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            run_admission_g9_enablement_evidence_bundle(
+                record_dir=record_dir,
+                skip_weight_warm=True,
+            )
+            issues = verify_admission_g9_enablement_evidence_bundle_files(record_dir)
+            self.assertEqual(issues, [])
+
+    def test_verify_files_fails_when_evidence_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            issues = verify_admission_g9_enablement_evidence_bundle_files(record_dir)
+            self.assertTrue(any("missing file" in issue for issue in issues))
+
+    def test_verify_admission_g9_enablement_evidence_bundle_script(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            record_dir = Path(directory)
+            run_admission_g9_enablement_evidence_bundle(
+                record_dir=record_dir,
+                skip_weight_warm=True,
+            )
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/verify_admission_g9_enablement_evidence_bundle.py",
+                    "--record-dir",
+                    str(record_dir),
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+                env={**__import__("os").environ, "PYTHONPATH": "src"},
+            )
+        self.assertEqual(result.returncode, 0, msg=result.stderr or result.stdout)
 
     def test_admission_g9_enablement_evidence_bundle_script(self) -> None:
         result = subprocess.run(
