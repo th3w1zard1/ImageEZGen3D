@@ -12,6 +12,8 @@ The CPU demo exports:
 - `.obj`: simple mesh exchange.
 - `.ply`: vertex color friendly exchange.
 - `.stl`: geometry-only 3D print style exchange.
+- `.fbx`: static mesh ASCII delivery export when configured.
+- `.usdz`: geometry-first AR Quick Look package when `usd-core` is installed.
 
 Format guidance:
 
@@ -19,6 +21,8 @@ Format guidance:
 - `obj`: useful fallback exchange, but weak for modern material workflows.
 - `ply`: useful when vertex colors matter more than material packaging.
 - `stl`: only for geometry-centric workflows such as rough print checks.
+- `fbx`: DCC/game interchange; static mesh ASCII export with honest geometry-only delivery notes in the export sidecar.
+- `usdz`: iOS AR Quick Look delivery tier when `usd-core` is installed (optional `mesh-delivery` extra); geometry-first packaging without separate PBR map files unless a paint adapter exported them.
 
 ## Material Strategy
 

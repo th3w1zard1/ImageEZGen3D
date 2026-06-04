@@ -6,6 +6,13 @@ import struct
 from dataclasses import dataclass
 from pathlib import Path
 
+from .delivery_exports import (
+    build_delivery_formats_block,
+    resolve_export_formats,
+    usd_core_available,
+    write_fbx,
+    write_usdz,
+)
 from .storage import atomic_write_bytes, atomic_write_text
 
 
@@ -254,23 +261,52 @@ def export_all(
     *,
     export_sidecar: dict[str, object] | None = None,
     raw_mesh: SimpleMesh | None = None,
+    formats: tuple[str, ...] | None = None,
 ) -> dict[str, Path]:
     directory.mkdir(parents=True, exist_ok=True)
-    paths = {
-        "glb": directory / f"{stem}.glb",
-        "obj": directory / f"{stem}.obj",
-        "ply": directory / f"{stem}.ply",
-        "stl": directory / f"{stem}.stl",
-    }
+    requested_formats = resolve_export_formats(formats)
+    paths: dict[str, Path] = {}
+
+    if "glb" in requested_formats:
+        paths["glb"] = directory / f"{stem}.glb"
+    if "obj" in requested_formats:
+        paths["obj"] = directory / f"{stem}.obj"
+    if "ply" in requested_formats:
+        paths["ply"] = directory / f"{stem}.ply"
+    if "stl" in requested_formats:
+        paths["stl"] = directory / f"{stem}.stl"
+    if "fbx" in requested_formats:
+        paths["fbx"] = directory / f"{stem}.fbx"
+    if "usdz" in requested_formats and usd_core_available():
+        paths["usdz"] = directory / f"{stem}.usdz"
+
     if raw_mesh is not None:
         raw_path = directory / f"{stem}.raw.glb"
         write_glb(raw_mesh, raw_path)
         paths["raw_glb"] = raw_path
-    write_glb(mesh, paths["glb"])
-    write_obj(mesh, paths["obj"])
-    write_ply(mesh, paths["ply"])
-    write_stl(mesh, paths["stl"])
+
+    if "glb" in paths:
+        write_glb(mesh, paths["glb"])
+    if "obj" in paths:
+        write_obj(mesh, paths["obj"])
+    if "ply" in paths:
+        write_ply(mesh, paths["ply"])
+    if "stl" in paths:
+        write_stl(mesh, paths["stl"])
+    if "fbx" in paths:
+        write_fbx(mesh, paths["fbx"])
+    if "usdz" in paths:
+        write_usdz(mesh, paths["usdz"])
+
     if export_sidecar is not None:
+        adapter = str(export_sidecar.get("adapter") or "unknown")
+        delivery_formats = build_delivery_formats_block(
+            adapter=adapter,
+            exported_keys=set(paths.keys()),
+            requested_formats=requested_formats,
+        )
+        if delivery_formats:
+            export_sidecar["delivery_formats"] = delivery_formats
         sidecar_path = directory / f"{stem}.export.json"
         write_export_sidecar(sidecar_path, export_sidecar)
         paths["export_sidecar"] = sidecar_path
