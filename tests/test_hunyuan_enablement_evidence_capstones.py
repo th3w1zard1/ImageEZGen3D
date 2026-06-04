@@ -11,6 +11,7 @@ from imageezgen3d.hunyuan_admission_g9_enablement_evidence_bundle import (
     run_admission_g9_enablement_evidence_bundle,
 )
 from imageezgen3d.hunyuan_enablement_evidence_capstones import (
+    run_enablement_evidence_capstones,
     verify_enablement_evidence_capstones_files,
 )
 
@@ -34,6 +35,16 @@ class HunyuanEnablementEvidenceCapstonesTests(unittest.TestCase):
             issues = verify_enablement_evidence_capstones_files(record_dir)
         self.assertEqual(issues, [])
 
+    def test_run_passes_after_ci_like_skip(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            result = run_enablement_evidence_capstones(
+                record_dir=Path(directory),
+                skip_weight_warm=True,
+            )
+        self.assertTrue(result.enablement_evidence_capstones_ok)
+        self.assertTrue(result.capstones_verify_ok)
+        self.assertEqual(result.verify_issues, ())
+
     def test_verify_enablement_evidence_capstones_script(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             record_dir = Path(directory)
@@ -54,6 +65,36 @@ class HunyuanEnablementEvidenceCapstonesTests(unittest.TestCase):
                 env={**__import__("os").environ, "PYTHONPATH": "src"},
             )
         self.assertEqual(result.returncode, 0, msg=result.stderr or result.stdout)
+
+    def test_hunyuan_enablement_evidence_capstones_script(self) -> None:
+        result = subprocess.run(
+            [
+                sys.executable,
+                "scripts/hunyuan_enablement_evidence_capstones.py",
+                "--skip-weight-warm",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            env={**__import__("os").environ, "PYTHONPATH": "src"},
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr or result.stdout)
+        self.assertIn("capstones_verify_ok=True", result.stdout)
+
+    def test_hunyuan_enablement_evidence_capstones_strict_exits_one_on_ci(self) -> None:
+        result = subprocess.run(
+            [
+                sys.executable,
+                "scripts/hunyuan_enablement_evidence_capstones.py",
+                "--skip-weight-warm",
+                "--strict",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            env={**__import__("os").environ, "PYTHONPATH": "src"},
+        )
+        self.assertEqual(result.returncode, 1, msg=result.stderr or result.stdout)
 
 
 if __name__ == "__main__":

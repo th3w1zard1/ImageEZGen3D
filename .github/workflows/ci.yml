@@ -158,11 +158,8 @@ jobs:
       - name: G9 enablement evidence record fixture verify
         run: PYTHONPATH=src python scripts/verify_g9_enablement_evidence_record_fixtures.py
 
-      - name: Admission G9 enablement evidence bundle (CI-like skip path)
-        run: PYTHONPATH=src python scripts/hunyuan_admission_g9_enablement_evidence_bundle.py --skip-weight-warm
-
-      - name: Enablement evidence capstones verify (record dir)
-        run: PYTHONPATH=src python scripts/verify_enablement_evidence_capstones.py --record-dir .
+      - name: Enablement evidence capstones preflight (CI-like skip path)
+        run: PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --skip-weight-warm
 
       - name: Admission G9 enablement evidence bundle record fixture verify
         run: PYTHONPATH=src python scripts/verify_admission_g9_enablement_evidence_bundle_record_fixtures.py
