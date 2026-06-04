@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan G9 capstone --strict parity gate (Phase AY)"
 type: feat
-status: active
+status: completed
 date: 2026-06-03
 origin: docs/brainstorms/2026-06-03-hunyuan-g9-capstone-strict-parity-phase-ay-requirements.md
 ---

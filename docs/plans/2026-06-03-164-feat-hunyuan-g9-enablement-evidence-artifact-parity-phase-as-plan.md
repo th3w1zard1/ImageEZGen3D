@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan G9 enablement evidence ↔ neural artifact parity (Phase AS)"
 type: feat
-status: active
+status: completed
 date: 2026-06-03
 origin: docs/brainstorms/2026-06-03-hunyuan-g9-enablement-evidence-artifact-parity-phase-as-requirements.md
 ---

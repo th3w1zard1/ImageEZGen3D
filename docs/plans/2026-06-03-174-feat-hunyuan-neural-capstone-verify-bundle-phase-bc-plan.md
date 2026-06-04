@@ -1,7 +1,7 @@
 ---
 title: "feat: Hunyuan neural capstone verify bundle (Phase BC)"
 type: feat
-status: active
+status: completed
 date: 2026-06-03
 origin: docs/brainstorms/2026-06-03-hunyuan-neural-capstone-verify-bundle-phase-bc-requirements.md
 ---

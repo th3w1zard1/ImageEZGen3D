@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–BF)
+# Hunyuan pre-G7 stack (Phases J–BG)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -55,6 +55,7 @@
 | **BD** | #131 | `verify_enablement_evidence_capstones.py` | One verify command for all enablement capstones under `--record-dir` |
 | **BE** | #132 | `hunyuan_enablement_evidence_capstones.py` | One run+verify command for admission capstone + umbrella capstone verify |
 | **BF** | #133 | (CI dedup) | Drop redundant neural artifact parity CI step subsumed by Phase BE capstones preflight |
+| **BG** | — | (arc closure) | Mark AS–BF plans completed; consolidate runbook preferred enablement path |
 
 ## Operator commands
 
@@ -162,9 +163,9 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-BF)
+## Next slice (post-BG)
 
-Enablement evidence automation is structurally complete through Phase BF (CI dedup after capstones preflight). Next execution slices:
+Pre-G7 **enablement evidence automation** closed at Phase BG (Phases J–BG on `main`). No further automation phases are planned unless new requirements land. Next execution slices are **operational**:
 
 1. **Tier-C workstation:** `PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-dir . --strict` until `g9_enablement_evidence_ready=true` and `parity_ok=true`.
 2. **Hosted G7:** live Space Block/Vase neural run; re-run with `--require-hosted-neural --hosted-neural --status-file status.md`; update hosted-validation with `G7_STATUS: PASS` — still **OPEN**.
