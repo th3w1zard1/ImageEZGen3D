@@ -51,7 +51,7 @@
 | **AZ** | #127 | `--strict` on `hunyuan_neural_enablement_preflight_bundle.py` | Exit 1 when `parity_ok` is false under `--strict` |
 | **BA** | #128 | `verify_admission_g9_enablement_evidence_bundle.py` | One verify command for admission capstone JSON + bundle↔evidence parity |
 | **BB** | #129 | `verify_g9_enablement_evidence_bundle.py` | One verify command for G9 evidence capstone JSON + record-dir artifact parity |
-| **BC** | — | `verify_neural_enablement_preflight_bundle.py` | One verify command for neural capstone JSON + record-dir artifact parity |
+| **BC** | #130 | `verify_neural_enablement_preflight_bundle.py` | One verify command for neural capstone JSON + record-dir artifact parity |
 
 ## Operator commands
 
