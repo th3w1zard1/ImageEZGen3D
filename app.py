@@ -1128,6 +1128,15 @@ def build_demo():
                             with gr.Row(
                                 equal_height=False, elem_classes="artifact-row"
                             ):
+                                fbx_file = gr.File(
+                                    label="FBX", elem_classes="artifact-file"
+                                )
+                                usdz_file = gr.File(
+                                    label="USDZ", elem_classes="artifact-file"
+                                )
+                            with gr.Row(
+                                equal_height=False, elem_classes="artifact-row"
+                            ):
                                 export_sidecar_file = gr.File(
                                     label="Export sidecar",
                                     elem_classes="artifact-file",
@@ -1246,6 +1255,12 @@ def build_demo():
                             )
                             history_stl = gr.File(
                                 label="STL", elem_classes="artifact-file"
+                            )
+                            history_fbx = gr.File(
+                                label="FBX", elem_classes="artifact-file"
+                            )
+                            history_usdz = gr.File(
+                                label="USDZ", elem_classes="artifact-file"
                             )
                             history_export_sidecar = gr.File(
                                 label="Export sidecar",
@@ -1400,6 +1415,8 @@ def build_demo():
                     None,
                     None,
                     None,
+                    None,
+                    None,
                 )
             try:
                 payload = orchestrator.store.read_manifest(run_id)
@@ -1408,6 +1425,8 @@ def build_demo():
                     None,
                     "",
                     _error_report(str(exc)),
+                    None,
+                    None,
                     None,
                     None,
                     None,
@@ -1435,6 +1454,8 @@ def build_demo():
                     None,
                     None,
                     None,
+                    None,
+                    None,
                 )
             bundle_path = orchestrator.store.archive_run(run_id)
             history_model_path = verified_artifacts.get(
@@ -1449,6 +1470,8 @@ def build_demo():
                 verified_artifacts.get("obj"),
                 verified_artifacts.get("ply"),
                 verified_artifacts.get("stl"),
+                verified_artifacts.get("fbx"),
+                verified_artifacts.get("usdz"),
                 verified_artifacts.get("export_sidecar"),
                 verified_artifacts.get("raw_glb"),
                 str(bundle_path),
@@ -1529,6 +1552,8 @@ def build_demo():
                     state.get("obj"),
                     state.get("ply"),
                     state.get("stl"),
+                    state.get("fbx"),
+                    state.get("usdz"),
                     state.get("export_sidecar"),
                     state.get("raw_glb"),
                     state.get("bundle"),
@@ -1563,6 +1588,8 @@ def build_demo():
                     None,
                     None,
                     None,
+                    None,
+                    None,
                     state,
                     history_dropdown,
                     history_compare_dropdown,
@@ -1576,6 +1603,8 @@ def build_demo():
             state["obj"] = artifacts.get("obj")
             state["ply"] = artifacts.get("ply")
             state["stl"] = artifacts.get("stl")
+            state["fbx"] = artifacts.get("fbx")
+            state["usdz"] = artifacts.get("usdz")
             state["export_sidecar"] = artifacts.get("export_sidecar")
             state["raw_glb"] = artifacts.get("raw_glb")
             state["bundle"] = str(orchestrator.store.archive_run(result["run_id"]))
@@ -1594,6 +1623,8 @@ def build_demo():
                 state["obj"],
                 state["ply"],
                 state["stl"],
+                state["fbx"],
+                state["usdz"],
                 state["export_sidecar"],
                 state["raw_glb"],
                 state["bundle"],
@@ -1678,6 +1709,8 @@ def build_demo():
                 obj_file,
                 ply_file,
                 stl_file,
+                fbx_file,
+                usdz_file,
                 export_sidecar_file,
                 raw_glb_file,
                 bundle_file,
@@ -1723,6 +1756,8 @@ def build_demo():
                 history_obj,
                 history_ply,
                 history_stl,
+                history_fbx,
+                history_usdz,
                 history_export_sidecar,
                 history_raw_glb,
                 history_bundle,

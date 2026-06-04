@@ -166,13 +166,17 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         for section in (create_section, history_section):
             self.assertIn('label="Export sidecar"', section)
             self.assertIn('label="RAW GLB"', section)
+            self.assertIn('label="FBX"', section)
+            self.assertIn('label="USDZ"', section)
 
         generate_outputs = source.split("api_name=\"generate\"")[0].split(
             "generate.click("
         )[-1]
         stl_idx = generate_outputs.index("stl_file")
         bundle_idx = generate_outputs.index("bundle_file")
-        self.assertLess(stl_idx, generate_outputs.index("export_sidecar_file"))
+        self.assertLess(stl_idx, generate_outputs.index("fbx_file"))
+        self.assertLess(generate_outputs.index("fbx_file"), generate_outputs.index("usdz_file"))
+        self.assertLess(generate_outputs.index("usdz_file"), generate_outputs.index("export_sidecar_file"))
         self.assertLess(
             generate_outputs.index("export_sidecar_file"),
             generate_outputs.index("raw_glb_file"),
