@@ -49,7 +49,7 @@
 | **AX** | #125 | `verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity.py`, `verify_admission_g9_enablement_evidence_bundle_evidence_artifact_parity_fixtures.py` | Dedicated bundle↔evidence parity CLI + aligned skipped fixtures + CI smoke |
 | **AY** | #126 | `--strict` on G9/admission capstone CLIs | Exit 1 when `parity_ok` is false under `--strict` |
 | **AZ** | #127 | `--strict` on `hunyuan_neural_enablement_preflight_bundle.py` | Exit 1 when `parity_ok` is false under `--strict` |
-| **BA** | — | `verify_admission_g9_enablement_evidence_bundle.py` | One verify command for admission capstone JSON + bundle↔evidence parity |
+| **BA** | #128 | `verify_admission_g9_enablement_evidence_bundle.py` | One verify command for admission capstone JSON + bundle↔evidence parity |
 
 ## Operator commands
 
