@@ -1,4 +1,4 @@
-# Hunyuan pre-G7 stack (Phases J–BE)
+# Hunyuan pre-G7 stack (Phases J–BF)
 
 **Status:** Landed on `main` as incremental slices before G7 neural enablement. Adapter stays **`configured=False`** on Space until G9 runbook completes.
 
@@ -54,6 +54,7 @@
 | **BC** | #130 | `verify_neural_enablement_preflight_bundle.py` | One verify command for neural capstone JSON + record-dir artifact parity |
 | **BD** | #131 | `verify_enablement_evidence_capstones.py` | One verify command for all enablement capstones under `--record-dir` |
 | **BE** | #132 | `hunyuan_enablement_evidence_capstones.py` | One run+verify command for admission capstone + umbrella capstone verify |
+| **BF** | — | (CI dedup) | Drop redundant neural artifact parity CI step subsumed by Phase BE capstones preflight |
 
 ## Operator commands
 
@@ -161,11 +162,11 @@ PYTHONPATH=src python scripts/hunyuan_preflight_bundle.py
 - **`DevPreviewHunyuanBackend`** and hosted **`cpu-demo`** paths must not be reported as neural Hunyuan success.
 - Do **not** set **`IMAGEEZ_HUNYUAN_CONFIGURED=true`** on Space until [g7-enablement-readiness-2026-05-28.md](g7-enablement-readiness-2026-05-28.md) gates close with evidence.
 
-## Next slice (post-BE)
+## Next slice (post-BF)
 
-Enablement evidence automation is structurally complete through Phase BE (capstones run+verify preflight). Next execution slices:
+Enablement evidence automation is structurally complete through Phase BF (CI dedup after capstones preflight). Next execution slices:
 
-1. **Tier-C workstation:** `PYTHONPATH=src python scripts/hunyuan_g9_enablement_evidence_bundle.py --record-dir . --strict` until `g9_enablement_evidence_ready=true` and `parity_ok=true`.
+1. **Tier-C workstation:** `PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-dir . --strict` until `g9_enablement_evidence_ready=true` and `parity_ok=true`.
 2. **Hosted G7:** live Space Block/Vase neural run; re-run with `--require-hosted-neural --hosted-neural --status-file status.md`; update hosted-validation with `G7_STATUS: PASS` — still **OPEN**.
 3. **G9 enablement PR** only after G7 evidence per [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md).
 
