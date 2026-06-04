@@ -35,8 +35,7 @@ PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --re
 PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --live-probe
 PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --hosted-neural --status-file status.md --hosted-sample Block
 PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --record-dir . --strict
-PYTHONPATH=src python scripts/verify_neural_enablement_record.py neural-enablement-preflight.json
-PYTHONPATH=src python scripts/verify_neural_enablement_artifact_parity.py --record-dir .
+PYTHONPATH=src python scripts/verify_neural_enablement_preflight_bundle.py --record-dir .
 ```
 
 Writes admission, enablement, workstation, G9 bundle, neural enablement, G9 evidence (`g9-enablement-evidence.json`), admission + G9 evidence bundle (`admission-g9-enablement-evidence-bundle.json`), and (with `--live-probe`) `hunyuan-g7-live-probe.json` under `--record-dir`, then verifies record + cross-artifact parity. With `--hosted-neural --status-file`, also writes `hunyuan-g7-hosted-neural.json` for post-enablement G7 evidence parity (Phase AP). When `g9-enablement-evidence.json` is present, parity also checks G9 evidence ↔ neural alignment (Phase AS), G9 evidence ↔ admission audit alignment when `hunyuan-admission-audit.json` is present (Phase AT), and bundle nested evidence ↔ standalone G9 evidence when `admission-g9-enablement-evidence-bundle.json` is present (Phase AW). Expect `workstation_evidence_ready=false` and `neural_enablement_ready=false` on CI; on tier-C GPU workstation re-run with `--strict` until `g9_enablement_evidence_ready=true` and `parity_ok=true` on the G9/admission capstone (Phases AY–AZ) and matching parity on the neural capstone (Phase AZ).

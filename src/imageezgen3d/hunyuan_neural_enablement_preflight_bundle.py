@@ -231,6 +231,17 @@ def run_neural_enablement_preflight_bundle(
     return final_result
 
 
+def verify_neural_enablement_preflight_bundle_files(record_dir: Path) -> list[str]:
+    """Verify neural enablement record and record-dir artifact parity."""
+    directory = record_dir.resolve()
+    record_path = directory / DEFAULT_NEURAL_ENABLEMENT_RECORD
+
+    issues: list[str] = []
+    issues.extend(verify_neural_enablement_record_file(record_path))
+    issues.extend(verify_neural_enablement_artifact_files(directory))
+    return issues
+
+
 def format_neural_enablement_preflight_bundle_report(
     result: NeuralEnablementPreflightBundleResult,
 ) -> str:
