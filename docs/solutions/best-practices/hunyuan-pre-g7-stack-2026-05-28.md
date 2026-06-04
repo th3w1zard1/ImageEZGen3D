@@ -56,7 +56,7 @@
 | **BE** | #132 | `hunyuan_enablement_evidence_capstones.py` | One run+verify command for admission capstone + umbrella capstone verify |
 | **BF** | #133 | (CI dedup) | Drop redundant neural artifact parity CI step subsumed by Phase BE capstones preflight |
 | **BG** | #134 | (arc closure) | Mark AS–BF plans completed; consolidate runbook preferred enablement path |
-| **BH** | — | (plan closure) | Mark AF–AR plans completed (extend BG arc closure) |
+| **BH** | #135 | (plan closure) | Mark AF–AR plans completed (extend BG arc closure) |
 
 ## Operator commands
 
