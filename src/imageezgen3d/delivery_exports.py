@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import Any, Mapping, TYPE_CHECKING
 
 from .storage import atomic_write_text
 
@@ -173,3 +173,40 @@ def build_delivery_formats_block(
             "notes": notes if exported else f"{fmt.upper()} export requested but not written for adapter {adapter!r}.",
         }
     return blocks
+
+
+def validate_delivery_formats_manifest(
+    artifacts: Mapping[str, Any],
+    sidecar: Mapping[str, Any],
+) -> list[str]:
+    """Cross-check optional FBX/USDZ manifest keys against sidecar delivery_formats."""
+    issues: list[str] = []
+    delivery = sidecar.get("delivery_formats")
+    if not isinstance(delivery, dict):
+        return issues
+
+    for fmt in DELIVERY_FORMATS:
+        block = delivery.get(fmt)
+        if not isinstance(block, dict):
+            continue
+        exported = block.get("exported") is True
+        has_key = fmt in artifacts
+        if exported and not has_key:
+            issues.append(
+                f"delivery_formats.{fmt}.exported=true but manifest artifacts missing {fmt}"
+            )
+        if not exported and has_key:
+            issues.append(
+                f"Manifest lists {fmt} but delivery_formats.{fmt}.exported is false"
+            )
+        if exported and has_key:
+            artifact_path = artifacts.get(fmt)
+            if artifact_path in (None, ""):
+                issues.append(f"Manifest {fmt} artifact path is empty")
+            else:
+                path = Path(str(artifact_path))
+                if not path.is_file():
+                    issues.append(f"Manifest {fmt} artifact path missing on disk: {path}")
+                elif path.stat().st_size == 0:
+                    issues.append(f"Manifest {fmt} artifact is empty")
+    return issues

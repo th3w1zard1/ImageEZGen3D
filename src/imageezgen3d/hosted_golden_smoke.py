@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .delivery_exports import validate_delivery_formats_manifest
 from .export_tiers import resolve_decimation_target
 from .hunyuan_g8_preflight import validate_g8_cpu_fallback_status
 
@@ -110,8 +111,14 @@ def validate_backend_rail_html(html: str) -> list[str]:
     return issues
 
 
+# app.py generate.click outputs (Plan 181 FBX/USDZ slots):
+# 0 model, 1 status, 2 manifest, 3 glb, 4 obj, 5 ply, 6 stl,
+# 7 fbx, 8 usdz, 9 export_sidecar, 10 raw_glb, 11 bundle, ...
 _GENERATE_MANIFEST_INDEX = 2
-_GENERATE_EXPORT_SIDECAR_INDEX = 7
+_GENERATE_FBX_INDEX = 7
+_GENERATE_USDZ_INDEX = 8
+_GENERATE_EXPORT_SIDECAR_INDEX = 9
+_GENERATE_RAW_GLB_INDEX = 10
 _GENERATE_BACKEND_RAIL_INDEX = 15
 
 
@@ -138,6 +145,34 @@ def _validate_export_sidecar_decimation(
         if method != "quadric":
             issues.append(f"Expected decimation_method quadric, got {method!r}")
     return issues
+
+
+def _resolve_export_sidecar_path(
+    artifacts: dict[str, Any],
+    sidecar_path: Path | None,
+) -> Path | None:
+    if sidecar_path is not None and sidecar_path.is_file():
+        return sidecar_path
+    sidecar_ref = artifacts.get("export_sidecar")
+    if isinstance(sidecar_ref, str) and sidecar_ref:
+        candidate = Path(sidecar_ref)
+        if candidate.is_file():
+            return candidate
+    return sidecar_path if sidecar_path is not None else None
+
+
+def _load_export_sidecar_payload(sidecar_path: Path | None) -> tuple[dict[str, Any] | None, list[str]]:
+    if sidecar_path is None:
+        return None, []
+    if not sidecar_path.is_file():
+        return None, [f"Export sidecar file missing: {sidecar_path}"]
+    try:
+        payload = json.loads(sidecar_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return None, [f"Export sidecar is not valid JSON: {exc}"]
+    if not isinstance(payload, dict):
+        return None, ["Export sidecar must be a JSON object"]
+    return payload, []
 
 
 def validate_run_manifest(
@@ -187,12 +222,21 @@ def validate_run_manifest(
     elif parameters.get("raw_exported"):
         issues.append("Draft manifest should not set raw_exported")
 
-    if expect_raw and sidecar_path is not None:
+    resolved_sidecar_path = _resolve_export_sidecar_path(artifacts, sidecar_path)
+    sidecar_payload, sidecar_issues = _load_export_sidecar_payload(resolved_sidecar_path)
+    issues.extend(sidecar_issues)
+
+    if expect_raw and resolved_sidecar_path is not None:
         issues.extend(
             _validate_export_sidecar_decimation(
-                sidecar_path,
+                resolved_sidecar_path,
                 expect_quadric=True,
             )
+        )
+
+    if sidecar_payload is not None:
+        issues.extend(
+            validate_delivery_formats_manifest(artifacts, sidecar_payload)
         )
 
     return issues
