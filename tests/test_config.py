@@ -56,6 +56,9 @@ class ConfigTests(unittest.TestCase):
         self.assertIn("gradio>=4.44,<7", lines)
         self.assertIn("Pillow>=10.0", lines)
         self.assertIn("numpy>=1.26", lines)
+        self.assertIn("trimesh>=4.4", lines)
+        self.assertIn("fast-simplification>=0.1", lines)
+        self.assertIn("usd-core>=24.0", lines)
         self.assertNotIn("-e .[app]", lines)
 
     def test_gradio_server_port_overrides_launch_port(self) -> None:
