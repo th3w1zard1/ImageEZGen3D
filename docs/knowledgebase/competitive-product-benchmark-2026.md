@@ -322,8 +322,8 @@ This section tracks **3D-native** competitors (not 2D image apps above). Evidenc
 | PBR textures | Yes | Yes | Yes | Yes (2.1) | Documented; not shipped |
 | Remesh / LOD | Yes | Yes | Partial | Manual | Export-tier decimation |
 | Rig + animate | Yes | Yes | T-pose | — | Deferred |
-| Async REST API | Yes | Yes | Yes | Self-host | Deferred |
-| GLB / FBX / USDZ | Yes | Yes | Yes | GLB-first | GLB/OBJ/PLY/STL |
+| Async REST API | Yes | Yes | Yes | Self-host | Partial (local `jobs/http_api`) |
+| GLB / FBX / USDZ | Yes | Yes | Yes | GLB-first | GLB/OBJ/PLY/STL/FBX/USDZ |
 | HF Gradio native | — | — | — | Yes | Yes |
 | Open weights | — | — | — | Yes | Via adapters |
 
@@ -340,14 +340,15 @@ ImageEZGen3D manifest `generation.pipeline_stages` (`shape`, `texture`, `pbr`, `
 
 ### Tier 1 gaps to close next (actionable)
 
-1. Enable Hunyuan shape path on hosted ZeroGPU (G7–G9 admission).
-2. Populate real `texture` / `pbr` stage success from paint models.
-3. PBR map sidecar + FBX/USDZ export tier.
+1. Enable Hunyuan shape path on hosted ZeroGPU (G7–G9 admission) — operational track.
+2. Populate real `texture` / `pbr` stage success from paint models; export PBR **map files** (not sidecar-only).
+3. ~~PBR map sidecar + FBX/USDZ export tier~~ — **FBX/USDZ landed** (Plans 180–183); golden/hosted attestation expansion in progress (Phase N/O).
 4. Neural text-to-3D adapter behind the same contract as `text-demo`.
+5. Preview → refine two-stage lanes (Meshy preview/refine split).
 
 ### Tier 2–3 (near-term / frontier)
 
 - Multi-view fusion, retexture-on-mesh, rig/animate, webhooks, batch API (Tier 2).
 - TRELLIS.2 O-Voxel, splat delivery, 3D print repair, agentic multi-stage products (Tier 3).
 
-See also `docs/knowledgebase/creator-product-patterns.md` and `docs/plans/2026-05-28-119-feat-meshy-class-platform-foundation-plan.md`.
+See also `docs/knowledgebase/creator-product-patterns.md`, `docs/plans/2026-05-28-119-feat-meshy-class-platform-foundation-plan.md`, and `docs/plans/2026-06-03-185-feat-meshy-parity-gap-program-plan.md` (phase index).

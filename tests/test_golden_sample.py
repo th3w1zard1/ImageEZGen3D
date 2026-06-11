@@ -8,8 +8,10 @@ from unittest.mock import patch
 
 from PIL import Image
 
+from imageezgen3d.delivery_exports import usd_core_available
 from imageezgen3d.golden_sample import (
     DEFAULT_SAMPLE_PATH,
+    resolve_golden_required_artifact_keys,
     run_golden_sample_attestation,
     write_attestation_record,
 )
@@ -32,6 +34,17 @@ class GoldenSampleTests(unittest.TestCase):
         self.assertIn("obj", attestation.artifacts)
         self.assertIn("manifest", attestation.artifacts)
         self.assertIn("export_sidecar", attestation.artifacts)
+        self.assertIn("fbx", attestation.artifacts)
+        if usd_core_available():
+            self.assertIn("usdz", attestation.artifacts)
+
+    def test_resolve_golden_required_artifact_keys_includes_fbx(self) -> None:
+        keys = resolve_golden_required_artifact_keys()
+        self.assertIn("fbx", keys)
+        if usd_core_available():
+            self.assertIn("usdz", keys)
+        else:
+            self.assertNotIn("usdz", keys)
 
     def test_attestation_fails_when_sample_missing(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -73,6 +86,9 @@ class GoldenSampleTests(unittest.TestCase):
         self.assertFalse(attestation.ok)
         self.assertTrue(
             any("Missing artifact" in issue for issue in attestation.issues)
+        )
+        self.assertTrue(
+            any("fbx" in issue for issue in attestation.issues)
         )
 
 

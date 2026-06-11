@@ -8,6 +8,7 @@ from typing import Any
 from PIL import Image
 
 from .config import AppConfig, AppSettings, StorageSettings
+from .delivery_exports import usd_core_available, validate_delivery_formats_manifest
 from .mesh_checks import inspect_artifacts
 from .orchestrator import ImageEZOrchestrator
 
@@ -18,8 +19,18 @@ MIN_ARTIFACT_BYTES = {
     "glb": 800,
     "obj": 100,
     "export_sidecar": 80,
+    "fbx": 200,
+    "usdz": 100,
 }
 DRAFT_DECIMATION_TARGET = 25_000
+
+
+def resolve_golden_required_artifact_keys() -> tuple[str, ...]:
+    keys: list[str] = list(REQUIRED_ARTIFACT_KEYS)
+    keys.append("fbx")
+    if usd_core_available():
+        keys.append("usdz")
+    return tuple(keys)
 
 
 @dataclass(frozen=True)
@@ -97,7 +108,7 @@ def run_golden_sample_attestation(
         )
 
     raw_artifacts = result.get("artifacts") or {}
-    for key in REQUIRED_ARTIFACT_KEYS:
+    for key in resolve_golden_required_artifact_keys():
         path_value = raw_artifacts.get(key)
         if not path_value:
             issues.append(f"Missing artifact key: {key}")
@@ -113,6 +124,16 @@ def run_golden_sample_attestation(
             issues.append(
                 f"Artifact {key} too small ({size} bytes, minimum {minimum})"
             )
+
+    sidecar_path_value = raw_artifacts.get("export_sidecar")
+    if sidecar_path_value and not issues:
+        sidecar_path = Path(str(sidecar_path_value))
+        if sidecar_path.is_file():
+            sidecar_payload = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            if isinstance(sidecar_payload, dict):
+                issues.extend(
+                    validate_delivery_formats_manifest(raw_artifacts, sidecar_payload)
+                )
 
     if not issues:
         inspection_keys = [key for key in ("glb", "obj") if key in raw_artifacts]
