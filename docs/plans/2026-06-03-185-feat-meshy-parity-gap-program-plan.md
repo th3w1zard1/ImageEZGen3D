@@ -100,7 +100,7 @@ ImageEZGen3D has strong trust scaffolding (manifests, hosted smoke guards, admis
 | **O** | 186 | Hosted smoke required keys for delivery formats post-Space deploy | merged (#141) |
 | **Q** | 187 | 3MF writer + honest BLEND deferral | merged (this PR) |
 | **P-UI** | 188 | Dynamic Gradio artifact rows from `exports.formats` | merged (this PR) |
-| **R** | (next) | `target_formats` on export API / job payload | Q optional |
+| **R** | 189 | `target_formats` on export API / job payload | merged (this PR) |
 | **S** | (next) | PBR map file export + sidecar `pbr_available=true` | Hunyuan paint path |
 | **T** | (next) | Preview/refine orchestrator lanes | S partial |
 | **U** | (next) | Retexture adapter hook | S |

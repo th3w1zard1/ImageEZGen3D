@@ -9,6 +9,7 @@ from typing import Any
 from PIL import Image
 
 from ..config import AppConfig, load_config
+from ..delivery_exports import resolve_target_export_formats
 from ..orchestrator import ImageEZOrchestrator
 from ..storage import atomic_write_json
 from .models import JobPollResponse, JobRequest, JobRecord
@@ -34,6 +35,10 @@ class JobService:
         self._futures: dict[str, Future[None]] = {}
 
     def submit(self, request: JobRequest) -> str:
+        resolve_target_export_formats(
+            request.target_formats,
+            self.config.exports.formats,
+        )
         record = self.job_store.create(request=request.to_dict())
         future = self._executor.submit(self._execute_job, record.job_id)
         self._futures[record.job_id] = future
@@ -152,6 +157,7 @@ class JobService:
             input_modality=modality,
             prompt_text=request.prompt_text,
             lane=request.lane,
+            target_formats=request.target_formats,
         )
 
     def _mark_run_async_capable(self, run_id: str, job_id: str) -> None:

@@ -64,6 +64,7 @@ def finalize_hunyuan_exports(
         stem="hunyuan_mesh",
         export_sidecar=sidecar,
         raw_mesh=raw_mesh,
+        formats=request.export_formats or load_config().exports.formats,
     )
     metadata = {
         "neural_backend": HUNYUAN_ADAPTER,
