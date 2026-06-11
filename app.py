@@ -43,6 +43,7 @@ from imageezgen3d.gradio_artifact_layout import (  # noqa: E402
     session_artifact_values,
     sync_session_artifact_keys,
 )
+from imageezgen3d.storage import RunStore  # noqa: E402
 
 
 _EXAMPLE_SPECS = (
@@ -1123,17 +1124,6 @@ def build_demo():
                                             label=UI_ARTIFACT_LABELS[key],
                                             elem_classes="artifact-file",
                                         )
-                            manifest_file = create_artifact_files["manifest"]
-                            glb_file = create_artifact_files["glb"]
-                            obj_file = create_artifact_files["obj"]
-                            ply_file = create_artifact_files["ply"]
-                            stl_file = create_artifact_files["stl"]
-                            threemf_file = create_artifact_files.get("3mf")
-                            fbx_file = create_artifact_files.get("fbx")
-                            usdz_file = create_artifact_files.get("usdz")
-                            export_sidecar_file = create_artifact_files["export_sidecar"]
-                            raw_glb_file = create_artifact_files["raw_glb"]
-                            bundle_file = create_artifact_files["bundle"]
 
             with gr.Tab("History"):
                 history_summary = gr.HTML(
@@ -1233,17 +1223,6 @@ def build_demo():
                                     label=UI_ARTIFACT_LABELS[key],
                                     elem_classes="artifact-file",
                                 )
-                            history_manifest = history_artifact_files["manifest"]
-                            history_glb = history_artifact_files["glb"]
-                            history_obj = history_artifact_files["obj"]
-                            history_ply = history_artifact_files["ply"]
-                            history_stl = history_artifact_files["stl"]
-                            history_threemf = history_artifact_files.get("3mf")
-                            history_fbx = history_artifact_files.get("fbx")
-                            history_usdz = history_artifact_files.get("usdz")
-                            history_export_sidecar = history_artifact_files["export_sidecar"]
-                            history_raw_glb = history_artifact_files["raw_glb"]
-                            history_bundle = history_artifact_files["bundle"]
 
             with gr.Tab("Guide"):
                 with gr.Group(elem_classes="workspace-panel guide-panel"):
