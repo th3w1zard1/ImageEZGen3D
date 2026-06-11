@@ -11,6 +11,7 @@ from urllib import request
 from imageezgen3d.config import AppConfig, AppSettings, StorageSettings
 from imageezgen3d.jobs import JobService
 from imageezgen3d.jobs.http_api import create_job_api_server
+from urllib import error as urlerror
 
 
 class JobHttpApiTests(unittest.TestCase):
@@ -80,6 +81,34 @@ class JobHttpApiTests(unittest.TestCase):
                 ) as result_resp:
                     manifest = json.loads(result_resp.read().decode("utf-8"))
                 self.assertEqual(manifest["parameters"]["job_id"], job_id)
+            finally:
+                server.shutdown()
+                server.server_close()
+                service.shutdown(wait=True)
+
+    def test_submit_rejects_unknown_target_formats(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            service, server, port = self._start_server(Path(directory))
+            base = f"http://127.0.0.1:{port}"
+            try:
+                body = json.dumps(
+                    {
+                        "input_modality": "text",
+                        "prompt_text": "Bad format",
+                        "target_formats": ["glb", "dae"],
+                    }
+                ).encode("utf-8")
+                submit_req = request.Request(
+                    f"{base}/v1/jobs",
+                    data=body,
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with self.assertRaises(urlerror.HTTPError) as ctx:
+                    request.urlopen(submit_req, timeout=5)
+                self.assertEqual(ctx.exception.code, 400)
+                payload = json.loads(ctx.exception.read().decode("utf-8"))
+                self.assertIn("Unknown export format", payload["error"])
             finally:
                 server.shutdown()
                 server.server_close()

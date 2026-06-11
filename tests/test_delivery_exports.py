@@ -9,6 +9,7 @@ from pathlib import Path
 from imageezgen3d.delivery_exports import (
     BLEND_UNAVAILABLE_NOTES,
     build_delivery_formats_block,
+    resolve_target_export_formats,
     usd_core_available,
     validate_delivery_formats_manifest,
     write_3mf,
@@ -161,6 +162,30 @@ class DeliveryExportTests(unittest.TestCase):
             validate_delivery_formats_manifest({"glb": "/tmp/mesh.glb"}, {}),
             [],
         )
+
+
+class TargetExportFormatTests(unittest.TestCase):
+    def test_resolve_target_export_formats_uses_config_when_unset(self) -> None:
+        configured = ("glb", "obj", "fbx")
+        self.assertEqual(
+            resolve_target_export_formats(None, configured),
+            configured,
+        )
+
+    def test_resolve_target_export_formats_preserves_subset_order(self) -> None:
+        configured = ("glb", "obj", "ply", "fbx")
+        self.assertEqual(
+            resolve_target_export_formats(["fbx", "glb"], configured),
+            ("fbx", "glb"),
+        )
+
+    def test_resolve_target_export_formats_rejects_unknown(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Unknown export format"):
+            resolve_target_export_formats(["glb", "dae"], ("glb", "obj"))
+
+    def test_resolve_target_export_formats_rejects_disabled(self) -> None:
+        with self.assertRaisesRegex(ValueError, "not enabled"):
+            resolve_target_export_formats(["fbx"], ("glb", "obj"))
 
 
 if __name__ == "__main__":

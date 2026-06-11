@@ -13,6 +13,9 @@ if TYPE_CHECKING:
 
 DEFAULT_CORE_FORMATS: tuple[str, ...] = ("glb", "obj", "ply", "stl")
 DELIVERY_FORMATS: tuple[str, ...] = ("fbx", "usdz", "3mf", "blend")
+KNOWN_EXPORT_FORMATS: frozenset[str] = frozenset(
+    (*DEFAULT_CORE_FORMATS, *DELIVERY_FORMATS)
+)
 _THREEMF_NS = "http://schemas.microsoft.com/3dmanufacturing/core/2015/02"
 _XML_NS = "http://www.w3.org/XML/1998/namespace"
 
@@ -52,6 +55,42 @@ def resolve_export_formats(formats: tuple[str, ...] | None) -> tuple[str, ...]:
         return DEFAULT_CORE_FORMATS
     normalized = tuple(fmt.strip().lower() for fmt in formats if fmt.strip())
     return normalized or DEFAULT_CORE_FORMATS
+
+
+def resolve_target_export_formats(
+    target_formats: tuple[str, ...] | list[str] | None,
+    configured_formats: tuple[str, ...],
+) -> tuple[str, ...]:
+    """Resolve Meshy-style target_formats against deployment export config."""
+    if not target_formats:
+        return configured_formats
+
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for fmt in target_formats:
+        token = str(fmt).strip().lower()
+        if not token:
+            continue
+        if token not in KNOWN_EXPORT_FORMATS:
+            known = ", ".join(sorted(KNOWN_EXPORT_FORMATS))
+            raise ValueError(
+                f"Unknown export format {token!r}. Known formats: {known}."
+            )
+        if token not in seen:
+            normalized.append(token)
+            seen.add(token)
+
+    if not normalized:
+        raise ValueError("target_formats must include at least one format.")
+
+    configured = {fmt.strip().lower() for fmt in configured_formats if fmt.strip()}
+    disabled = [fmt for fmt in normalized if fmt not in configured]
+    if disabled:
+        raise ValueError(
+            "target_formats not enabled in this deployment: "
+            f"{disabled}. Configured formats: {sorted(configured)}."
+        )
+    return tuple(normalized)
 
 
 def write_fbx(mesh: SimpleMesh, path: Path) -> None:

@@ -11,6 +11,7 @@ from PIL import Image
 from .adapters import CpuDemoAdapter, HunyuanPlaceholderAdapter, TextDemoAdapter, TextNeuralPlaceholderAdapter
 from .adapters.base import GenerationRequest, ModelAdapter
 from .config import AppConfig
+from .delivery_exports import resolve_target_export_formats
 from .export_tiers import apply_pbr_stage_from_sidecar
 from .generation_pipeline import (
     PipelineStageTracker,
@@ -224,6 +225,7 @@ class ImageEZOrchestrator:
         input_modality: str | None = None,
         prompt_text: str | None = None,
         lane: str | None = None,
+        target_formats: tuple[str, ...] | list[str] | None = None,
     ) -> dict[str, Any]:
         pipeline_spec = build_pipeline_spec(
             input_modality=input_modality,
@@ -246,6 +248,12 @@ class ImageEZOrchestrator:
             pipeline_spec,
             default=self.config.generation.decimation_target,
         )
+        export_formats: tuple[str, ...] | None = None
+        if target_formats:
+            export_formats = resolve_target_export_formats(
+                target_formats,
+                self.config.exports.formats,
+            )
         stage_tracker = PipelineStageTracker()
         manifest.stage = "preprocessing"
         manifest.parameters = {
@@ -259,6 +267,13 @@ class ImageEZOrchestrator:
             "runtime": runtime_status(self.config).__dict__,
             "generation": pipeline_spec.to_manifest_dict(),
         }
+        if target_formats:
+            manifest.parameters["target_formats"] = [
+                str(fmt).strip().lower()
+                for fmt in target_formats
+                if str(fmt).strip()
+            ]
+            manifest.parameters["export_formats"] = list(export_formats or ())
         manifest.parameters["generation"]["pipeline_stages"] = (
             stage_tracker.to_list()
         )
@@ -358,6 +373,7 @@ class ImageEZOrchestrator:
                     input_modality=pipeline_spec.input_modality,
                     lane=pipeline_spec.lane,
                     prompt_text=pipeline_spec.prompt_text,
+                    export_formats=export_formats,
                 )
             )
 

@@ -27,6 +27,7 @@ class GenerationRequest:
     input_modality: str = "image"
     lane: str = "draft"
     prompt_text: str = ""
+    export_formats: tuple[str, ...] | None = None
 
 
 @dataclass

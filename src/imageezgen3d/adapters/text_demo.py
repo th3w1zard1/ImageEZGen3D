@@ -61,7 +61,7 @@ class TextDemoAdapter:
             request.run_dir / "exports",
             stem="text_demo_mesh",
             export_sidecar=sidecar,
-            formats=load_config().exports.formats,
+            formats=request.export_formats or load_config().exports.formats,
         )
         return GenerationResult(
             adapter=self.capabilities.name,

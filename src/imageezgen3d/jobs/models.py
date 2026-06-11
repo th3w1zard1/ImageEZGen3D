@@ -23,6 +23,7 @@ class JobRequest:
     reference_brief: str | None = None
     view_image_paths: dict[str, str] | None = None
     webhook_url: str | None = None
+    target_formats: tuple[str, ...] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
@@ -41,6 +42,8 @@ class JobRequest:
         }
         if self.view_image_paths:
             payload["view_image_paths"] = dict(self.view_image_paths)
+        if self.target_formats:
+            payload["target_formats"] = list(self.target_formats)
         return payload
 
     @classmethod
@@ -59,6 +62,7 @@ class JobRequest:
             reference_brief=_optional_str(payload.get("reference_brief")),
             view_image_paths=_optional_view_paths(payload.get("view_image_paths")),
             webhook_url=_optional_str(payload.get("webhook_url")),
+            target_formats=_optional_str_tuple(payload.get("target_formats")),
         )
 
 
@@ -151,6 +155,23 @@ def _optional_int(value: object) -> int | None:
         return int(value)
     return int(str(value))
 
+
+
+def _optional_str_tuple(value: object) -> tuple[str, ...] | None:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        items = [value]
+    elif isinstance(value, (list, tuple)):
+        items = list(value)
+    else:
+        raise ValueError("target_formats must be a list of format names.")
+    normalized: list[str] = []
+    for item in items:
+        text = _optional_str(item)
+        if text:
+            normalized.append(text)
+    return tuple(normalized) or None
 
 
 def _optional_view_paths(value: object) -> dict[str, str] | None:
