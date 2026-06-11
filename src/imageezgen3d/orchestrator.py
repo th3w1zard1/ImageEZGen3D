@@ -248,10 +248,12 @@ class ImageEZOrchestrator:
             pipeline_spec,
             default=self.config.generation.decimation_target,
         )
-        export_formats = resolve_target_export_formats(
-            target_formats,
-            self.config.exports.formats,
-        )
+        export_formats: tuple[str, ...] | None = None
+        if target_formats:
+            export_formats = resolve_target_export_formats(
+                target_formats,
+                self.config.exports.formats,
+            )
         stage_tracker = PipelineStageTracker()
         manifest.stage = "preprocessing"
         manifest.parameters = {
@@ -264,7 +266,6 @@ class ImageEZOrchestrator:
             "seed": seed or self.config.generation.seed,
             "runtime": runtime_status(self.config).__dict__,
             "generation": pipeline_spec.to_manifest_dict(),
-            "export_formats": list(export_formats),
         }
         if target_formats:
             manifest.parameters["target_formats"] = [
@@ -272,6 +273,7 @@ class ImageEZOrchestrator:
                 for fmt in target_formats
                 if str(fmt).strip()
             ]
+            manifest.parameters["export_formats"] = list(export_formats or ())
         manifest.parameters["generation"]["pipeline_stages"] = (
             stage_tracker.to_list()
         )
