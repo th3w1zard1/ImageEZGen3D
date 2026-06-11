@@ -60,4 +60,11 @@ def inspect_artifacts(paths: dict[str, Path]) -> MeshHealthReport:
         if magic != b"PK":
             warnings.append("USDZ package is not ZIP-based.")
 
+    threemf_path = paths.get("3mf")
+    if threemf_path and threemf_path.exists():
+        with threemf_path.open("rb") as handle:
+            magic = handle.read(2)
+        if magic != b"PK":
+            warnings.append("3MF package is not ZIP-based.")
+
     return MeshHealthReport(status="warning" if warnings else "ok", warnings=warnings, metrics=metrics)

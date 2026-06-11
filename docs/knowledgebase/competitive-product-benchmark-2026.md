@@ -323,7 +323,7 @@ This section tracks **3D-native** competitors (not 2D image apps above). Evidenc
 | Remesh / LOD | Yes | Yes | Partial | Manual | Export-tier decimation |
 | Rig + animate | Yes | Yes | T-pose | — | Deferred |
 | Async REST API | Yes | Yes | Yes | Self-host | Partial (local `jobs/http_api`) |
-| GLB / FBX / USDZ | Yes | Yes | Yes | GLB-first | GLB/OBJ/PLY/STL/FBX/USDZ |
+| GLB / FBX / USDZ | Yes | Yes | Yes | GLB-first | GLB/OBJ/PLY/STL/FBX/USDZ/**3MF** |
 | HF Gradio native | — | — | — | Yes | Yes |
 | Open weights | — | — | — | Yes | Via adapters |
 

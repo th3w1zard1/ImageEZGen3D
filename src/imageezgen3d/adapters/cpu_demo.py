@@ -25,7 +25,7 @@ class CpuDemoAdapter:
         zerogpu_ready=True,
         configured=True,
         supports_multi_view=True,
-        outputs=("glb", "obj", "ply", "stl", "fbx", "usdz"),
+        outputs=("glb", "obj", "ply", "stl", "fbx", "usdz", "3mf"),
         notes="Procedural draft mesh for local development, CI, and no-CUDA workflows.",
     )
 

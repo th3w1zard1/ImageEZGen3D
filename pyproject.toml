@@ -97,7 +97,7 @@ configured = false
 
 [tool.imageezgen3d.exports]
 default_format = "glb"
-formats = ["glb", "obj", "ply", "stl", "fbx", "usdz"]
+formats = ["glb", "obj", "ply", "stl", "fbx", "usdz", "3mf", "blend"]
 
 [tool.imageezgen3d.release]
 create_missing_targets = true

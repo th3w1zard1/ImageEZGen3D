@@ -14,6 +14,7 @@ The CPU demo exports:
 - `.stl`: geometry-only 3D print style exchange.
 - `.fbx`: static mesh ASCII delivery export when configured.
 - `.usdz`: geometry-first AR Quick Look package when `usd-core` is installed (included in Space `requirements.txt`; local dev may use the `mesh-delivery` extra).
+- `.3mf`: ZIP-packaged triangle mesh for modern slicers when configured.
 
 Format guidance:
 
@@ -23,6 +24,8 @@ Format guidance:
 - `stl`: only for geometry-centric workflows such as rough print checks.
 - `fbx`: DCC/game interchange; static mesh ASCII export with honest geometry-only delivery notes in the export sidecar.
 - `usdz`: iOS AR Quick Look delivery tier when `usd-core` is installed; geometry-first packaging without separate PBR map files unless a paint adapter exported them. Hugging Face Space builds install `usd-core` via `requirements.txt`; local installs can use the optional `mesh-delivery` extra instead.
+- `3mf`: modern print interchange (ZIP + 3D Manufacturing Core XML); geometry-first packaging for slicers.
+- `blend`: **not exported** in this deployment — native `.blend` requires a Blender runtime (`bpy`). When `blend` appears in `exports.formats`, the export sidecar records `available: false` with guidance to use GLB or FBX for DCC interchange.
 
 ## Material Strategy
 

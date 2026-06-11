@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import tempfile
+import zipfile
 from pathlib import Path
 from typing import Any, Mapping, TYPE_CHECKING
+from xml.etree.ElementTree import Element, SubElement, tostring
 
 from .storage import atomic_write_text
 
@@ -10,7 +12,9 @@ if TYPE_CHECKING:
     from .exporters import SimpleMesh
 
 DEFAULT_CORE_FORMATS: tuple[str, ...] = ("glb", "obj", "ply", "stl")
-DELIVERY_FORMATS: tuple[str, ...] = ("fbx", "usdz")
+DELIVERY_FORMATS: tuple[str, ...] = ("fbx", "usdz", "3mf", "blend")
+_THREEMF_NS = "http://schemas.microsoft.com/3dmanufacturing/core/2015/02"
+_XML_NS = "http://www.w3.org/XML/1998/namespace"
 
 FBX_GEOMETRY_NOTES = (
     "Static triangle mesh in FBX 7.4 ASCII. Factor colors may be embedded; "
@@ -23,6 +27,14 @@ USDZ_GEOMETRY_NOTES = (
 USDZ_UNAVAILABLE_NOTES = (
     "USDZ export skipped because usd-core is not installed. "
     "Install the mesh-delivery optional extra to enable USDZ."
+)
+THREEMF_GEOMETRY_NOTES = (
+    "Triangle mesh packaged as 3MF for modern slicers. Geometry-first; "
+    "separate PBR map files are not embedded when pbr_available is false."
+)
+BLEND_UNAVAILABLE_NOTES = (
+    "BLEND export requires a Blender runtime (bpy). "
+    "Not available in this deployment; use GLB or FBX for DCC interchange."
 )
 
 
@@ -121,6 +133,77 @@ Connections:  {{
     atomic_write_text(path, content)
 
 
+def write_3mf(mesh: SimpleMesh, path: Path) -> None:
+    """Write a triangle mesh as a 3MF ZIP package (geometry-first delivery tier)."""
+    model = Element(
+        f"{{{_THREEMF_NS}}}model",
+        attrib={
+            "unit": "millimeter",
+            f"{{{_XML_NS}}}lang": "en-US",
+        },
+    )
+    resources = SubElement(model, f"{{{_THREEMF_NS}}}resources")
+    obj = SubElement(
+        resources,
+        f"{{{_THREEMF_NS}}}object",
+        attrib={"id": "1", "type": "model"},
+    )
+    mesh_element = SubElement(obj, f"{{{_THREEMF_NS}}}mesh")
+    vertices_element = SubElement(mesh_element, f"{{{_THREEMF_NS}}}vertices")
+    for x, y, z in mesh.vertices:
+        SubElement(
+            vertices_element,
+            f"{{{_THREEMF_NS}}}vertex",
+            attrib={"x": f"{x:.6f}", "y": f"{y:.6f}", "z": f"{z:.6f}"},
+        )
+    triangles_element = SubElement(mesh_element, f"{{{_THREEMF_NS}}}triangles")
+    for a, b, c in mesh.faces:
+        SubElement(
+            triangles_element,
+            f"{{{_THREEMF_NS}}}triangle",
+            attrib={"v1": str(a), "v2": str(b), "v3": str(c)},
+        )
+    build = SubElement(model, f"{{{_THREEMF_NS}}}build")
+    SubElement(build, f"{{{_THREEMF_NS}}}item", attrib={"objectid": "1"})
+    model_xml = tostring(model, encoding="utf-8", xml_declaration=True)
+    content_types = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+        '<Default Extension="rels" '
+        'ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+        '<Default Extension="model" '
+        'ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/>'
+        "</Types>"
+    )
+    relationships = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        '<Relationship Target="/3D/3dmodel.model" Id="rel0" '
+        'Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/>'
+        "</Relationships>"
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("[Content_Types].xml", content_types)
+        archive.writestr("_rels/.rels", relationships)
+        archive.writestr("3D/3dmodel.model", model_xml)
+    if not path.exists() or path.stat().st_size == 0:
+        raise RuntimeError("3MF export produced an empty artifact.")
+    with path.open("rb") as handle:
+        if handle.read(2) != b"PK":
+            raise RuntimeError("3MF export did not produce a ZIP-based package.")
+
+
+def _delivery_format_notes(fmt: str) -> str:
+    if fmt == "fbx":
+        return FBX_GEOMETRY_NOTES
+    if fmt == "usdz":
+        return USDZ_GEOMETRY_NOTES
+    if fmt == "3mf":
+        return THREEMF_GEOMETRY_NOTES
+    return BLEND_UNAVAILABLE_NOTES
+
+
 def write_usdz(mesh: SimpleMesh, path: Path) -> None:
     if not usd_core_available():
         raise RuntimeError(USDZ_UNAVAILABLE_NOTES)
@@ -165,8 +248,15 @@ def build_delivery_formats_block(
                 "notes": USDZ_UNAVAILABLE_NOTES,
             }
             continue
+        if fmt == "blend":
+            blocks[fmt] = {
+                "available": False,
+                "exported": False,
+                "notes": BLEND_UNAVAILABLE_NOTES,
+            }
+            continue
         exported = fmt in exported_keys
-        notes = FBX_GEOMETRY_NOTES if fmt == "fbx" else USDZ_GEOMETRY_NOTES
+        notes = _delivery_format_notes(fmt)
         blocks[fmt] = {
             "available": True,
             "exported": exported,

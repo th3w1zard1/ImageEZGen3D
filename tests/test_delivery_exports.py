@@ -3,12 +3,15 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 from imageezgen3d.delivery_exports import (
+    BLEND_UNAVAILABLE_NOTES,
     build_delivery_formats_block,
     usd_core_available,
     validate_delivery_formats_manifest,
+    write_3mf,
     write_fbx,
     write_usdz,
 )
@@ -35,6 +38,16 @@ class DeliveryExportTests(unittest.TestCase):
             path = Path(directory) / "mesh.usdz"
             write_usdz(mesh, path)
             self.assertEqual(path.read_bytes()[:2], b"PK")
+
+    def test_write_3mf_produces_zip_with_model_part(self) -> None:
+        mesh = make_box_mesh(1.0, 1.0, 1.0, (0.2, 0.4, 0.6, 1.0))
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "mesh.3mf"
+            write_3mf(mesh, path)
+            self.assertEqual(path.read_bytes()[:2], b"PK")
+            with zipfile.ZipFile(path) as archive:
+                names = archive.namelist()
+            self.assertIn("3D/3dmodel.model", names)
 
     def test_export_all_respects_format_subset(self) -> None:
         mesh = make_box_mesh(1.0, 1.0, 1.0, (1.0, 1.0, 1.0, 1.0))
@@ -100,6 +113,31 @@ class DeliveryExportTests(unittest.TestCase):
             self.assertTrue(block["usdz"]["available"])
         else:
             self.assertFalse(block["usdz"]["available"])
+
+    def test_build_delivery_formats_block_marks_blend_unavailable(self) -> None:
+        block = build_delivery_formats_block(
+            adapter="cpu-demo",
+            exported_keys={"glb", "3mf"},
+            requested_formats=("glb", "3mf", "blend"),
+        )
+        self.assertTrue(block["3mf"]["exported"])
+        self.assertFalse(block["blend"]["available"])
+        self.assertFalse(block["blend"]["exported"])
+        self.assertIn("Blender", block["blend"]["notes"])
+        self.assertEqual(block["blend"]["notes"], BLEND_UNAVAILABLE_NOTES)
+
+    def test_export_all_writes_3mf_when_requested(self) -> None:
+        mesh = make_box_mesh(1.0, 1.0, 1.0, (1.0, 1.0, 1.0, 1.0))
+        with tempfile.TemporaryDirectory() as directory:
+            paths = export_all(
+                mesh,
+                Path(directory),
+                stem="mesh",
+                formats=("glb", "3mf"),
+            )
+            self.assertIn("3mf", paths)
+            self.assertEqual(paths["3mf"].read_bytes()[:2], b"PK")
+            self.assertNotIn("blend", paths)
 
     def test_validate_delivery_formats_manifest_requires_exported_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
