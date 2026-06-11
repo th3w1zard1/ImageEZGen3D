@@ -9,6 +9,7 @@ from .export_tiers import build_export_sidecar
 from .exporters import SimpleMesh, export_all, mesh_topology
 from .config import load_config
 from .generation_pipeline import PipelineStageTracker
+from .generation_pipeline import lane_exports_reference_pbr_maps
 from .mesh_decimation import decimate_mesh
 from .pbr_map_exports import (
     REFERENCE_PBR_NOTES,
@@ -56,14 +57,19 @@ def finalize_hunyuan_exports(
     export_mesh, decimation_meta = decimate_mesh(mesh, request.decimation_target)
     vertex_count, face_count = mesh_topology(export_mesh)
     export_dir = request.run_dir / "exports"
-    base_color_image = resolve_base_color_image(
-        export_mesh.color,
-        b64_image=export_mesh.b64_image,
-    )
-    pbr_written, pbr_sidecar_paths = write_reference_pbr_maps(
-        export_dir,
-        base_color_image=base_color_image,
-    )
+    pbr_written: dict[str, Path] = {}
+    pbr_sidecar_paths: dict[str, str] | None = None
+    pbr_available = False
+    if lane_exports_reference_pbr_maps(request.lane):
+        base_color_image = resolve_base_color_image(
+            export_mesh.color,
+            b64_image=export_mesh.b64_image,
+        )
+        pbr_written, pbr_sidecar_paths = write_reference_pbr_maps(
+            export_dir,
+            base_color_image=base_color_image,
+        )
+        pbr_available = True
     sidecar = build_export_sidecar(
         quality=request.quality,
         decimation_target=request.decimation_target,
@@ -72,9 +78,9 @@ def finalize_hunyuan_exports(
         adapter=HUNYUAN_ADAPTER,
         decimation=decimation_meta,
         raw_exported=raw_mesh is not None,
-        pbr_available=True,
+        pbr_available=pbr_available,
         pbr_map_paths=pbr_sidecar_paths,
-        pbr_notes=REFERENCE_PBR_NOTES,
+        pbr_notes=REFERENCE_PBR_NOTES if pbr_available else None,
     )
     paths = export_all(
         export_mesh,

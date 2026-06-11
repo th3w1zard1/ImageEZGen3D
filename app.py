@@ -230,6 +230,8 @@ _TEXT_PROMPT_TEMPLATES = (
 _LANE_GUIDANCE = {
     "draft": "Fast preview lane for first-pass geometry and workflow validation.",
     "production": "Higher-fidelity lane with more decimation budget when adapters support it.",
+    "preview": "Meshy-style preview pass — lightweight GLB/OBJ geometry without PBR maps.",
+    "refine": "Meshy-style refine pass — full exports with reference texture and PBR maps.",
 }
 
 
@@ -854,7 +856,7 @@ def build_demo():
                                     )
                                     generation_lane = gr.Radio(
                                         label="Generation lane",
-                                        choices=["draft", "production"],
+                                        choices=["draft", "production", "preview", "refine"],
                                         value="draft",
                                         info="Draft is fastest; production maps to a higher export tier.",
                                         elem_classes="composer-control generation-lane",

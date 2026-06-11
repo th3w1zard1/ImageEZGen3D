@@ -24,6 +24,8 @@ _BACKEND_LABELS: dict[str, str] = {
 _LANE_GUIDANCE: dict[str, str] = {
     "draft": "Fast preview lane — concept geometry and capture validation.",
     "production": "Higher-fidelity lane — more detail and decimation budget when supported.",
+    "preview": "Meshy-style preview pass — lightweight GLB/OBJ geometry without PBR maps.",
+    "refine": "Meshy-style refine pass — full exports with reference texture and PBR maps.",
 }
 
 

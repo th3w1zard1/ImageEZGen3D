@@ -18,6 +18,10 @@ from .generation_pipeline import (
     TEXT_STUB_DISCLAIMER,
     build_pipeline_spec,
     decimation_target_for_spec,
+    finalize_pipeline_stages_for_lane,
+    is_preview_lane,
+    preview_lane_export_formats,
+    workflow_phase_for_lane,
 )
 from .mesh_checks import inspect_artifacts
 from .preprocess import save_input_bundle
@@ -254,6 +258,8 @@ class ImageEZOrchestrator:
                 target_formats,
                 self.config.exports.formats,
             )
+        elif is_preview_lane(pipeline_spec.lane):
+            export_formats = preview_lane_export_formats(self.config.exports.formats)
         stage_tracker = PipelineStageTracker()
         manifest.stage = "preprocessing"
         manifest.parameters = {
@@ -266,6 +272,7 @@ class ImageEZOrchestrator:
             "seed": seed or self.config.generation.seed,
             "runtime": runtime_status(self.config).__dict__,
             "generation": pipeline_spec.to_manifest_dict(),
+            "workflow_phase": workflow_phase_for_lane(pipeline_spec.lane),
         }
         if target_formats:
             manifest.parameters["target_formats"] = [
@@ -381,9 +388,21 @@ class ImageEZOrchestrator:
             if isinstance(reported_stages, list) and reported_stages:
                 stage_tracker.apply_stage_snapshot(reported_stages)
             else:
-                stage_tracker.mark_shape_succeeded(
-                    adapter_key,
-                    notes=str(result.metadata.get("adapter_note", "")),
+                sidecar_path = result.artifacts.get("export_sidecar")
+                pbr_available = False
+                if sidecar_path is not None and Path(sidecar_path).is_file():
+                    sidecar_payload = json.loads(
+                        Path(sidecar_path).read_text(encoding="utf-8")
+                    )
+                    delivery = sidecar_payload.get("pbr_delivery")
+                    if isinstance(delivery, dict):
+                        pbr_available = delivery.get("pbr_available") is True
+                finalize_pipeline_stages_for_lane(
+                    stage_tracker,
+                    lane=pipeline_spec.lane,
+                    adapter=adapter_key,
+                    adapter_note=str(result.metadata.get("adapter_note", "")),
+                    pbr_available=pbr_available,
                 )
             for key, path in result.artifacts.items():
                 self.store.record_artifact(manifest, key, path)

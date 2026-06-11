@@ -186,6 +186,57 @@ class CpuDemoTests(unittest.TestCase):
             self.assertEqual(stages["pbr"]["status"], "succeeded")
             self.assertIn("Reference PBR", stages["pbr"]["notes"])
 
+    def test_preview_lane_omits_pbr_maps_and_skips_texture_stage(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            config = AppConfig(
+                app=AppSettings(output_dir=Path(directory)),
+                storage=StorageSettings(retention_runs=10),
+            )
+            orchestrator = ImageEZOrchestrator(config)
+            image = Image.new("RGBA", (640, 640), (40, 120, 180, 255))
+            result = orchestrator.generate(
+                image,
+                adapter_name="cpu-demo",
+                lane="preview",
+                seed=4,
+            )
+            artifacts = result["artifacts"]
+            self.assertIn("glb", artifacts)
+            self.assertIn("obj", artifacts)
+            self.assertNotIn("fbx", artifacts)
+            self.assertNotIn("pbr_base_color", artifacts)
+            self.assertEqual(result["parameters"]["workflow_phase"], "preview")
+            stages = {
+                item["name"]: item
+                for item in result["parameters"]["generation"]["pipeline_stages"]
+            }
+            self.assertEqual(stages["texture"]["status"], "skipped")
+            self.assertEqual(stages["pbr"]["status"], "skipped")
+
+    def test_refine_lane_exports_pbr_maps_and_texture_stage(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            config = AppConfig(
+                app=AppSettings(output_dir=Path(directory)),
+                storage=StorageSettings(retention_runs=10),
+            )
+            orchestrator = ImageEZOrchestrator(config)
+            image = Image.new("RGBA", (640, 640), (40, 120, 180, 255))
+            result = orchestrator.generate(
+                image,
+                adapter_name="cpu-demo",
+                lane="refine",
+                seed=5,
+            )
+            artifacts = result["artifacts"]
+            self.assertIn("pbr_base_color", artifacts)
+            self.assertEqual(result["parameters"]["workflow_phase"], "refine")
+            stages = {
+                item["name"]: item
+                for item in result["parameters"]["generation"]["pipeline_stages"]
+            }
+            self.assertEqual(stages["texture"]["status"], "succeeded")
+            self.assertEqual(stages["pbr"]["status"], "succeeded")
+
     def test_mesh_check_validates_glb_header(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             config = AppConfig(app=AppSettings(output_dir=Path(directory)))

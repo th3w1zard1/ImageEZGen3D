@@ -5,6 +5,8 @@ import unittest
 from imageezgen3d.generation_pipeline import (
     PipelineStageTracker,
     build_pipeline_spec,
+    finalize_pipeline_stages_for_lane,
+    preview_lane_export_formats,
     resolve_lane_and_quality,
 )
 
@@ -25,6 +27,50 @@ class GenerationPipelineTests(unittest.TestCase):
         self.assertEqual(lane, "production")
         self.assertEqual(quality, "high")
 
+    def test_preview_lane_defaults_to_draft_quality(self) -> None:
+        lane, quality = resolve_lane_and_quality(lane="preview", quality=None)
+        self.assertEqual(lane, "preview")
+        self.assertEqual(quality, "draft")
+
+    def test_refine_lane_defaults_to_balanced_quality(self) -> None:
+        lane, quality = resolve_lane_and_quality(lane="refine", quality=None)
+        self.assertEqual(lane, "refine")
+        self.assertEqual(quality, "balanced")
+
+    def test_preview_lane_export_formats_subset(self) -> None:
+        formats = preview_lane_export_formats(
+            ("glb", "obj", "ply", "stl", "fbx", "usdz", "3mf")
+        )
+        self.assertEqual(formats, ("glb", "obj"))
+
+    def test_finalize_preview_lane_skips_texture_and_pbr(self) -> None:
+        tracker = PipelineStageTracker()
+        finalize_pipeline_stages_for_lane(
+            tracker,
+            lane="preview",
+            adapter="cpu-demo",
+            adapter_note="preview mesh",
+            pbr_available=False,
+        )
+        stages = {item["name"]: item for item in tracker.to_list()}
+        self.assertEqual(stages["shape"]["status"], "succeeded")
+        self.assertEqual(stages["texture"]["status"], "skipped")
+        self.assertEqual(stages["pbr"]["status"], "skipped")
+        self.assertIn("refine lane", stages["texture"]["notes"].lower())
+
+    def test_finalize_refine_lane_marks_texture_when_pbr_available(self) -> None:
+        tracker = PipelineStageTracker()
+        finalize_pipeline_stages_for_lane(
+            tracker,
+            lane="refine",
+            adapter="cpu-demo",
+            adapter_note="refine mesh",
+            pbr_available=True,
+        )
+        stages = {item["name"]: item for item in tracker.to_list()}
+        self.assertEqual(stages["texture"]["status"], "succeeded")
+        self.assertEqual(stages["pbr"]["status"], "pending")
+
     def test_text_modality_requires_prompt(self) -> None:
         with self.assertRaisesRegex(ValueError, "text prompt"):
             build_pipeline_spec(
@@ -44,7 +90,7 @@ class GenerationPipelineTests(unittest.TestCase):
         stages = {item["name"]: item["status"] for item in tracker.to_list()}
         self.assertEqual(stages["shape"], "succeeded")
         self.assertEqual(stages["texture"], "succeeded")
-        self.assertEqual(stages["pbr"], "skipped")
+        self.assertEqual(stages["pbr"], "pending")
         self.assertEqual(stages["export"], "succeeded")
 
     def test_apply_stage_snapshot_replaces_tracker_state(self) -> None:

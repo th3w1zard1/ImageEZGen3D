@@ -75,7 +75,7 @@ class HunyuanInferenceTests(unittest.TestCase):
             stages = {item["name"]: item["status"] for item in result.pipeline_stages}
             self.assertEqual(stages["shape"], "succeeded")
             self.assertEqual(stages["texture"], "succeeded")
-            self.assertEqual(stages["pbr"], "skipped")
+            self.assertEqual(stages["pbr"], "pending")
             self.assertTrue(result.artifacts["glb"].exists())
 
     def test_finalize_includes_export_sidecar(self) -> None:
