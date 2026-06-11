@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import hashlib
+from pathlib import Path
 
 from .base import AdapterCapabilities, GenerationRequest, GenerationResult
 from ..config import load_config
 from ..export_tiers import build_export_sidecar
 from ..exporters import export_all, make_box_mesh, mesh_topology
-from ..generation_pipeline import TEXT_STUB_DISCLAIMER
+from ..generation_pipeline import TEXT_STUB_DISCLAIMER, lane_exports_reference_pbr_maps
 from ..mesh_decimation import decimate_mesh
 from ..pbr_map_exports import (
     REFERENCE_PBR_NOTES,
@@ -54,11 +55,16 @@ class TextDemoAdapter:
         export_mesh, decimation_meta = decimate_mesh(mesh, request.decimation_target)
         vertex_count, face_count = mesh_topology(export_mesh)
         export_dir = request.run_dir / "exports"
-        base_color_image = resolve_base_color_image(color)
-        _pbr_written, pbr_sidecar_paths = write_reference_pbr_maps(
-            export_dir,
-            base_color_image=base_color_image,
-        )
+        pbr_written: dict[str, Path] = {}
+        pbr_sidecar_paths: dict[str, str] | None = None
+        pbr_available = False
+        if lane_exports_reference_pbr_maps(request.lane):
+            base_color_image = resolve_base_color_image(color)
+            pbr_written, pbr_sidecar_paths = write_reference_pbr_maps(
+                export_dir,
+                base_color_image=base_color_image,
+            )
+            pbr_available = True
         sidecar = build_export_sidecar(
             quality=request.quality,
             decimation_target=request.decimation_target,
@@ -67,9 +73,9 @@ class TextDemoAdapter:
             adapter=self.capabilities.name,
             decimation=decimation_meta,
             raw_exported=False,
-            pbr_available=True,
+            pbr_available=pbr_available,
             pbr_map_paths=pbr_sidecar_paths,
-            pbr_notes=REFERENCE_PBR_NOTES,
+            pbr_notes=REFERENCE_PBR_NOTES if pbr_available else None,
         )
         paths = export_all(
             export_mesh,
@@ -78,7 +84,7 @@ class TextDemoAdapter:
             export_sidecar=sidecar,
             formats=request.export_formats or load_config().exports.formats,
         )
-        paths.update(pbr_manifest_artifacts(_pbr_written))
+        paths.update(pbr_manifest_artifacts(pbr_written))
         return GenerationResult(
             adapter=self.capabilities.name,
             artifacts=paths,

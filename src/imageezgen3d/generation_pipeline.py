@@ -6,9 +6,18 @@ from typing import Any, Literal
 from .export_tiers import DECIMATION_TARGET_BY_QUALITY, resolve_decimation_target
 
 InputModality = Literal["image", "text"]
-GenerationLane = Literal["draft", "production"]
+GenerationLane = Literal["draft", "production", "preview", "refine"]
 StageName = Literal["shape", "texture", "pbr", "export"]
 StageStatus = Literal["pending", "running", "succeeded", "skipped", "failed"]
+
+PREVIEW_LANE_EXPORT_FORMATS: tuple[str, ...] = ("glb", "obj")
+PREVIEW_LANE_TEXTURE_NOTE = (
+    "Preview lane — submit a refine lane job for texture and PBR map delivery."
+)
+PREVIEW_LANE_PBR_NOTE = "Preview lane — PBR maps deferred to refine lane."
+REFINE_LANE_TEXTURE_NOTE = (
+    "Refine lane — reference texture maps exported for metallic-roughness delivery."
+)
 
 TEXT_STUB_DISCLAIMER = (
     "Text-to-3D preview only — this run uses the text-demo stub adapter and does not "
@@ -30,6 +39,7 @@ class GenerationPipelineSpec:
         return {
             "input_modality": self.input_modality,
             "lane": self.lane,
+            "workflow_phase": workflow_phase_for_lane(self.lane),
             "prompt_text": self.prompt_text,
             "quality": self.quality,
             "async_capable": self.async_capable,
@@ -51,19 +61,96 @@ def resolve_lane_and_quality(
     default_quality: str = "draft",
 ) -> tuple[GenerationLane, str]:
     normalized_lane = (lane or "draft").strip().lower()
+    explicit_quality = (quality or "").strip().lower()
+
+    if normalized_lane == "preview":
+        lane_value: GenerationLane = "preview"
+        if explicit_quality in DECIMATION_TARGET_BY_QUALITY:
+            return lane_value, explicit_quality
+        return lane_value, "draft"
+
+    if normalized_lane == "refine":
+        lane_value = "refine"
+        if explicit_quality in DECIMATION_TARGET_BY_QUALITY:
+            return lane_value, explicit_quality
+        return lane_value, "balanced"
+
     if normalized_lane not in ("draft", "production"):
         normalized_lane = "draft"
-    lane_value: GenerationLane = (
-        "production" if normalized_lane == "production" else "draft"
-    )
+    lane_value = "production" if normalized_lane == "production" else "draft"
 
-    explicit_quality = (quality or "").strip().lower()
     if explicit_quality in DECIMATION_TARGET_BY_QUALITY:
         return lane_value, explicit_quality
 
     if lane_value == "production":
         return lane_value, "balanced"
     return lane_value, default_quality
+
+
+def normalize_lane_name(lane: str | None) -> str:
+    return (lane or "draft").strip().lower()
+
+
+def is_preview_lane(lane: str | None) -> bool:
+    return normalize_lane_name(lane) == "preview"
+
+
+def is_refine_lane(lane: str | None) -> bool:
+    return normalize_lane_name(lane) == "refine"
+
+
+def workflow_phase_for_lane(lane: str | None) -> str:
+    normalized = normalize_lane_name(lane)
+    if normalized == "preview":
+        return "preview"
+    if normalized == "refine":
+        return "refine"
+    return "single_pass"
+
+
+def preview_lane_export_formats(
+    configured_formats: tuple[str, ...],
+) -> tuple[str, ...]:
+    configured = {fmt.strip().lower() for fmt in configured_formats if fmt.strip()}
+    selected = tuple(
+        fmt for fmt in PREVIEW_LANE_EXPORT_FORMATS if fmt in configured
+    )
+    return selected or ("glb",)
+
+
+def lane_exports_reference_pbr_maps(lane: str | None) -> bool:
+    return not is_preview_lane(lane)
+
+
+def finalize_pipeline_stages_for_lane(
+    tracker: PipelineStageTracker,
+    *,
+    lane: str,
+    adapter: str,
+    adapter_note: str,
+    pbr_available: bool,
+) -> None:
+    """Apply Meshy-style preview/refine stage semantics after shape export."""
+    if is_preview_lane(lane):
+        tracker.mark_shape_succeeded_staged(adapter, notes=adapter_note)
+        tracker.set_stage("texture", "skipped", notes=PREVIEW_LANE_TEXTURE_NOTE)
+        tracker.set_stage("pbr", "skipped", notes=PREVIEW_LANE_PBR_NOTE)
+        return
+
+    if is_refine_lane(lane):
+        tracker.mark_shape_succeeded_staged(adapter, notes=adapter_note)
+        tracker.mark_texture_running(adapter)
+        if pbr_available:
+            tracker.mark_texture_succeeded(adapter, notes=REFINE_LANE_TEXTURE_NOTE)
+        else:
+            tracker.set_stage(
+                "texture",
+                "skipped",
+                notes="Refine lane requested texture delivery but maps were not exported.",
+            )
+        return
+
+    tracker.mark_shape_succeeded(adapter, notes=adapter_note)
 
 
 def build_pipeline_spec(
@@ -144,11 +231,6 @@ class PipelineStageTracker:
 
     def mark_texture_succeeded(self, adapter: str, *, notes: str = "") -> None:
         self.set_stage("texture", "succeeded", adapter=adapter, notes=notes)
-        self.set_stage(
-            "pbr",
-            "skipped",
-            notes="PBR map sidecar export deferred to Phase C.",
-        )
 
     def mark_texture_failed(self, adapter: str, *, notes: str) -> None:
         self.set_stage("texture", "failed", adapter=adapter, notes=notes)

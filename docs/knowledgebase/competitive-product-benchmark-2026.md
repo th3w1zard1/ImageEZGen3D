@@ -344,7 +344,7 @@ ImageEZGen3D manifest `generation.pipeline_stages` (`shape`, `texture`, `pbr`, `
 2. ~~Export PBR map files (reference pack on demo adapters)~~ — **Phase S landed**; neural paint maps remain G7/G8 operational track.
 3. ~~PBR map sidecar + FBX/USDZ export tier~~ — **FBX/USDZ landed** (Plans 180–183); golden/hosted attestation expansion in progress (Phase N/O).
 4. Neural text-to-3D adapter behind the same contract as `text-demo`.
-5. Preview → refine two-stage lanes (Meshy preview/refine split).
+5. ~~Preview → refine two-stage lanes (Meshy preview/refine split)~~ — **Phase T landed** (preview/refine orchestrator lanes).
 
 ### Tier 2–3 (near-term / frontier)
 
