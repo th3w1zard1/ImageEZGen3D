@@ -21,7 +21,7 @@ class TextDemoAdapter:
         zerogpu_ready=False,
         configured=True,
         supports_multi_view=False,
-        outputs=("glb", "obj", "ply", "stl", "fbx", "usdz"),
+        outputs=("glb", "obj", "ply", "stl", "fbx", "usdz", "3mf"),
         notes="Procedural text-to-3D stub for workflow proof until a licensed neural adapter ships.",
     )
 

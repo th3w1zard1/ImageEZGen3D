@@ -10,6 +10,7 @@ from .delivery_exports import (
     build_delivery_formats_block,
     resolve_export_formats,
     usd_core_available,
+    write_3mf,
     write_fbx,
     write_usdz,
 )
@@ -279,6 +280,8 @@ def export_all(
         paths["fbx"] = directory / f"{stem}.fbx"
     if "usdz" in requested_formats and usd_core_available():
         paths["usdz"] = directory / f"{stem}.usdz"
+    if "3mf" in requested_formats:
+        paths["3mf"] = directory / f"{stem}.3mf"
 
     if raw_mesh is not None:
         raw_path = directory / f"{stem}.raw.glb"
@@ -297,6 +300,8 @@ def export_all(
         write_fbx(mesh, paths["fbx"])
     if "usdz" in paths:
         write_usdz(mesh, paths["usdz"])
+    if "3mf" in paths:
+        write_3mf(mesh, paths["3mf"])
 
     if export_sidecar is not None:
         adapter = str(export_sidecar.get("adapter") or "unknown")
