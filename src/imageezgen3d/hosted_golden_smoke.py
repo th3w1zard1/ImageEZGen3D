@@ -120,6 +120,85 @@ _GENERATE_USDZ_INDEX = 8
 _GENERATE_EXPORT_SIDECAR_INDEX = 9
 _GENERATE_RAW_GLB_INDEX = 10
 _GENERATE_BACKEND_RAIL_INDEX = 15
+_MIN_DELIVERY_ARTIFACT_BYTES = {
+    "fbx": 200,
+    "usdz": 100,
+}
+
+
+def resolve_hosted_required_delivery_artifact_keys(
+    sidecar_payload: dict[str, Any] | None,
+) -> tuple[str, ...]:
+    """Return delivery artifact keys required for hosted manifest validation."""
+    if sidecar_payload is None:
+        return ()
+    delivery = sidecar_payload.get("delivery_formats")
+    if not isinstance(delivery, dict):
+        return ()
+    keys: list[str] = []
+    fbx_block = delivery.get("fbx")
+    if isinstance(fbx_block, dict):
+        if fbx_block.get("exported") is True or fbx_block.get("available") is True:
+            keys.append("fbx")
+    usdz_block = delivery.get("usdz")
+    if isinstance(usdz_block, dict) and usdz_block.get("available") is True:
+        keys.append("usdz")
+    return tuple(keys)
+
+
+def _validate_required_delivery_artifact_keys(
+    artifacts: dict[str, Any],
+    sidecar_payload: dict[str, Any] | None,
+) -> list[str]:
+    issues: list[str] = []
+    for key in resolve_hosted_required_delivery_artifact_keys(sidecar_payload):
+        path_value = artifacts.get(key)
+        if not path_value:
+            issues.append(f"Manifest artifacts missing {key} key")
+            continue
+        path = Path(str(path_value))
+        if not path.is_file():
+            issues.append(f"Manifest {key} artifact path missing on disk: {path}")
+            continue
+        size = path.stat().st_size
+        minimum = _MIN_DELIVERY_ARTIFACT_BYTES.get(key, 1)
+        if size < minimum:
+            issues.append(
+                f"Manifest {key} artifact too small ({size} bytes, minimum {minimum})"
+            )
+    return issues
+
+
+def _validate_generate_delivery_output_paths(
+    result: tuple[Any, ...] | list[Any],
+    *,
+    required_keys: tuple[str, ...],
+) -> list[str]:
+    issues: list[str] = []
+    index_by_key = {
+        "fbx": _GENERATE_FBX_INDEX,
+        "usdz": _GENERATE_USDZ_INDEX,
+    }
+    for key in required_keys:
+        index = index_by_key.get(key)
+        if index is None or len(result) <= index:
+            issues.append(f"Generate response missing {key.upper()} output slot")
+            continue
+        path_value = result[index]
+        if path_value in (None, ""):
+            issues.append(f"Generate response missing {key.upper()} file path")
+            continue
+        path = Path(str(path_value))
+        if not path.is_file():
+            issues.append(f"Generate response {key.upper()} path missing on disk: {path}")
+            continue
+        minimum = _MIN_DELIVERY_ARTIFACT_BYTES.get(key, 1)
+        if path.stat().st_size < minimum:
+            issues.append(
+                f"Generate response {key.upper()} file too small "
+                f"({path.stat().st_size} bytes, minimum {minimum})"
+            )
+    return issues
 
 
 def _validate_export_sidecar_decimation(
@@ -238,6 +317,9 @@ def validate_run_manifest(
         issues.extend(
             validate_delivery_formats_manifest(artifacts, sidecar_payload)
         )
+        issues.extend(
+            _validate_required_delivery_artifact_keys(artifacts, sidecar_payload)
+        )
 
     return issues
 
@@ -329,6 +411,26 @@ def run_hosted_golden_smoke(
                     sidecar_path=sidecar_path,
                 )
             )
+            resolved_sidecar = sidecar_path
+            if resolved_sidecar is None and manifest_path.is_file():
+                manifest_payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+                artifacts_obj = manifest_payload.get("artifacts")
+                if isinstance(artifacts_obj, dict):
+                    resolved_sidecar = _resolve_export_sidecar_path(
+                        artifacts_obj,
+                        None,
+                    )
+            sidecar_payload, _ = _load_export_sidecar_payload(resolved_sidecar)
+            required_delivery_keys = resolve_hosted_required_delivery_artifact_keys(
+                sidecar_payload
+            )
+            if required_delivery_keys:
+                issues.extend(
+                    _validate_generate_delivery_output_paths(
+                        result,
+                        required_keys=required_delivery_keys,
+                    )
+                )
         else:
             issues.append("Generate response missing manifest file path")
 

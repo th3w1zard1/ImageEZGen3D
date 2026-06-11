@@ -282,7 +282,7 @@ class HostedExportTierSmokeTests(unittest.TestCase):
             manifest_path = Path(directory) / "manifest.json"
             sidecar_path = Path(directory) / "mesh.export.json"
             fbx_path = Path(directory) / "mesh.fbx"
-            fbx_path.write_text("FBXVersion: 7400", encoding="utf-8")
+            fbx_path.write_text("FBXVersion: 7400\n" + ("x" * 200), encoding="utf-8")
             sidecar_path.write_text(
                 json.dumps(
                     {
@@ -318,6 +318,89 @@ class HostedExportTierSmokeTests(unittest.TestCase):
                 sidecar_path=sidecar_path,
             )
             self.assertEqual(issues, [])
+
+    def test_validate_run_manifest_requires_fbx_when_delivery_formats_present(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            manifest_path = Path(directory) / "manifest.json"
+            sidecar_path = Path(directory) / "mesh.export.json"
+            sidecar_path.write_text(
+                json.dumps(
+                    {
+                        "delivery_formats": {
+                            "fbx": {"exported": True, "available": True},
+                            "usdz": {"exported": False, "available": False},
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "artifacts": {
+                            "export_sidecar": str(sidecar_path),
+                            "glb": str(Path(directory) / "mesh.glb"),
+                        },
+                        "parameters": {
+                            "decimation_target": 25_000,
+                            "raw_exported": False,
+                            "decimation_applied": False,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            issues = validate_run_manifest(
+                manifest_path,
+                quality="draft",
+                expect_raw=False,
+                sidecar_path=sidecar_path,
+            )
+            self.assertTrue(any("missing fbx" in issue.lower() for issue in issues))
+
+    def test_validate_run_manifest_requires_usdz_when_available(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            manifest_path = Path(directory) / "manifest.json"
+            sidecar_path = Path(directory) / "mesh.export.json"
+            fbx_path = Path(directory) / "mesh.fbx"
+            fbx_path.write_text("FBXVersion: 7400" * 20, encoding="utf-8")
+            sidecar_path.write_text(
+                json.dumps(
+                    {
+                        "delivery_formats": {
+                            "fbx": {"exported": True, "available": True},
+                            "usdz": {"exported": True, "available": True},
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "artifacts": {
+                            "export_sidecar": str(sidecar_path),
+                            "glb": str(Path(directory) / "mesh.glb"),
+                            "fbx": str(fbx_path),
+                        },
+                        "parameters": {
+                            "decimation_target": 25_000,
+                            "raw_exported": False,
+                            "decimation_applied": False,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            issues = validate_run_manifest(
+                manifest_path,
+                quality="draft",
+                expect_raw=False,
+                sidecar_path=sidecar_path,
+            )
+            self.assertTrue(any("missing usdz" in issue.lower() for issue in issues))
 
 
 if __name__ == "__main__":
