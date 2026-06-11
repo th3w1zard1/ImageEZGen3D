@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+from pathlib import Path
 
 from .base import AdapterCapabilities, GenerationRequest, GenerationResult
 from ..config import load_config
