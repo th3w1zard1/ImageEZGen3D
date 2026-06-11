@@ -35,7 +35,14 @@ from imageezgen3d.jobs.gradio_bridge import (  # noqa: E402
 )
 from imageezgen3d.preprocess import normalize_image, validate_image  # noqa: E402
 from imageezgen3d.runtime import running_on_hugging_face_space  # noqa: E402
-from imageezgen3d.storage import RunStore  # noqa: E402
+from imageezgen3d.gradio_artifact_layout import (  # noqa: E402
+    UI_ARTIFACT_LABELS,
+    artifact_download_values,
+    resolve_artifact_row_layout,
+    resolve_gradio_download_keys,
+    session_artifact_values,
+    sync_session_artifact_keys,
+)
 
 
 _EXAMPLE_SPECS = (
@@ -786,6 +793,8 @@ def build_demo():
         raise RuntimeError(f"Gradio is not installed: {GRADIO_IMPORT_ERROR}")
 
     config = load_config()
+    download_keys = resolve_gradio_download_keys(config.exports.formats)
+    artifact_row_layout = resolve_artifact_row_layout(config.exports.formats)
     orchestrator = ImageEZOrchestrator(config)
     job_service = JobService(config)
     backend_choices = orchestrator.adapter_choices()
@@ -1104,50 +1113,27 @@ def build_demo():
                                     "Manifest, meshes, and ZIP stay tied to the run, with nothing shown early and nothing faked.",
                                 )
                             )
-                            with gr.Row(
-                                equal_height=False, elem_classes="artifact-row"
-                            ):
-                                manifest_file = gr.File(
-                                    label="Manifest", elem_classes="artifact-file"
-                                )
-                                glb_file = gr.File(
-                                    label="GLB", elem_classes="artifact-file"
-                                )
-                                obj_file = gr.File(
-                                    label="OBJ", elem_classes="artifact-file"
-                                )
-                            with gr.Row(
-                                equal_height=False, elem_classes="artifact-row"
-                            ):
-                                ply_file = gr.File(
-                                    label="PLY", elem_classes="artifact-file"
-                                )
-                                stl_file = gr.File(
-                                    label="STL", elem_classes="artifact-file"
-                                )
-                            with gr.Row(
-                                equal_height=False, elem_classes="artifact-row"
-                            ):
-                                fbx_file = gr.File(
-                                    label="FBX", elem_classes="artifact-file"
-                                )
-                                usdz_file = gr.File(
-                                    label="USDZ", elem_classes="artifact-file"
-                                )
-                            with gr.Row(
-                                equal_height=False, elem_classes="artifact-row"
-                            ):
-                                export_sidecar_file = gr.File(
-                                    label="Export sidecar",
-                                    elem_classes="artifact-file",
-                                )
-                                raw_glb_file = gr.File(
-                                    label="RAW GLB", elem_classes="artifact-file"
-                                )
-                                bundle_file = gr.File(
-                                    label="All artifacts (ZIP)",
-                                    elem_classes="artifact-file",
-                                )
+                            create_artifact_files: dict[str, Any] = {}
+                            for row_keys in artifact_row_layout:
+                                with gr.Row(
+                                    equal_height=False, elem_classes="artifact-row"
+                                ):
+                                    for key in row_keys:
+                                        create_artifact_files[key] = gr.File(
+                                            label=UI_ARTIFACT_LABELS[key],
+                                            elem_classes="artifact-file",
+                                        )
+                            manifest_file = create_artifact_files["manifest"]
+                            glb_file = create_artifact_files["glb"]
+                            obj_file = create_artifact_files["obj"]
+                            ply_file = create_artifact_files["ply"]
+                            stl_file = create_artifact_files["stl"]
+                            threemf_file = create_artifact_files.get("3mf")
+                            fbx_file = create_artifact_files.get("fbx")
+                            usdz_file = create_artifact_files.get("usdz")
+                            export_sidecar_file = create_artifact_files["export_sidecar"]
+                            raw_glb_file = create_artifact_files["raw_glb"]
+                            bundle_file = create_artifact_files["bundle"]
 
             with gr.Tab("History"):
                 history_summary = gr.HTML(
@@ -1241,38 +1227,23 @@ def build_demo():
                                     "Everything stays attached to the selected run so comparison and rollback remain explicit.",
                                 )
                             )
-                            history_manifest = gr.File(
-                                label="Manifest", elem_classes="artifact-file"
-                            )
-                            history_glb = gr.File(
-                                label="GLB", elem_classes="artifact-file"
-                            )
-                            history_obj = gr.File(
-                                label="OBJ", elem_classes="artifact-file"
-                            )
-                            history_ply = gr.File(
-                                label="PLY", elem_classes="artifact-file"
-                            )
-                            history_stl = gr.File(
-                                label="STL", elem_classes="artifact-file"
-                            )
-                            history_fbx = gr.File(
-                                label="FBX", elem_classes="artifact-file"
-                            )
-                            history_usdz = gr.File(
-                                label="USDZ", elem_classes="artifact-file"
-                            )
-                            history_export_sidecar = gr.File(
-                                label="Export sidecar",
-                                elem_classes="artifact-file",
-                            )
-                            history_raw_glb = gr.File(
-                                label="RAW GLB", elem_classes="artifact-file"
-                            )
-                            history_bundle = gr.File(
-                                label="All artifacts (ZIP)",
-                                elem_classes="artifact-file",
-                            )
+                            history_artifact_files: dict[str, Any] = {}
+                            for key in download_keys:
+                                history_artifact_files[key] = gr.File(
+                                    label=UI_ARTIFACT_LABELS[key],
+                                    elem_classes="artifact-file",
+                                )
+                            history_manifest = history_artifact_files["manifest"]
+                            history_glb = history_artifact_files["glb"]
+                            history_obj = history_artifact_files["obj"]
+                            history_ply = history_artifact_files["ply"]
+                            history_stl = history_artifact_files["stl"]
+                            history_threemf = history_artifact_files.get("3mf")
+                            history_fbx = history_artifact_files.get("fbx")
+                            history_usdz = history_artifact_files.get("usdz")
+                            history_export_sidecar = history_artifact_files["export_sidecar"]
+                            history_raw_glb = history_artifact_files["raw_glb"]
+                            history_bundle = history_artifact_files["bundle"]
 
             with gr.Tab("Guide"):
                 with gr.Group(elem_classes="workspace-panel guide-panel"):
@@ -1401,22 +1372,14 @@ def build_demo():
             return markdown, str(json_path), str(report_path)
 
         def open_history_run(history_choice):
+            empty_artifacts = (None,) * len(download_keys)
             run_id = _selected_run_id(history_choice)
             if not run_id:
                 return (
                     None,
                     "",
                     "Select a run to inspect.",
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
+                    *empty_artifacts,
                 )
             try:
                 payload = orchestrator.store.read_manifest(run_id)
@@ -1425,16 +1388,7 @@ def build_demo():
                     None,
                     "",
                     _error_report(str(exc)),
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
+                    *empty_artifacts,
                 )
             artifacts = payload.get("artifacts", {})
             verified_artifacts, missing_keys = _verified_artifact_state(
@@ -1446,16 +1400,7 @@ def build_demo():
                     None,
                     _history_inspect_html(payload, missing_keys),
                     _stale_artifact_report(run_id, missing_keys),
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
+                    *empty_artifacts,
                 )
             bundle_path = orchestrator.store.archive_run(run_id)
             history_model_path = verified_artifacts.get(
@@ -1465,16 +1410,11 @@ def build_demo():
                 history_model_path,
                 _history_inspect_html(payload, missing_keys),
                 _format_report(payload),
-                verified_artifacts.get("manifest"),
-                verified_artifacts.get("glb"),
-                verified_artifacts.get("obj"),
-                verified_artifacts.get("ply"),
-                verified_artifacts.get("stl"),
-                verified_artifacts.get("fbx"),
-                verified_artifacts.get("usdz"),
-                verified_artifacts.get("export_sidecar"),
-                verified_artifacts.get("raw_glb"),
-                str(bundle_path),
+                *artifact_download_values(
+                    verified_artifacts,
+                    download_keys,
+                    bundle_path=str(bundle_path),
+                ),
             )
 
         def run_generate(
@@ -1547,16 +1487,7 @@ def build_demo():
                 return (
                     fallback_model,
                     _error_report(str(exc)),
-                    state.get("manifest"),
-                    state.get("glb"),
-                    state.get("obj"),
-                    state.get("ply"),
-                    state.get("stl"),
-                    state.get("fbx"),
-                    state.get("usdz"),
-                    state.get("export_sidecar"),
-                    state.get("raw_glb"),
-                    state.get("bundle"),
+                    *session_artifact_values(state, download_keys),
                     state,
                     history_dropdown,
                     history_compare_dropdown,
@@ -1580,16 +1511,7 @@ def build_demo():
                 return (
                     None,
                     _stale_artifact_report(result["run_id"], missing_keys),
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
+                    *((None,) * len(download_keys)),
                     state,
                     history_dropdown,
                     history_compare_dropdown,
@@ -1598,15 +1520,7 @@ def build_demo():
                     create_overview,
                 )
             state["model"] = artifacts.get("glb") or artifacts.get("obj")
-            state["manifest"] = artifacts.get("manifest")
-            state["glb"] = artifacts.get("glb")
-            state["obj"] = artifacts.get("obj")
-            state["ply"] = artifacts.get("ply")
-            state["stl"] = artifacts.get("stl")
-            state["fbx"] = artifacts.get("fbx")
-            state["usdz"] = artifacts.get("usdz")
-            state["export_sidecar"] = artifacts.get("export_sidecar")
-            state["raw_glb"] = artifacts.get("raw_glb")
+            sync_session_artifact_keys(state, artifacts, download_keys)
             state["bundle"] = str(orchestrator.store.archive_run(result["run_id"]))
             (
                 history_dropdown,
@@ -1618,16 +1532,11 @@ def build_demo():
             return (
                 state["model"],
                 _format_report(result),
-                state["manifest"],
-                state["glb"],
-                state["obj"],
-                state["ply"],
-                state["stl"],
-                state["fbx"],
-                state["usdz"],
-                state["export_sidecar"],
-                state["raw_glb"],
-                state["bundle"],
+                *artifact_download_values(
+                    artifacts,
+                    download_keys,
+                    bundle_path=state["bundle"],
+                ),
                 state,
                 history_dropdown,
                 history_compare_dropdown,
@@ -1704,16 +1613,7 @@ def build_demo():
             outputs=[
                 model,
                 status,
-                manifest_file,
-                glb_file,
-                obj_file,
-                ply_file,
-                stl_file,
-                fbx_file,
-                usdz_file,
-                export_sidecar_file,
-                raw_glb_file,
-                bundle_file,
+                *[create_artifact_files[key] for key in download_keys],
                 session_state,
                 history_run,
                 history_compare_run,
@@ -1751,16 +1651,7 @@ def build_demo():
                 history_model,
                 history_inspect,
                 history_status,
-                history_manifest,
-                history_glb,
-                history_obj,
-                history_ply,
-                history_stl,
-                history_fbx,
-                history_usdz,
-                history_export_sidecar,
-                history_raw_glb,
-                history_bundle,
+                *[history_artifact_files[key] for key in download_keys],
             ],
         )
 

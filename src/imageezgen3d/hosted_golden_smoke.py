@@ -7,9 +7,21 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .config import load_config
 from .delivery_exports import validate_delivery_formats_manifest
 from .export_tiers import resolve_decimation_target
+from .gradio_artifact_layout import generate_download_index, generate_output_indices
 from .hunyuan_g8_preflight import validate_g8_cpu_fallback_status
+
+_DEFAULT_EXPORT_FORMATS = load_config().exports.formats
+_GENERATE_OUTPUT_INDICES = generate_output_indices(_DEFAULT_EXPORT_FORMATS)
+_GENERATE_MANIFEST_INDEX = _GENERATE_OUTPUT_INDICES["manifest"]
+_GENERATE_FBX_INDEX = _GENERATE_OUTPUT_INDICES["fbx"]
+_GENERATE_USDZ_INDEX = _GENERATE_OUTPUT_INDICES["usdz"]
+_GENERATE_THREEMF_INDEX = _GENERATE_OUTPUT_INDICES.get("3mf")
+_GENERATE_EXPORT_SIDECAR_INDEX = _GENERATE_OUTPUT_INDICES["export_sidecar"]
+_GENERATE_RAW_GLB_INDEX = _GENERATE_OUTPUT_INDICES["raw_glb"]
+_GENERATE_BACKEND_RAIL_INDEX = _GENERATE_OUTPUT_INDICES["create_history_summary"]
 
 DEFAULT_SPACE_URL = "https://th3w1zard1-imageezgen3d.hf.space/"
 DEFAULT_SAMPLE_PATH = Path("assets/examples/teal_block.png")
@@ -111,18 +123,11 @@ def validate_backend_rail_html(html: str) -> list[str]:
     return issues
 
 
-# app.py generate.click outputs (Plan 181 FBX/USDZ slots):
-# 0 model, 1 status, 2 manifest, 3 glb, 4 obj, 5 ply, 6 stl,
-# 7 fbx, 8 usdz, 9 export_sidecar, 10 raw_glb, 11 bundle, ...
-_GENERATE_MANIFEST_INDEX = 2
-_GENERATE_FBX_INDEX = 7
-_GENERATE_USDZ_INDEX = 8
-_GENERATE_EXPORT_SIDECAR_INDEX = 9
-_GENERATE_RAW_GLB_INDEX = 10
-_GENERATE_BACKEND_RAIL_INDEX = 15
+
 _MIN_DELIVERY_ARTIFACT_BYTES = {
     "fbx": 200,
     "usdz": 100,
+    "3mf": 100,
 }
 
 
@@ -143,6 +148,10 @@ def resolve_hosted_required_delivery_artifact_keys(
     usdz_block = delivery.get("usdz")
     if isinstance(usdz_block, dict) and usdz_block.get("available") is True:
         keys.append("usdz")
+    threemf_block = delivery.get("3mf")
+    if isinstance(threemf_block, dict):
+        if threemf_block.get("exported") is True or threemf_block.get("available") is True:
+            keys.append("3mf")
     return tuple(keys)
 
 
@@ -175,13 +184,13 @@ def _validate_generate_delivery_output_paths(
     required_keys: tuple[str, ...],
 ) -> list[str]:
     issues: list[str] = []
-    index_by_key = {
-        "fbx": _GENERATE_FBX_INDEX,
-        "usdz": _GENERATE_USDZ_INDEX,
-    }
     for key in required_keys:
-        index = index_by_key.get(key)
-        if index is None or len(result) <= index:
+        try:
+            index = generate_download_index(key, _DEFAULT_EXPORT_FORMATS)
+        except KeyError:
+            issues.append(f"Generate response missing {key.upper()} output slot")
+            continue
+        if len(result) <= index:
             issues.append(f"Generate response missing {key.upper()} output slot")
             continue
         path_value = result[index]

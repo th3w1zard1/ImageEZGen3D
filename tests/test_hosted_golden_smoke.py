@@ -12,8 +12,10 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
+from imageezgen3d.gradio_artifact_layout import generate_download_index
 from imageezgen3d.hosted_golden_smoke import (
     HostedGoldenSmokeResult,
+    _DEFAULT_EXPORT_FORMATS,
     _GENERATE_EXPORT_SIDECAR_INDEX,
     _GENERATE_FBX_INDEX,
     _GENERATE_USDZ_INDEX,
@@ -47,23 +49,26 @@ class HostedGoldenSmokeTests(unittest.TestCase):
         import app
 
         source = Path(app.__file__).read_text(encoding="utf-8")
-        generate_outputs = source.split('api_name="generate"')[0].split(
-            "generate.click("
-        )[-1]
-        outputs_section = generate_outputs.split("outputs=[", maxsplit=1)[1].split(
-            "],", maxsplit=1
-        )[0]
-        output_tokens = [
-            line.strip().rstrip(",")
-            for line in outputs_section.splitlines()
-            if line.strip()
-        ]
-        self.assertEqual(output_tokens[_GENERATE_FBX_INDEX], "fbx_file")
-        self.assertEqual(output_tokens[_GENERATE_USDZ_INDEX], "usdz_file")
-        self.assertEqual(
-            output_tokens[_GENERATE_EXPORT_SIDECAR_INDEX],
-            "export_sidecar_file",
+        self.assertIn("resolve_gradio_download_keys", source)
+        self.assertIn(
+            "*[create_artifact_files[key] for key in download_keys]",
+            source,
         )
+        self.assertEqual(
+            _GENERATE_FBX_INDEX,
+            generate_download_index("fbx", _DEFAULT_EXPORT_FORMATS),
+        )
+        self.assertEqual(
+            _GENERATE_USDZ_INDEX,
+            generate_download_index("usdz", _DEFAULT_EXPORT_FORMATS),
+        )
+        self.assertEqual(
+            _GENERATE_EXPORT_SIDECAR_INDEX,
+            generate_download_index("export_sidecar", _DEFAULT_EXPORT_FORMATS),
+        )
+        threemf_index = generate_download_index("3mf", _DEFAULT_EXPORT_FORMATS)
+        self.assertLess(_GENERATE_USDZ_INDEX, threemf_index)
+        self.assertLess(threemf_index, _GENERATE_EXPORT_SIDECAR_INDEX)
 
     def test_parse_run_id(self) -> None:
         self.assertEqual(
