@@ -22,6 +22,7 @@ def build_pbr_delivery_block(
     pbr_available: bool = False,
     map_paths: Mapping[str, str | None] | None = None,
     workflow: str = "metallic-roughness",
+    notes: str | None = None,
 ) -> dict[str, Any]:
     """Khronos-style PBR delivery metadata for export sidecars."""
     maps: dict[str, str | None] = {slot: None for slot in PBR_MAP_SLOTS}
@@ -31,14 +32,15 @@ def build_pbr_delivery_block(
             maps[slot] = str(value) if value else None
     if pbr_available and not any(maps.values()):
         pbr_available = False
-    notes = (
-        "Separate PBR texture maps are present and referenced below."
-        if pbr_available
-        else (
-            "Factor-only materials embedded in GLB; separate map files not exported "
-            f"for adapter {adapter!r}."
+    if notes is None:
+        notes = (
+            "Separate PBR texture maps are present and referenced below."
+            if pbr_available
+            else (
+                "Factor-only materials embedded in GLB; separate map files not exported "
+                f"for adapter {adapter!r}."
+            )
         )
-    )
     return {
         "workflow": workflow,
         "pbr_available": pbr_available,
@@ -59,6 +61,7 @@ def build_export_sidecar(
     raw_exported: bool = False,
     pbr_available: bool = False,
     pbr_map_paths: Mapping[str, str | None] | None = None,
+    pbr_notes: str | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "export_tier": quality,
@@ -78,6 +81,7 @@ def build_export_sidecar(
             adapter=adapter,
             pbr_available=pbr_available,
             map_paths=pbr_map_paths,
+            notes=pbr_notes,
         ),
     }
     if decimation:

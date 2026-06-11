@@ -52,7 +52,7 @@ ImageEZGen3D has strong trust scaffolding (manifests, hosted smoke guards, admis
 | Gap | Meshy / peers | ImageEZGen3D today | Phase |
 |-----|---------------|-------------------|-------|
 | Neural shape reconstruction | Hunyuan/Tripo quality | CPU demo / gated Hunyuan | **Op-G7** (operational enablement, not this program) |
-| Textured PBR maps on disk | base_color, normal, ORM packs | Sidecar metadata only (`pbr_available=false`) | **P** |
+| Textured PBR maps on disk | base_color, normal, ORM packs | Reference map pack on demo adapters (`pbr_available=true`) | **S** |
 | Preview → refine lanes | Preview mesh then texture pass | Single-pass lanes | **T** |
 | Neural text-to-3D | Text prompt → mesh | `text-neural` placeholder | **W** |
 | Golden CI delivery proof | FBX/USDZ in attestation | Done (Plan 184) | **N** |
@@ -101,7 +101,7 @@ ImageEZGen3D has strong trust scaffolding (manifests, hosted smoke guards, admis
 | **Q** | 187 | 3MF writer + honest BLEND deferral | merged (this PR) |
 | **P-UI** | 188 | Dynamic Gradio artifact rows from `exports.formats` | merged (this PR) |
 | **R** | 189 | `target_formats` on export API / job payload | merged (this PR) |
-| **S** | (next) | PBR map file export + sidecar `pbr_available=true` | Hunyuan paint path |
+| **S** | 190 | PBR map file export + sidecar `pbr_available=true` | merged (this PR) |
 | **T** | (next) | Preview/refine orchestrator lanes | S partial |
 | **U** | (next) | Retexture adapter hook | S |
 | **V** | (next) | Multi-view fusion adapter | intake storage exists |

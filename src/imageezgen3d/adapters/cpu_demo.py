@@ -10,6 +10,11 @@ from ..config import load_config
 from ..export_tiers import build_export_sidecar
 from ..exporters import export_all, make_box_mesh, mesh_topology
 from ..mesh_decimation import decimate_mesh, subdivide_mesh
+from ..pbr_map_exports import (
+    REFERENCE_PBR_NOTES,
+    pbr_manifest_artifacts,
+    write_reference_pbr_maps,
+)
 
 _SUBDIVIDE_LEVELS_BY_QUALITY: dict[str, int] = {
     "draft": 0,
@@ -66,6 +71,11 @@ class CpuDemoAdapter:
             export_mesh, decimation_meta = decimate_mesh(mesh, request.decimation_target)
 
         vertex_count, face_count = mesh_topology(export_mesh)
+        export_dir = request.run_dir / "exports"
+        _pbr_written, pbr_sidecar_paths = write_reference_pbr_maps(
+            export_dir,
+            base_color_image=thumb,
+        )
         sidecar = build_export_sidecar(
             quality=request.quality,
             decimation_target=request.decimation_target,
@@ -74,15 +84,19 @@ class CpuDemoAdapter:
             adapter=self.capabilities.name,
             decimation=decimation_meta,
             raw_exported=raw_mesh is not None,
+            pbr_available=True,
+            pbr_map_paths=pbr_sidecar_paths,
+            pbr_notes=REFERENCE_PBR_NOTES,
         )
         paths = export_all(
             export_mesh,
-            request.run_dir / "exports",
+            export_dir,
             stem="cpu_demo_mesh",
             export_sidecar=sidecar,
             raw_mesh=raw_mesh,
             formats=request.export_formats or load_config().exports.formats,
         )
+        paths.update(pbr_manifest_artifacts(_pbr_written))
         return GenerationResult(
             adapter=self.capabilities.name,
             artifacts=paths,
