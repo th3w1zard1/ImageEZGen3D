@@ -23,4 +23,4 @@ Measured on Fedora 44 / Python 3.14 dev environment via `du` on installed `pxr` 
 
 - `requirements.txt` adds `usd-core>=24.0`, matching `pyproject.toml` `[project.optional-dependencies].mesh-delivery`.
 - Local/CI dev installs continue using `.[mesh-delivery]`; Space uses flat requirements only.
-- Golden sample and hosted smoke **required keys** remain unchanged until live Space attestation confirms USDZ bytes.
+- Golden sample CI attestation requires **FBX** always and **USDZ** when `usd-core` is installed (Phase N); hosted smoke required keys unchanged until live Space attestation.
