@@ -319,7 +319,7 @@ This section tracks **3D-native** competitors (not 2D image apps above). Evidenc
 | Image-to-3D | Yes | Yes | Yes | Yes | Workflow + cpu-demo; neural gated |
 | Text-to-3D | Yes | Yes | Yes | Yes | Stub (`text-demo`) + contract |
 | Multi-view | Yes | Yes | Yes | Yes | Labeled intake; fusion deferred |
-| PBR textures | Yes | Yes | Yes | Yes (2.1) | Documented; not shipped |
+| PBR textures | Yes | Yes | Yes | Yes (2.1) | Reference map pack on demo adapters (Phase S) |
 | Remesh / LOD | Yes | Yes | Partial | Manual | Export-tier decimation |
 | Rig + animate | Yes | Yes | T-pose | — | Deferred |
 | Async REST API | Yes | Yes | Yes | Self-host | Partial (local `jobs/http_api`) |
@@ -341,7 +341,7 @@ ImageEZGen3D manifest `generation.pipeline_stages` (`shape`, `texture`, `pbr`, `
 ### Tier 1 gaps to close next (actionable)
 
 1. Enable Hunyuan shape path on hosted ZeroGPU (G7–G9 admission) — operational track.
-2. Populate real `texture` / `pbr` stage success from paint models; export PBR **map files** (not sidecar-only).
+2. ~~Export PBR map files (reference pack on demo adapters)~~ — **Phase S landed**; neural paint maps remain G7/G8 operational track.
 3. ~~PBR map sidecar + FBX/USDZ export tier~~ — **FBX/USDZ landed** (Plans 180–183); golden/hosted attestation expansion in progress (Phase N/O).
 4. Neural text-to-3D adapter behind the same contract as `text-demo`.
 5. Preview → refine two-stage lanes (Meshy preview/refine split).

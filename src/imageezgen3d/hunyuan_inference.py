@@ -10,6 +10,12 @@ from .exporters import SimpleMesh, export_all, mesh_topology
 from .config import load_config
 from .generation_pipeline import PipelineStageTracker
 from .mesh_decimation import decimate_mesh
+from .pbr_map_exports import (
+    REFERENCE_PBR_NOTES,
+    pbr_manifest_artifacts,
+    resolve_base_color_image,
+    write_reference_pbr_maps,
+)
 
 HUNYUAN_ADAPTER = "hunyuan-zerogpu"
 _NOT_IMPLEMENTED_MESSAGE = (
@@ -49,6 +55,15 @@ def finalize_hunyuan_exports(
     """Decimate and export Hunyuan mesh artifacts matching the G6 sidecar contract."""
     export_mesh, decimation_meta = decimate_mesh(mesh, request.decimation_target)
     vertex_count, face_count = mesh_topology(export_mesh)
+    export_dir = request.run_dir / "exports"
+    base_color_image = resolve_base_color_image(
+        export_mesh.color,
+        b64_image=export_mesh.b64_image,
+    )
+    pbr_written, pbr_sidecar_paths = write_reference_pbr_maps(
+        export_dir,
+        base_color_image=base_color_image,
+    )
     sidecar = build_export_sidecar(
         quality=request.quality,
         decimation_target=request.decimation_target,
@@ -57,15 +72,19 @@ def finalize_hunyuan_exports(
         adapter=HUNYUAN_ADAPTER,
         decimation=decimation_meta,
         raw_exported=raw_mesh is not None,
+        pbr_available=True,
+        pbr_map_paths=pbr_sidecar_paths,
+        pbr_notes=REFERENCE_PBR_NOTES,
     )
     paths = export_all(
         export_mesh,
-        request.run_dir / "exports",
+        export_dir,
         stem="hunyuan_mesh",
         export_sidecar=sidecar,
         raw_mesh=raw_mesh,
         formats=request.export_formats or load_config().exports.formats,
     )
+    paths.update(pbr_manifest_artifacts(pbr_written))
     metadata = {
         "neural_backend": HUNYUAN_ADAPTER,
         "pipeline_mode": "shape+texture",

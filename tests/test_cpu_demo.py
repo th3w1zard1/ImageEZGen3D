@@ -178,13 +178,13 @@ class CpuDemoTests(unittest.TestCase):
                 sidecar["mesh_topology"]["face_count"],
                 result["parameters"]["decimation_target"],
             )
-            self.assertFalse(sidecar["pbr_delivery"]["pbr_available"])
+            self.assertTrue(sidecar["pbr_delivery"]["pbr_available"])
             stages = {
                 item["name"]: item
                 for item in result["parameters"]["generation"]["pipeline_stages"]
             }
-            self.assertEqual(stages["pbr"]["status"], "skipped")
-            self.assertIn("Factor-only", stages["pbr"]["notes"])
+            self.assertEqual(stages["pbr"]["status"], "succeeded")
+            self.assertIn("Reference PBR", stages["pbr"]["notes"])
 
     def test_mesh_check_validates_glb_header(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

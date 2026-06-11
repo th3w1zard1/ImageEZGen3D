@@ -55,7 +55,7 @@ Each run writes `export_sidecar.json` beside tier exports. Besides decimation an
 | `maps.ao` | Path to ambient-occlusion map, or `null` |
 | `notes` | Human-readable delivery explanation |
 
-`[REPO]` cpu-demo and text-demo set `pbr_available: false` with factor-only GLB materials; map slots are reserved but `null`. The manifest `generation.pipeline_stages` entry for **`pbr`** is updated from this block after export validation — `succeeded` only when maps are present, otherwise `skipped` with an explicit note.
+`[REPO]` cpu-demo and text-demo export a **reference PBR map pack** under `exports/pbr/` (base color from input or procedural color; neutral normal and default metallic-roughness). Sidecar sets `pbr_available: true` with honest notes that maps are not neural bakes. The manifest `generation.pipeline_stages` entry for **`pbr`** is updated from this block after export validation — `succeeded` when map files are present, otherwise `skipped` with an explicit note.
 
 Future paint-capable adapters should populate map paths and set `pbr_available: true` when files exist on disk.
 

@@ -12,7 +12,7 @@ from ..config import AppConfig, load_config
 from ..delivery_exports import resolve_target_export_formats
 from ..orchestrator import ImageEZOrchestrator
 from ..storage import atomic_write_json
-from .models import JobPollResponse, JobRequest, JobRecord
+from .models import JobPollResponse, JobRequest, JobRecord, JobStatus
 from .store import JobStore
 from .webhooks import deliver_webhook
 
@@ -114,19 +114,35 @@ class JobService:
             result = self._run_generation(request)
             run_id = str(result.get("run_id") or "")
             self._mark_run_async_capable(run_id, job_id)
-            updated = self.job_store.update_status(
+            webhook_delivered, webhook_error = self._deliver_webhook(
+                record,
+                status="succeeded",
+                run_id=run_id or None,
+                error=None,
+                result=result,
+            )
+            self.job_store.update_status(
                 job_id,
                 "succeeded",
                 run_id=run_id or None,
+                webhook_delivered=webhook_delivered,
+                webhook_error=webhook_error,
             )
-            self._maybe_deliver_webhook(updated, result)
         except Exception as exc:
-            updated = self.job_store.update_status(
+            webhook_delivered, webhook_error = self._deliver_webhook(
+                record,
+                status="failed",
+                run_id=None,
+                error=str(exc),
+                result={"job_id": job_id, "error": str(exc)},
+            )
+            self.job_store.update_status(
                 job_id,
                 "failed",
                 error=str(exc),
+                webhook_delivered=webhook_delivered,
+                webhook_error=webhook_error,
             )
-            self._maybe_deliver_webhook(updated, {"job_id": job_id, "error": str(exc)})
 
     def _run_generation(self, request: JobRequest) -> dict[str, Any]:
         modality = (request.input_modality or "image").strip().lower()
@@ -173,24 +189,23 @@ class JobService:
         parameters["job_id"] = job_id
         atomic_write_json(manifest_path, payload)
 
-    def _maybe_deliver_webhook(
+    def _deliver_webhook(
         self,
         record: JobRecord,
-        payload: dict[str, Any],
-    ) -> None:
+        *,
+        status: JobStatus,
+        run_id: str | None,
+        error: str | None,
+        result: dict[str, Any],
+    ) -> tuple[bool | None, str | None]:
         if not record.webhook_url:
-            return
+            return None, None
         body = {
             "job_id": record.job_id,
-            "status": record.status,
-            "run_id": record.run_id,
-            "error": record.error,
-            "result": payload if record.status == "succeeded" else None,
+            "status": status,
+            "run_id": run_id,
+            "error": error,
+            "result": result if status == "succeeded" else None,
         }
-        delivered, error = deliver_webhook(record.webhook_url, body)
-        self.job_store.update_status(
-            record.job_id,
-            record.status,
-            webhook_delivered=delivered,
-            webhook_error=error,
-        )
+        delivered, webhook_error = deliver_webhook(record.webhook_url, body)
+        return delivered, webhook_error
