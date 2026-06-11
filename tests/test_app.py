@@ -163,25 +163,20 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
             'with gr.Tab("Guide")'
         )[0]
 
-        for section in (create_section, history_section):
-            self.assertIn('label="Export sidecar"', section)
-            self.assertIn('label="RAW GLB"', section)
-            self.assertIn('label="FBX"', section)
-            self.assertIn('label="USDZ"', section)
+        self.assertIn("UI_ARTIFACT_LABELS[key]", create_section)
+        self.assertIn("UI_ARTIFACT_LABELS[key]", history_section)
+        self.assertIn("create_artifact_files", create_section)
+        self.assertIn("history_artifact_files", history_section)
 
-        generate_outputs = source.split("api_name=\"generate\"")[0].split(
-            "generate.click("
-        )[-1]
-        stl_idx = generate_outputs.index("stl_file")
-        bundle_idx = generate_outputs.index("bundle_file")
-        self.assertLess(stl_idx, generate_outputs.index("fbx_file"))
-        self.assertLess(generate_outputs.index("fbx_file"), generate_outputs.index("usdz_file"))
-        self.assertLess(generate_outputs.index("usdz_file"), generate_outputs.index("export_sidecar_file"))
-        self.assertLess(
-            generate_outputs.index("export_sidecar_file"),
-            generate_outputs.index("raw_glb_file"),
+        self.assertIn("resolve_gradio_download_keys", source)
+        self.assertIn(
+            "*[create_artifact_files[key] for key in download_keys]",
+            source,
         )
-        self.assertLess(generate_outputs.index("raw_glb_file"), bundle_idx)
+        self.assertIn(
+            "*[history_artifact_files[key] for key in download_keys]",
+            source,
+        )
 
     def test_advanced_controls_expose_background_job_queue_toggle(self) -> None:
         source = Path(app.__file__).read_text(encoding="utf-8")
