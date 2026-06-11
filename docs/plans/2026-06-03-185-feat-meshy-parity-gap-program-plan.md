@@ -55,8 +55,8 @@ ImageEZGen3D has strong trust scaffolding (manifests, hosted smoke guards, admis
 | Textured PBR maps on disk | base_color, normal, ORM packs | Sidecar metadata only (`pbr_available=false`) | **P** |
 | Preview → refine lanes | Preview mesh then texture pass | Single-pass lanes | **T** |
 | Neural text-to-3D | Text prompt → mesh | `text-neural` placeholder | **W** |
-| Golden CI delivery proof | FBX/USDZ in attestation | GLB/OBJ only | **N** (Plan 184, active) |
-| Hosted delivery smoke required keys | Optional USDZ on Space | Sidecar validation only | **O** |
+| Golden CI delivery proof | FBX/USDZ in attestation | Done (Plan 184) | **N** |
+| Hosted delivery smoke required keys | Optional USDZ on Space | Sidecar parity only | **O** (Plan 186) |
 
 ### Tier 2 — workflow depth (Meshy API / studio parity)
 
@@ -96,8 +96,8 @@ ImageEZGen3D has strong trust scaffolding (manifests, hosted smoke guards, admis
 
 | Phase | Plan | Scope | Depends |
 |-------|------|-------|---------|
-| **N** | 184 | Golden sample FBX/USDZ + sidecar validation | main |
-| **O** | (next) | Hosted smoke required keys for delivery formats post-Space deploy | N, M merged |
+| **N** | 184 | Golden sample FBX/USDZ + sidecar validation | merged (#140) |
+| **O** | 186 | Hosted smoke required keys for delivery formats post-Space deploy | N, M merged |
 | **P-UI** | (next) | Dynamic Gradio artifact rows from `exports.formats` | — |
 | **Q** | (next) | BLEND + 3MF writers | delivery_exports pattern |
 | **R** | (next) | `target_formats` on export API / job payload | Q optional |
