@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 from .base import AdapterCapabilities, GenerationRequest, GenerationResult
 from .demo_helpers import humanoid_bone_hierarchy

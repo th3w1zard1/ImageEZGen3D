@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 from .base import AdapterCapabilities, GenerationRequest, GenerationResult
 from .demo_helpers import procedural_image_from_prompt
 
