@@ -8,6 +8,7 @@ from ..mesh_ops.convert import convert_mesh, supported_convert_formats
 from ..mesh_ops.printability import analyze_printability, repair_printability
 from ..mesh_ops.remesh import remesh_mesh
 from ..mesh_ops.resize import resize_mesh
+from ..credits import apply_credit_estimate_to_parameters
 from ..storage import RunStore
 from .models import JobRequest
 
@@ -76,6 +77,7 @@ def run_mesh_op_job(store: RunStore, request: JobRequest) -> dict[str, Any]:
 
     manifest.stage = "done"
     manifest.parameters["mesh_op_report"] = report
+    apply_credit_estimate_to_parameters(manifest.parameters)
     if artifact_key != "analysis":
         store.record_artifact(manifest, artifact_key, output_path)
     else:

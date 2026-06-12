@@ -22,6 +22,7 @@ from .adapters import (
 )
 from .adapters.base import GenerationRequest, ModelAdapter
 from .config import AppConfig
+from .credits import apply_credit_estimate_to_parameters
 from .delivery_exports import resolve_target_export_formats
 from .export_tiers import apply_pbr_stage_from_sidecar
 from .generation_pipeline import (
@@ -588,6 +589,7 @@ class ImageEZOrchestrator:
                 stage_tracker.mark_export_failed(notes="Mesh validation reported issues.")
             manifest.stage = "done"
             manifest.parameters.update(result.metadata)
+            apply_credit_estimate_to_parameters(manifest.parameters)
             manifest.parameters["generation"]["pipeline_stages"] = (
                 stage_tracker.to_list()
             )

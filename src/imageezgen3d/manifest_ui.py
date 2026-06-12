@@ -5,6 +5,7 @@ from html import escape
 from typing import Any, Mapping
 
 from .export_tiers import decimation_target_from_parameters, resolve_decimation_target
+from .credits import credit_chip_label
 from .orchestrator import PREVIEW_FALLBACK_DISCLAIMER
 
 QUALITY_GUIDANCE: dict[str, str] = {
@@ -102,6 +103,9 @@ def generation_summary_chips_html(parameters: Mapping[str, Any]) -> str:
         chips.append(f'<span class="run-status-chip">Job {short_id}</span>')
     if isinstance(generation, dict) and generation.get("async_capable") is True:
         chips.append('<span class="run-status-chip">Async queue</span>')
+    chips.append(
+        f'<span class="run-status-chip credit-chip">{escape(credit_chip_label(parameters))}</span>'
+    )
     return f'<div class="run-status-chips">{"".join(chips)}</div>'
 
 
