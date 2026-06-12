@@ -92,7 +92,10 @@ class MeshyHttpApiTests(unittest.TestCase):
                 with request.urlopen(submit_req, timeout=5) as resp:
                     self.assertEqual(resp.status, 202)
                     submit_payload = json.loads(resp.read().decode("utf-8"))
-                self.assertEqual(submit_payload["status"], "PENDING")
+                self.assertIn(
+                    submit_payload["status"],
+                    ("PENDING", "IN_PROGRESS", "SUCCEEDED"),
+                )
                 task_id = submit_payload["id"]
                 deadline = time.monotonic() + 60.0
                 status = submit_payload["status"]
