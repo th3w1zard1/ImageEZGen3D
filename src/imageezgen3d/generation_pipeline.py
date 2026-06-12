@@ -5,7 +5,7 @@ from typing import Any, Literal
 
 from .export_tiers import DECIMATION_TARGET_BY_QUALITY, resolve_decimation_target
 
-InputModality = Literal["image", "text"]
+InputModality = Literal["image", "text", "retexture"]
 GenerationLane = Literal["draft", "production", "preview", "refine"]
 StageName = Literal["shape", "texture", "pbr", "export"]
 StageStatus = Literal["pending", "running", "succeeded", "skipped", "failed"]
@@ -22,6 +22,18 @@ REFINE_LANE_TEXTURE_NOTE = (
 TEXT_STUB_DISCLAIMER = (
     "Text-to-3D preview only — this run uses the text-demo stub adapter and does not "
     "perform neural text-conditioned 3D reconstruction."
+)
+
+RETEXTURE_STUB_DISCLAIMER = (
+    "Retexture preview only — this run uses the retexture-demo adapter and exports "
+    "reference PBR maps from the texture image; it does not neural-paint UVs on the "
+    "source mesh."
+)
+RETEXTURE_TEXTURE_NOTE = (
+    "Retexture lane — reference PBR maps exported from the texture reference image."
+)
+RETEXTURE_SHAPE_SKIPPED_NOTE = (
+    "Retexture tasks reuse or stand in geometry; shape reconstruction is not executed."
 )
 
 _STAGE_ORDER: tuple[StageName, ...] = ("shape", "texture", "pbr", "export")
@@ -153,6 +165,38 @@ def finalize_pipeline_stages_for_lane(
     tracker.mark_shape_succeeded(adapter, notes=adapter_note)
 
 
+def finalize_pipeline_stages_after_export(
+    tracker: PipelineStageTracker,
+    *,
+    input_modality: InputModality,
+    lane: str,
+    adapter: str,
+    adapter_note: str,
+    pbr_available: bool,
+) -> None:
+    """Apply lane or modality stage semantics after adapter export."""
+    if input_modality == "retexture":
+        tracker.set_stage("shape", "skipped", notes=RETEXTURE_SHAPE_SKIPPED_NOTE)
+        tracker.mark_texture_running(adapter)
+        if pbr_available:
+            tracker.mark_texture_succeeded(adapter, notes=RETEXTURE_TEXTURE_NOTE)
+        else:
+            tracker.set_stage(
+                "texture",
+                "failed",
+                notes="Retexture expected PBR maps but none were exported.",
+            )
+        return
+
+    finalize_pipeline_stages_for_lane(
+        tracker,
+        lane=lane,
+        adapter=adapter,
+        adapter_note=adapter_note,
+        pbr_available=pbr_available,
+    )
+
+
 def build_pipeline_spec(
     *,
     input_modality: str | None,
@@ -162,7 +206,12 @@ def build_pipeline_spec(
     default_quality: str = "draft",
 ) -> GenerationPipelineSpec:
     modality_raw = (input_modality or "image").strip().lower()
-    modality: InputModality = "text" if modality_raw == "text" else "image"
+    if modality_raw == "text":
+        modality: InputModality = "text"
+    elif modality_raw == "retexture":
+        modality = "retexture"
+    else:
+        modality = "image"
     lane_value, quality_value = resolve_lane_and_quality(
         lane=lane,
         quality=quality,
@@ -171,7 +220,7 @@ def build_pipeline_spec(
     prompt = (prompt_text or "").strip()
     if modality == "text" and not prompt:
         raise ValueError("Enter a text prompt before generating from text.")
-    if modality == "image":
+    if modality in ("image", "retexture"):
         prompt = prompt  # optional context from brief; stored when non-empty
 
     return GenerationPipelineSpec(

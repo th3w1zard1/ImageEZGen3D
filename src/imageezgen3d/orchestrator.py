@@ -8,17 +8,24 @@ from typing import Any
 
 from PIL import Image
 
-from .adapters import CpuDemoAdapter, HunyuanPlaceholderAdapter, TextDemoAdapter, TextNeuralPlaceholderAdapter
+from .adapters import (
+    CpuDemoAdapter,
+    HunyuanPlaceholderAdapter,
+    RetextureDemoAdapter,
+    TextDemoAdapter,
+    TextNeuralPlaceholderAdapter,
+)
 from .adapters.base import GenerationRequest, ModelAdapter
 from .config import AppConfig
 from .delivery_exports import resolve_target_export_formats
 from .export_tiers import apply_pbr_stage_from_sidecar
 from .generation_pipeline import (
     PipelineStageTracker,
+    RETEXTURE_STUB_DISCLAIMER,
     TEXT_STUB_DISCLAIMER,
     build_pipeline_spec,
     decimation_target_for_spec,
-    finalize_pipeline_stages_for_lane,
+    finalize_pipeline_stages_after_export,
     is_preview_lane,
     preview_lane_export_formats,
     workflow_phase_for_lane,
@@ -56,6 +63,7 @@ class ImageEZOrchestrator:
         )
         self.adapters: dict[str, ModelAdapter] = {
             "cpu-demo": CpuDemoAdapter(),
+            "retexture-demo": RetextureDemoAdapter(),
             "text-demo": TextDemoAdapter(),
             "text-neural": TextNeuralPlaceholderAdapter(
                 configured=config.text_neural.configured
@@ -175,6 +183,20 @@ class ImageEZOrchestrator:
     def select_adapter(
         self, adapter_name: str | None, *, input_modality: str = "image"
     ) -> tuple[str, ModelAdapter, str | None]:
+        if input_modality == "retexture":
+            requested = (adapter_name or "auto").strip().lower()
+            adapter = self.adapters.get("retexture-demo")
+            if adapter is None or not adapter.capabilities.configured:
+                raise ValueError(
+                    "Retexture is not available. The retexture-demo adapter is not configured."
+                )
+            if requested not in ("auto", "", "retexture-demo", "none"):
+                raise ValueError(
+                    f"Adapter '{adapter_name}' does not support retexture tasks. "
+                    "Use auto or retexture-demo."
+                )
+            return "retexture-demo", adapter, None
+
         if input_modality == "text":
             requested = (adapter_name or "auto").strip().lower()
             neural = self.adapters.get("text-neural")
@@ -230,6 +252,7 @@ class ImageEZOrchestrator:
         prompt_text: str | None = None,
         lane: str | None = None,
         target_formats: tuple[str, ...] | list[str] | None = None,
+        source_mesh_path: str | Path | None = None,
     ) -> dict[str, Any]:
         pipeline_spec = build_pipeline_spec(
             input_modality=input_modality,
@@ -240,6 +263,10 @@ class ImageEZOrchestrator:
         )
         if pipeline_spec.input_modality == "image" and primary_image is None:
             raise ValueError("Upload a primary image before generating a 3D draft.")
+        if pipeline_spec.input_modality == "retexture" and primary_image is None:
+            raise ValueError(
+                "Upload a texture reference image before running retexture."
+            )
 
         run_dir, manifest = self.store.create_run()
         adapter_key, adapter, fallback_reason = self.select_adapter(
@@ -301,17 +328,35 @@ class ImageEZOrchestrator:
             manifest.parameters["preview_disclaimer"] = TEXT_STUB_DISCLAIMER
             if fallback_reason:
                 manifest.parameters["fallback_reason"] = fallback_reason
+        if adapter_key == "retexture-demo":
+            manifest.parameters["preview_disclaimer"] = RETEXTURE_STUB_DISCLAIMER
         self.store.save_manifest(run_dir, manifest)
 
+        saved_source_mesh: Path | None = None
         try:
             processed_path: Path | None = None
             saved_views: dict[str, Path] = {}
 
-            if pipeline_spec.input_modality == "image":
+            if pipeline_spec.input_modality in ("image", "retexture"):
                 assert primary_image is not None
-                input_path = self.store.artifact_path(run_dir, "inputs", "primary.png")
+                input_name = (
+                    "texture_reference.png"
+                    if pipeline_spec.input_modality == "retexture"
+                    else "primary.png"
+                )
+                processed_name = (
+                    "texture_reference_normalized.png"
+                    if pipeline_spec.input_modality == "retexture"
+                    else "primary_normalized.png"
+                )
+                artifact_key = (
+                    "texture_reference"
+                    if pipeline_spec.input_modality == "retexture"
+                    else "original"
+                )
+                input_path = self.store.artifact_path(run_dir, "inputs", input_name)
                 processed_path = self.store.artifact_path(
-                    run_dir, "processed", "primary_normalized.png"
+                    run_dir, "processed", processed_name
                 )
                 report_path = self.store.artifact_path(
                     run_dir, "reports", "input_validation.json"
@@ -328,19 +373,22 @@ class ImageEZOrchestrator:
                     low_contrast_threshold=self.config.preprocessing.low_contrast_threshold,
                 )
                 manifest.validation = report.to_dict()
-                self.store.record_artifact(manifest, "original", input_path)
+                self.store.record_artifact(manifest, artifact_key, input_path)
                 self.store.record_artifact(manifest, "processed", processed_path)
                 self.store.record_artifact(manifest, "validation", report_path)
+                if pipeline_spec.input_modality == "retexture":
+                    manifest.parameters["task_type"] = "retexture"
 
-                for label, image in (view_images or {}).items():
-                    if image is None:
-                        continue
-                    view_path = self.store.artifact_path(
-                        run_dir, "inputs", f"view_{label}.png"
-                    )
-                    image.save(view_path)
-                    saved_views[label] = view_path
-                    self.store.record_artifact(manifest, f"view_{label}", view_path)
+                if pipeline_spec.input_modality == "image":
+                    for label, image in (view_images or {}).items():
+                        if image is None:
+                            continue
+                        view_path = self.store.artifact_path(
+                            run_dir, "inputs", f"view_{label}.png"
+                        )
+                        image.save(view_path)
+                        saved_views[label] = view_path
+                        self.store.record_artifact(manifest, f"view_{label}", view_path)
             else:
                 prompt_path = self.store.artifact_path(run_dir, "inputs", "prompt.txt")
                 prompt_path.write_text(pipeline_spec.prompt_text + "\n", encoding="utf-8")
@@ -363,8 +411,27 @@ class ImageEZOrchestrator:
                     self.store.record_artifact(manifest, "reference_brief", brief_path)
                     manifest.parameters["reference_brief_name"] = source_brief.name
 
+            if source_mesh_path:
+                mesh_source = Path(source_mesh_path)
+                if not mesh_source.is_file():
+                    raise FileNotFoundError(f"Source mesh not found: {mesh_source}")
+                suffix = mesh_source.suffix or ".glb"
+                saved_source_mesh = self.store.artifact_path(
+                    run_dir, "inputs", f"source_mesh{suffix}"
+                )
+                shutil.copyfile(mesh_source, saved_source_mesh)
+                self.store.record_artifact(manifest, "source_mesh", saved_source_mesh)
+                manifest.parameters["source_mesh_name"] = mesh_source.name
+
             manifest.stage = "generating"
-            stage_tracker.mark_shape_running(adapter_key)
+            if pipeline_spec.input_modality == "retexture":
+                stage_tracker.set_stage(
+                    "shape",
+                    "skipped",
+                    notes="Retexture tasks do not run shape reconstruction.",
+                )
+            else:
+                stage_tracker.mark_shape_running(adapter_key)
             manifest.parameters["generation"]["pipeline_stages"] = (
                 stage_tracker.to_list()
             )
@@ -381,6 +448,7 @@ class ImageEZOrchestrator:
                     lane=pipeline_spec.lane,
                     prompt_text=pipeline_spec.prompt_text,
                     export_formats=export_formats,
+                    source_mesh_path=saved_source_mesh,
                 )
             )
 
@@ -397,8 +465,9 @@ class ImageEZOrchestrator:
                     delivery = sidecar_payload.get("pbr_delivery")
                     if isinstance(delivery, dict):
                         pbr_available = delivery.get("pbr_available") is True
-                finalize_pipeline_stages_for_lane(
+                finalize_pipeline_stages_after_export(
                     stage_tracker,
+                    input_modality=pipeline_spec.input_modality,
                     lane=pipeline_spec.lane,
                     adapter=adapter_key,
                     adapter_note=str(result.metadata.get("adapter_note", "")),
