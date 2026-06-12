@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Literal
 
+from ..credits import estimate_credits, informational_balance_starting
 from .models import JobPollResponse, JobRequest, JobStatus
 
 MeshyTaskStatus = Literal["PENDING", "IN_PROGRESS", "SUCCEEDED", "FAILED", "CANCELED"]
@@ -30,7 +31,7 @@ _MESHY_RESOURCE_NAMES: dict[str, str] = {
     "repair-printability": "repair-printability",
 }
 
-_SYNTHETIC_BALANCE = 10_000
+_SYNTHETIC_BALANCE = informational_balance_starting()
 
 
 @dataclass(frozen=True)
@@ -261,6 +262,8 @@ def meshy_task_payload(
     }
     if poll.error:
         payload["task_error"] = {"message": poll.error}
+    credits = _consumed_credits(payload["status"], manifest, task_kind)
+    payload["consumed_credits"] = credits
     if manifest is not None and status == "SUCCEEDED":
         payload.update(_meshy_result_fields(manifest))
     return payload
@@ -290,6 +293,23 @@ def meshy_webhook_payload(
         body["result"] = result
         body.update(_meshy_result_fields(result))
     return body
+
+
+def _consumed_credits(
+    status: MeshyTaskStatus,
+    manifest: dict[str, Any] | None,
+    task_kind: str,
+) -> int:
+    if status == "FAILED":
+        return 0
+    parameters: dict[str, Any] = {}
+    if isinstance(manifest, dict):
+        raw = manifest.get("parameters")
+        if isinstance(raw, dict):
+            parameters = raw
+    if parameters.get("consumed_credits") is not None:
+        return int(parameters["consumed_credits"])
+    return estimate_credits({**parameters, "task_type": task_kind}).consumed_credits
 
 
 def _meshy_result_fields(manifest: dict[str, Any]) -> dict[str, Any]:
