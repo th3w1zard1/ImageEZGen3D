@@ -2,10 +2,18 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 from urllib.parse import urlparse
 
+from .meshy_api import (
+    job_request_from_meshy,
+    match_meshy_route,
+    meshy_balance_payload,
+    meshy_status,
+    meshy_task_payload,
+)
 from .models import JobRequest
 from .service import JobService
 
@@ -29,6 +37,10 @@ class JobApiHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         segments = [segment for segment in parsed.path.split("/") if segment]
         try:
+            meshy_route = match_meshy_route(segments, method)
+            if meshy_route is not None:
+                self._handle_meshy_route(meshy_route, method)
+                return
             if method == "GET" and segments == ["health"]:
                 self._write_json(200, {"ok": True, "service": "imageezgen3d-jobs"})
                 return
@@ -72,6 +84,74 @@ class JobApiHandler(BaseHTTPRequestHandler):
             return
 
         self._write_json(404, {"error": f"Unknown route: {self.path}"})
+
+    def _handle_meshy_route(self, route, method: str) -> None:
+        if route.action == "balance":
+            self._write_json(200, meshy_balance_payload())
+            return
+        if route.action == "create":
+            assert route.task_kind is not None
+            payload = self._read_json_body()
+            job_request = job_request_from_meshy(route.task_kind, payload)
+            job_id = self.service.submit(job_request)
+            poll = self.service.poll(job_id)
+            response = meshy_task_payload(
+                task_kind=route.task_kind,
+                task_id=job_id,
+                poll=poll,
+            )
+            self._write_json(202, response)
+            return
+        if route.action == "retrieve":
+            assert route.task_kind is not None and route.task_id is not None
+            self._validate_job_id(route.task_id)
+            poll = self.service.poll(route.task_id)
+            manifest = None
+            if poll.status == "succeeded":
+                manifest = self.service.get_result(route.task_id)
+            response = meshy_task_payload(
+                task_kind=route.task_kind,
+                task_id=route.task_id,
+                poll=poll,
+                manifest=manifest,
+            )
+            self._write_json(200, response)
+            return
+        if route.action == "stream":
+            assert route.task_kind is not None and route.task_id is not None
+            self._validate_job_id(route.task_id)
+            self._write_meshy_stream(route.task_kind, route.task_id)
+            return
+        raise ValueError(f"Unsupported Meshy route action: {route.action}")
+
+    def _write_meshy_stream(self, task_kind: str, task_id: str) -> None:
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Connection", "keep-alive")
+        self.end_headers()
+        deadline = time.monotonic() + 120.0
+        last_status: str | None = None
+        while time.monotonic() < deadline:
+            poll = self.service.poll(task_id)
+            status = meshy_status(poll.status)
+            manifest = None
+            if poll.status == "succeeded":
+                manifest = self.service.get_result(task_id)
+            payload = meshy_task_payload(
+                task_kind=task_kind,
+                task_id=task_id,
+                poll=poll,
+                manifest=manifest,
+            )
+            if status != last_status:
+                chunk = f"data: {json.dumps(payload, sort_keys=True)}\n\n".encode("utf-8")
+                self.wfile.write(chunk)
+                self.wfile.flush()
+                last_status = status
+            if status in ("SUCCEEDED", "FAILED", "CANCELED"):
+                break
+            time.sleep(0.1)
 
     def _read_json_body(self) -> dict[str, Any]:
         length = int(self.headers.get("Content-Length", "0"))
