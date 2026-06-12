@@ -1,0 +1,309 @@
+# Meshy API
+
+> Meshy is an AI-powered 3D model generation platform. The Meshy API is a RESTful API that allows you to programmatically generate 3D models, textures, images, rig characters, and animate them.
+
+- API Base URL: `https://api.meshy.ai/openapi/`
+
+- Documentation: https://docs.meshy.ai
+- Status Page: https://status.meshy.ai
+
+> **For agents:** For single-fetch full content (all docs pages concatenated), see https://docs.meshy.ai/llms-full.txt. For tool-calling access, install the Meshy MCP server — see https://docs.meshy.ai/api/ai.
+
+## Instructions for Large Language Models
+
+When generating code that integrates with the Meshy API, follow these guidelines:
+
+### 1. Authentication
+
+All requests require a Bearer token in the `Authorization` header:
+
+```
+Authorization: Bearer msy_YOUR_API_KEY
+```
+
+API keys are created at https://www.meshy.ai/settings/api and have the format `msy_<random-string>`.
+
+**Tip:** For tool-calling access from MCP-compatible agents (Claude Code, Cursor, Windsurf, Claude Desktop, Codex CLI, etc.), install the Meshy MCP server instead of calling this REST API directly:
+
+```
+claude mcp add meshy --env MESHY_API_KEY=msy_YOUR_API_KEY -- npx -y @meshy-ai/meshy-mcp-server
+```
+
+See https://docs.meshy.ai/api/ai for the full install matrix (8 clients) and tool reference.
+
+
+### 2. Asynchronous Task Model
+
+Meshy uses an asynchronous execution model. All generation endpoints return a task ID, not the result directly. You retrieve results via one of three mechanisms:
+
+- **Polling** — GET the task endpoint until `status` is terminal (shown in the examples below)
+- **SSE streaming** — connect to `/<endpoint>/:id/stream` for real-time updates (see section 3)
+- **Webhooks** — register a URL to receive a POST when the task completes (see https://docs.meshy.ai/api/webhooks.md)
+
+**Correct pattern:**
+
+```python
+import requests, time, os
+
+headers = {"Authorization": f"Bearer {os.environ['MESHY_API_KEY']}"}
+
+# Step 1: Create a task
+response = requests.post(
+    "https://api.meshy.ai/openapi/v2/text-to-3d",
+    headers=headers,
+    json={"mode": "preview", "prompt": "a monster mask"},
+)
+task_id = response.json()["result"]
+
+# Step 2: Poll until completion
+while True:
+    task = requests.get(
+        f"https://api.meshy.ai/openapi/v2/text-to-3d/{task_id}",
+        headers=headers,
+    ).json()
+    if task["status"] == "SUCCEEDED":
+        break
+    if task["status"] == "FAILED":
+        raise Exception(task["task_error"]["message"])
+    time.sleep(5)
+
+# Step 3: Download result
+model_url = task["model_urls"]["glb"]
+```
+
+**WRONG pattern** (expecting synchronous result):
+```python
+# WRONG - the POST does not return a model
+response = requests.post("https://api.meshy.ai/openapi/v2/text-to-3d", ...)
+model = response.json()["model_urls"]  # WRONG
+```
+
+### 3. SSE Streaming (Alternative to Polling)
+
+All task endpoints support Server-Sent Events streaming at `/<endpoint>/:id/stream`:
+
+```python
+import requests, json
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Accept": "text/event-stream"
+}
+
+response = requests.get(
+    f"https://api.meshy.ai/openapi/v2/text-to-3d/{task_id}/stream",
+    headers=headers,
+    stream=True
+)
+
+for line in response.iter_lines():
+    if line and line.startswith(b"data:"):
+        data = json.loads(line.decode("utf-8")[5:])
+        print(data["status"], data.get("progress"))
+        if data["status"] in ["SUCCEEDED", "FAILED", "CANCELED"]:
+            break
+
+response.close()
+```
+
+### 4. Task Statuses
+
+All tasks follow the same lifecycle: `PENDING` -> `IN_PROGRESS` -> `SUCCEEDED` | `FAILED` | `CANCELED`
+
+### 5. Timestamps
+
+All timestamps in the API are Unix epoch milliseconds (not seconds). For example, `1693569600000` represents September 1, 2023 12:00:00 PM UTC.
+
+### 6. Model Output Formats
+
+3D model outputs are available in multiple formats: GLB, FBX, OBJ, USDZ. Access them via `model_urls.glb`, `model_urls.fbx`, etc. Not all formats are always available; omitted properties mean that format was not generated.
+
+### 7. Asset Retention
+
+Generated assets are retained for a maximum of **3 days** for non-Enterprise customers. Download and store models locally if you need them longer.
+
+### 8. Rate Limits
+
+| Tier | Requests/Second | Queue Tasks | Priority |
+|------|-----------------|-------------|----------|
+| Pro | 20 | 10 | Default |
+| Studio | 20 | 20 | Higher |
+| Enterprise | 100 | 50+ | Highest |
+
+Exceeding limits returns `429 Too Many Requests`.
+
+### 9. Choosing the Right AI Model
+
+- Use `"latest"` or `"meshy-6"` for the best quality (default).
+- Use `"meshy-5"` for the previous generation model.
+- `"latest"` always resolves to the newest model (currently Meshy 6).
+
+### 10. Common Mistakes to Avoid
+
+- **Don't call CORS-restricted endpoints from browser JavaScript.** The API blocks CORS requests. Use a server-side proxy.
+- **Don't forget `enable_pbr: true`** if you need metallic/roughness/normal maps.
+- **Don't set both `texture_prompt` and `texture_image_url`** — if both are provided, `texture_prompt` takes precedence.
+- **Don't assume model format availability.** Check that the URL key exists in `model_urls` before downloading.
+
+---
+
+## Complete Code Example: Text to 3D (Preview + Refine)
+
+```python
+import requests, os, time
+
+headers = {"Authorization": f"Bearer {os.environ['MESHY_API_KEY']}"}
+
+# 1. Create preview task
+preview_resp = requests.post(
+    "https://api.meshy.ai/openapi/v2/text-to-3d",
+    headers=headers,
+    json={
+        "mode": "preview",
+        "prompt": "a monster mask",
+        "should_remesh": True,
+    },
+)
+preview_resp.raise_for_status()
+preview_task_id = preview_resp.json()["result"]
+
+# 2. Poll preview task
+while True:
+    task = requests.get(
+        f"https://api.meshy.ai/openapi/v2/text-to-3d/{preview_task_id}",
+        headers=headers,
+    ).json()
+    if task["status"] == "SUCCEEDED":
+        break
+    if task["status"] == "FAILED":
+        raise Exception(task["task_error"]["message"])
+    time.sleep(5)
+
+# 3. Download preview model
+with open("preview_model.glb", "wb") as f:
+    f.write(requests.get(task["model_urls"]["glb"]).content)
+
+# 4. Create refine task (texturing)
+refine_resp = requests.post(
+    "https://api.meshy.ai/openapi/v2/text-to-3d",
+    headers=headers,
+    json={
+        "mode": "refine",
+        "preview_task_id": preview_task_id,
+        "enable_pbr": True,
+    },
+)
+refine_resp.raise_for_status()
+refine_task_id = refine_resp.json()["result"]
+
+# 5. Poll refine task
+while True:
+    task = requests.get(
+        f"https://api.meshy.ai/openapi/v2/text-to-3d/{refine_task_id}",
+        headers=headers,
+    ).json()
+    if task["status"] == "SUCCEEDED":
+        break
+    if task["status"] == "FAILED":
+        raise Exception(task["task_error"]["message"])
+    time.sleep(5)
+
+# 6. Download refined (textured) model
+with open("refined_model.glb", "wb") as f:
+    f.write(requests.get(task["model_urls"]["glb"]).content)
+```
+
+## Complete Code Example: Image to 3D
+
+```python
+import requests, os, time
+
+headers = {"Authorization": f"Bearer {os.environ['MESHY_API_KEY']}"}
+
+response = requests.post(
+    "https://api.meshy.ai/openapi/v1/image-to-3d",
+    headers=headers,
+    json={
+        "image_url": "https://example.com/photo.jpg",
+        "should_texture": True,
+        "enable_pbr": True,
+    },
+)
+response.raise_for_status()
+task_id = response.json()["result"]
+
+while True:
+    task = requests.get(
+        f"https://api.meshy.ai/openapi/v1/image-to-3d/{task_id}",
+        headers=headers,
+    ).json()
+    if task["status"] == "SUCCEEDED":
+        break
+    if task["status"] == "FAILED":
+        raise Exception(task["task_error"]["message"])
+    time.sleep(5)
+
+with open("model.glb", "wb") as f:
+    f.write(requests.get(task["model_urls"]["glb"]).content)
+```
+
+---
+
+# Documentation Index
+
+Each link below points to the Markdown version of that page. For single-fetch full content (all pages concatenated), see [llms-full.txt](https://docs.meshy.ai/llms-full.txt).
+
+## Getting Started
+
+- [Quickstart](https://docs.meshy.ai/api/quick-start.md): Create an API key and make your first request.
+- [Authentication](https://docs.meshy.ai/api/authentication.md): Bearer token auth, API key format, test-mode key.
+- [Errors](https://docs.meshy.ai/api/errors.md): HTTP status codes and task failure semantics.
+- [Pricing](https://docs.meshy.ai/api/pricing.md): Credit cost per endpoint and task mode.
+- [Rate Limits](https://docs.meshy.ai/api/rate-limits.md): Per-tier requests-per-second and queue sizes.
+- [Asset Retention](https://docs.meshy.ai/api/asset-retention.md): How long generated models are retained (3 days for non-Enterprise).
+- [Webhooks](https://docs.meshy.ai/api/webhooks.md): Real-time task status via HTTP POST.
+- [AI Integration](https://docs.meshy.ai/api/ai.md): MCP server install (8 clients) and tool reference. Start here if you're using Claude Code, Cursor, Windsurf, or any MCP-compatible agent.
+- [Changelog](https://docs.meshy.ai/api/changelog.md): API release notes.
+
+## API Endpoints
+
+### 3D Generation
+
+- [Text to 3D](https://docs.meshy.ai/api/text-to-3d.md): Generate 3D models from text prompts. Two-stage workflow (preview + refine).
+- [Image to 3D](https://docs.meshy.ai/api/image-to-3d.md): Generate 3D models from a single image.
+- [Multi-Image to 3D](https://docs.meshy.ai/api/multi-image-to-3d.md): Generate 3D models from multiple images of the same object.
+
+### Post-Processing
+
+- [Remesh](https://docs.meshy.ai/api/remesh.md): Change topology, polycount, or file format of an existing model.
+- [Convert](https://docs.meshy.ai/api/convert.md): Convert 3D models between formats (GLB, FBX, OBJ, STL, USDZ, BLEND, 3MF). 1 credit per task.
+- [Resize](https://docs.meshy.ai/api/resize.md): Resize 3D models to specific physical dimensions. Supports height, longest-side, and AI auto-size modes. 1 credit per task.
+- [Retexture](https://docs.meshy.ai/api/retexture.md): Apply a new texture to an existing model via text or image prompt.
+- [Rigging](https://docs.meshy.ai/api/rigging.md): Add a skeleton to a 3D humanoid character.
+- [Animation](https://docs.meshy.ai/api/animation.md): Apply animations to a rigged character.
+
+### 2D Generation
+
+- [Text to Image](https://docs.meshy.ai/api/text-to-image.md): Generate images from text prompts.
+- [Image to Image](https://docs.meshy.ai/api/image-to-image.md): Transform an input image via prompt guidance.
+
+### 3D Printing
+
+- [Multi-Color Print](https://docs.meshy.ai/api/multi-color-print.md): Convert a 3D model into a multi-color 3MF file for 3D printing.
+- [Analyze Printability](https://docs.meshy.ai/api/analyze-printability.md): Analyze a 3D model for FDM printability — watertightness, volume, holes, non-manifold edges, degenerate faces. Free, no credits.
+- [Repair Printability](https://docs.meshy.ai/api/repair-printability.md): Repair a 3D model for FDM printability — fix non-manifold edges, degenerate faces, and holes. 10 credits per task.
+
+### Creative Lab APIs
+
+- [Creative Lab — Keychain](https://docs.meshy.ai/api/creative-lab-keychain.md): Turn a photo into a 3D-printable keychain medallion. Two-stage workflow (prototype colorized concept image → build depth-relief 3D mesh).
+- [Creative Lab — Fridge Magnet](https://docs.meshy.ai/api/creative-lab-fridge-magnet.md): Turn a photo into a custom fridge magnet — a colorized depth relief with a flat magnetic back. Two-stage workflow (prototype colorized concept image → build depth-relief 3D mesh).
+- [Creative Lab — Figure](https://docs.meshy.ai/api/creative-lab-figure.md): Turn a photo into a chibi-style figurine. Two-stage workflow (prototype concept image → build textured 3D model).
+- [Creative Lab — Lamp](https://docs.meshy.ai/api/creative-lab-lamp.md): Turn text or a photo into a 3D-printable lampshade. Two-stage workflow (prototype matte-white concept image → build hollow STL lampshade + optional fixture base disk).
+
+### Account
+
+- [Balance](https://docs.meshy.ai/api/balance.md): Check remaining credit balance.
+
+## Reference
+
+- [Animation Library](https://docs.meshy.ai/api/animation-library.md): Catalog of preset animations with `action_id` values. The live catalog is also served as JSON at https://api.meshy.ai/web/public/animations/resources.
