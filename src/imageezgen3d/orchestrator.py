@@ -9,11 +9,16 @@ from typing import Any
 from PIL import Image
 
 from .adapters import (
+    AnimationDemoAdapter,
     CpuDemoAdapter,
+    CreativeLabDemoAdapter,
     HunyuanPlaceholderAdapter,
+    ImageToImageDemoAdapter,
     RetextureDemoAdapter,
+    RiggingDemoAdapter,
     TextDemoAdapter,
     TextNeuralPlaceholderAdapter,
+    TextToImageDemoAdapter,
 )
 from .adapters.base import GenerationRequest, ModelAdapter
 from .config import AppConfig
@@ -65,6 +70,11 @@ class ImageEZOrchestrator:
             "cpu-demo": CpuDemoAdapter(),
             "retexture-demo": RetextureDemoAdapter(),
             "text-demo": TextDemoAdapter(),
+            "text-to-image-demo": TextToImageDemoAdapter(),
+            "image-to-image-demo": ImageToImageDemoAdapter(),
+            "rigging-demo": RiggingDemoAdapter(),
+            "animation-demo": AnimationDemoAdapter(),
+            "creative-lab-demo": CreativeLabDemoAdapter(),
             "text-neural": TextNeuralPlaceholderAdapter(
                 configured=config.text_neural.configured
             ),
@@ -180,6 +190,27 @@ class ImageEZOrchestrator:
             ),
         )
 
+    def _select_fixed_adapter(
+        self,
+        adapter_name: str | None,
+        *,
+        adapter_key: str,
+        modality_label: str,
+    ) -> tuple[str, ModelAdapter, str | None]:
+        requested = (adapter_name or "auto").strip().lower()
+        adapter = self.adapters.get(adapter_key)
+        if adapter is None or not adapter.capabilities.configured:
+            raise ValueError(
+                f"{modality_label} is not available. The {adapter_key} adapter "
+                "is not configured."
+            )
+        if requested not in ("auto", "", adapter_key, "none"):
+            raise ValueError(
+                f"Adapter '{adapter_name}' does not support {modality_label} tasks. "
+                f"Use auto or {adapter_key}."
+            )
+        return adapter_key, adapter, None
+
     def select_adapter(
         self, adapter_name: str | None, *, input_modality: str = "image"
     ) -> tuple[str, ModelAdapter, str | None]:
@@ -227,6 +258,37 @@ class ImageEZOrchestrator:
                 return "text-neural", neural, None
             return "text-demo", stub, TEXT_NEURAL_FALLBACK_REASON
 
+        if input_modality == "text-to-image":
+            return self._select_fixed_adapter(
+                adapter_name,
+                adapter_key="text-to-image-demo",
+                modality_label="text-to-image",
+            )
+        if input_modality == "image-to-image":
+            return self._select_fixed_adapter(
+                adapter_name,
+                adapter_key="image-to-image-demo",
+                modality_label="image-to-image",
+            )
+        if input_modality == "rig":
+            return self._select_fixed_adapter(
+                adapter_name,
+                adapter_key="rigging-demo",
+                modality_label="rigging",
+            )
+        if input_modality == "animate":
+            return self._select_fixed_adapter(
+                adapter_name,
+                adapter_key="animation-demo",
+                modality_label="animation",
+            )
+        if input_modality == "creative-lab":
+            return self._select_fixed_adapter(
+                adapter_name,
+                adapter_key="creative-lab-demo",
+                modality_label="creative lab",
+            )
+
         resolution = self.resolve_adapter(adapter_name)
         if resolution.selected is None:
             if resolution.requested != "auto":
@@ -253,6 +315,10 @@ class ImageEZOrchestrator:
         lane: str | None = None,
         target_formats: tuple[str, ...] | list[str] | None = None,
         source_mesh_path: str | Path | None = None,
+        aspect_ratio: str | None = None,
+        action_id: str | int | None = None,
+        creative_lab_flow: str | None = None,
+        creative_lab_stage: str | None = None,
     ) -> dict[str, Any]:
         pipeline_spec = build_pipeline_spec(
             input_modality=input_modality,
@@ -266,6 +332,10 @@ class ImageEZOrchestrator:
         if pipeline_spec.input_modality == "retexture" and primary_image is None:
             raise ValueError(
                 "Upload a texture reference image before running retexture."
+            )
+        if pipeline_spec.input_modality == "image-to-image" and primary_image is None:
+            raise ValueError(
+                "Upload a reference image before running image-to-image."
             )
 
         run_dir, manifest = self.store.create_run()
@@ -337,7 +407,12 @@ class ImageEZOrchestrator:
             processed_path: Path | None = None
             saved_views: dict[str, Path] = {}
 
-            if pipeline_spec.input_modality in ("image", "retexture"):
+            if pipeline_spec.input_modality in (
+                "image",
+                "retexture",
+                "image-to-image",
+                "creative-lab",
+            ) and primary_image is not None:
                 assert primary_image is not None
                 input_name = (
                     "texture_reference.png"
@@ -389,16 +464,26 @@ class ImageEZOrchestrator:
                         image.save(view_path)
                         saved_views[label] = view_path
                         self.store.record_artifact(manifest, f"view_{label}", view_path)
-            else:
+            elif pipeline_spec.input_modality in ("text", "text-to-image"):
                 prompt_path = self.store.artifact_path(run_dir, "inputs", "prompt.txt")
                 prompt_path.write_text(pipeline_spec.prompt_text + "\n", encoding="utf-8")
                 self.store.record_artifact(manifest, "prompt", prompt_path)
                 manifest.validation = {
-                    "input_modality": "text",
+                    "input_modality": pipeline_spec.input_modality,
                     "prompt_length": len(pipeline_spec.prompt_text),
                     "score": 100,
                     "messages": [],
                 }
+            else:
+                manifest.validation = {
+                    "input_modality": pipeline_spec.input_modality,
+                    "score": 100,
+                    "messages": [],
+                }
+                if pipeline_spec.prompt_text:
+                    prompt_path = self.store.artifact_path(run_dir, "inputs", "prompt.txt")
+                    prompt_path.write_text(pipeline_spec.prompt_text + "\n", encoding="utf-8")
+                    self.store.record_artifact(manifest, "prompt", prompt_path)
 
             if reference_brief:
                 source_brief = Path(reference_brief)
@@ -449,6 +534,10 @@ class ImageEZOrchestrator:
                     prompt_text=pipeline_spec.prompt_text,
                     export_formats=export_formats,
                     source_mesh_path=saved_source_mesh,
+                    aspect_ratio=aspect_ratio,
+                    action_id=action_id,
+                    creative_lab_flow=creative_lab_flow,
+                    creative_lab_stage=creative_lab_stage,
                 )
             )
 

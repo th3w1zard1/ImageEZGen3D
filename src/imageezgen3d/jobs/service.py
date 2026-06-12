@@ -49,6 +49,22 @@ class JobService:
                 mesh_path = Path(request.source_mesh_path)
                 if not mesh_path.is_file():
                     raise FileNotFoundError(f"Source mesh not found: {mesh_path}")
+        elif modality == "text-to-image":
+            if not (request.prompt_text or request.project_brief):
+                raise ValueError("text-to-image jobs require prompt_text.")
+        elif modality == "image-to-image":
+            if not request.image_path:
+                raise ValueError("image-to-image jobs require image_path.")
+        elif modality in ("rig", "animate"):
+            if request.source_mesh_path:
+                mesh_path = Path(request.source_mesh_path)
+                if not mesh_path.is_file():
+                    raise FileNotFoundError(f"Source mesh not found: {mesh_path}")
+        elif modality == "creative-lab":
+            if request.image_path:
+                image_path = Path(request.image_path)
+                if not image_path.is_file():
+                    raise FileNotFoundError(f"Image not found: {image_path}")
         record = self.job_store.create(request=request.to_dict())
         future = self._executor.submit(self._execute_job, record.job_id)
         self._futures[record.job_id] = future
@@ -158,6 +174,7 @@ class JobService:
         modality = (request.input_modality or "image").strip().lower()
         primary_image: Image.Image | None = None
         source_mesh_path: Path | None = None
+        prompt_text = request.prompt_text or request.project_brief
         if modality == "image":
             if not request.image_path:
                 raise ValueError("image_path is required for image modality jobs.")
@@ -181,6 +198,29 @@ class JobService:
                     raise FileNotFoundError(
                         f"Source mesh not found: {source_mesh_path}"
                     )
+        elif modality == "image-to-image":
+            if not request.image_path:
+                raise ValueError("image_path is required for image-to-image jobs.")
+            image_path = Path(request.image_path)
+            if not image_path.is_file():
+                raise FileNotFoundError(f"Image not found: {image_path}")
+            primary_image = Image.open(image_path)
+        elif modality == "creative-lab":
+            if request.image_path:
+                image_path = Path(request.image_path)
+                if not image_path.is_file():
+                    raise FileNotFoundError(f"Image not found: {image_path}")
+                primary_image = Image.open(image_path)
+        elif modality in ("rig", "animate"):
+            if request.source_mesh_path:
+                source_mesh_path = Path(request.source_mesh_path)
+                if not source_mesh_path.is_file():
+                    raise FileNotFoundError(
+                        f"Source mesh not found: {source_mesh_path}"
+                    )
+        elif modality == "text-to-image":
+            if not prompt_text:
+                raise ValueError("prompt_text is required for text-to-image jobs.")
         view_images: dict[str, Image.Image] = {}
         if request.view_image_paths:
             for label, path_str in request.view_image_paths.items():
@@ -198,10 +238,14 @@ class JobService:
             starter_flow_label=request.starter_flow_label,
             reference_brief=request.reference_brief,
             input_modality=modality,
-            prompt_text=request.prompt_text,
+            prompt_text=prompt_text,
             lane=request.lane,
             target_formats=request.target_formats,
             source_mesh_path=source_mesh_path,
+            aspect_ratio=request.aspect_ratio,
+            action_id=request.action_id,
+            creative_lab_flow=request.creative_lab_flow,
+            creative_lab_stage=request.creative_lab_stage,
         )
 
     def _mark_run_async_capable(self, run_id: str, job_id: str) -> None:
