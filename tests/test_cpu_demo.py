@@ -19,7 +19,17 @@ class CpuDemoTests(unittest.TestCase):
         orchestrator = ImageEZOrchestrator(AppConfig())
         self.assertEqual(
             orchestrator.adapter_choices(),
-            ["auto", "cpu-demo", "retexture-demo", "text-demo"],
+            [
+                "auto",
+                "animation-demo",
+                "cpu-demo",
+                "creative-lab-demo",
+                "image-to-image-demo",
+                "retexture-demo",
+                "rigging-demo",
+                "text-demo",
+                "text-to-image-demo",
+            ],
         )
 
     def test_adapter_choices_include_hunyuan_when_configured(self) -> None:
@@ -27,7 +37,18 @@ class CpuDemoTests(unittest.TestCase):
         orchestrator = ImageEZOrchestrator(config)
         self.assertEqual(
             orchestrator.adapter_choices(),
-            ["auto", "cpu-demo", "hunyuan-zerogpu", "retexture-demo", "text-demo"],
+            [
+                "auto",
+                "animation-demo",
+                "cpu-demo",
+                "creative-lab-demo",
+                "hunyuan-zerogpu",
+                "image-to-image-demo",
+                "retexture-demo",
+                "rigging-demo",
+                "text-demo",
+                "text-to-image-demo",
+            ],
         )
 
     def test_select_adapter_rejects_unconfigured_backend(self) -> None:

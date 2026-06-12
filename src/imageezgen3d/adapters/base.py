@@ -29,6 +29,10 @@ class GenerationRequest:
     prompt_text: str = ""
     export_formats: tuple[str, ...] | None = None
     source_mesh_path: Path | None = None
+    aspect_ratio: str | None = None
+    action_id: str | int | None = None
+    creative_lab_flow: str | None = None
+    creative_lab_stage: str | None = None
 
 
 @dataclass

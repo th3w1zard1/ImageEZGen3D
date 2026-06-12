@@ -15,6 +15,21 @@ class JobRequest:
     image_path: str | None = None
     texture_image_path: str | None = None
     source_mesh_path: str | None = None
+    aspect_ratio: str | None = None
+    action_id: str | int | None = None
+    creative_lab_flow: str | None = None
+    creative_lab_stage: str | None = None
+    task_type: str | None = None
+    topology: str | None = None
+    target_polycount: int | None = None
+    enable_pbr: bool | None = None
+    texture_prompt: str | None = None
+    mesh_input_path: str | None = None
+    mesh_output_path: str | None = None
+    resize_height: float | None = None
+    resize_longest_side: float | None = None
+    auto_size: bool | None = None
+    origin_at: str | None = None
     adapter_name: str | None = None
     quality: str | None = None
     lane: str | None = None
@@ -48,6 +63,30 @@ class JobRequest:
             payload["view_image_paths"] = dict(self.view_image_paths)
         if self.target_formats:
             payload["target_formats"] = list(self.target_formats)
+        for key in (
+            "aspect_ratio",
+            "action_id",
+            "creative_lab_flow",
+            "creative_lab_stage",
+            "task_type",
+            "topology",
+            "target_polycount",
+            "texture_prompt",
+            "mesh_input_path",
+            "mesh_output_path",
+            "origin_at",
+        ):
+            value = getattr(self, key)
+            if value is not None:
+                payload[key] = value
+        if self.enable_pbr is not None:
+            payload["enable_pbr"] = self.enable_pbr
+        if self.resize_height is not None:
+            payload["resize_height"] = self.resize_height
+        if self.resize_longest_side is not None:
+            payload["resize_longest_side"] = self.resize_longest_side
+        if self.auto_size is not None:
+            payload["auto_size"] = self.auto_size
         return payload
 
     @classmethod
@@ -58,6 +97,21 @@ class JobRequest:
             image_path=_optional_str(payload.get("image_path")),
             texture_image_path=_optional_str(payload.get("texture_image_path")),
             source_mesh_path=_optional_str(payload.get("source_mesh_path")),
+            aspect_ratio=_optional_str(payload.get("aspect_ratio")),
+            action_id=payload.get("action_id"),
+            creative_lab_flow=_optional_str(payload.get("creative_lab_flow")),
+            creative_lab_stage=_optional_str(payload.get("creative_lab_stage")),
+            task_type=_optional_str(payload.get("task_type")),
+            topology=_optional_str(payload.get("topology")),
+            target_polycount=_optional_int(payload.get("target_polycount")),
+            enable_pbr=_optional_bool(payload.get("enable_pbr")),
+            texture_prompt=_optional_str(payload.get("texture_prompt")),
+            mesh_input_path=_optional_str(payload.get("mesh_input_path")),
+            mesh_output_path=_optional_str(payload.get("mesh_output_path")),
+            resize_height=_optional_float(payload.get("resize_height")),
+            resize_longest_side=_optional_float(payload.get("resize_longest_side")),
+            auto_size=_optional_bool(payload.get("auto_size")),
+            origin_at=_optional_str(payload.get("origin_at")),
             adapter_name=_optional_str(payload.get("adapter_name")),
             quality=_optional_str(payload.get("quality")),
             lane=_optional_str(payload.get("lane")),
@@ -160,6 +214,29 @@ def _optional_int(value: object) -> int | None:
     if isinstance(value, float):
         return int(value)
     return int(str(value))
+
+
+def _optional_bool(value: object) -> bool | None:
+    if value is None or value == "":
+        return None
+    if isinstance(value, bool):
+        return value
+    normalized = str(value).strip().lower()
+    if normalized in ("1", "true", "yes", "on"):
+        return True
+    if normalized in ("0", "false", "no", "off"):
+        return False
+    return None
+
+
+def _optional_float(value: object) -> float | None:
+    if value is None or value == "":
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    return float(str(value))
 
 
 

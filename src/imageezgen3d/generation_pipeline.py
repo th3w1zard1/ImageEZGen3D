@@ -5,7 +5,16 @@ from typing import Any, Literal
 
 from .export_tiers import DECIMATION_TARGET_BY_QUALITY, resolve_decimation_target
 
-InputModality = Literal["image", "text", "retexture"]
+InputModality = Literal[
+    "image",
+    "text",
+    "retexture",
+    "text-to-image",
+    "image-to-image",
+    "rig",
+    "animate",
+    "creative-lab",
+]
 GenerationLane = Literal["draft", "production", "preview", "refine"]
 StageName = Literal["shape", "texture", "pbr", "export"]
 StageStatus = Literal["pending", "running", "succeeded", "skipped", "failed"]
@@ -205,22 +214,28 @@ def build_pipeline_spec(
     prompt_text: str | None,
     default_quality: str = "draft",
 ) -> GenerationPipelineSpec:
-    modality_raw = (input_modality or "image").strip().lower()
-    if modality_raw == "text":
-        modality: InputModality = "text"
-    elif modality_raw == "retexture":
-        modality = "retexture"
-    else:
-        modality = "image"
+    modality_raw = (input_modality or "image").strip().lower().replace("_", "-")
+    modality_map: dict[str, InputModality] = {
+        "text": "text",
+        "retexture": "retexture",
+        "text-to-image": "text-to-image",
+        "image-to-image": "image-to-image",
+        "rig": "rig",
+        "rigging": "rig",
+        "animate": "animate",
+        "animation": "animate",
+        "creative-lab": "creative-lab",
+    }
+    modality: InputModality = modality_map.get(modality_raw, "image")
     lane_value, quality_value = resolve_lane_and_quality(
         lane=lane,
         quality=quality,
         default_quality=default_quality,
     )
     prompt = (prompt_text or "").strip()
-    if modality == "text" and not prompt:
-        raise ValueError("Enter a text prompt before generating from text.")
-    if modality in ("image", "retexture"):
+    if modality in ("text", "text-to-image") and not prompt:
+        raise ValueError("Enter a text prompt before generating.")
+    if modality in ("image", "retexture", "image-to-image", "creative-lab"):
         prompt = prompt  # optional context from brief; stored when non-empty
 
     return GenerationPipelineSpec(

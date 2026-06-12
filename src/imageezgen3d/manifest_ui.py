@@ -18,6 +18,11 @@ _BACKEND_LABELS: dict[str, str] = {
     "text-demo": "Text-to-3D Stub",
     "text-neural": "Text-to-3D Neural",
     "retexture-demo": "Retexture Demo",
+    "text-to-image-demo": "Text-to-Image Demo",
+    "image-to-image-demo": "Image-to-Image Demo",
+    "rigging-demo": "Rigging Demo",
+    "animation-demo": "Animation Demo",
+    "creative-lab-demo": "Creative Lab Demo",
     "hunyuan-zerogpu": "Hosted ZeroGPU",
     "auto": "Auto",
 }
@@ -66,6 +71,16 @@ def modality_label(modality: str | None) -> str:
         return "Text prompt"
     if normalized == "retexture":
         return "Retexture"
+    if normalized == "text-to-image":
+        return "Text-to-image"
+    if normalized == "image-to-image":
+        return "Image-to-image"
+    if normalized in ("rig", "rigging"):
+        return "Rigging"
+    if normalized in ("animate", "animation"):
+        return "Animation"
+    if normalized == "creative-lab":
+        return "Creative Lab"
     return "Image"
 
 

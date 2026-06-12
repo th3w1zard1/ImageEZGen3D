@@ -7,6 +7,7 @@ from pathlib import Path
 from PIL import Image, ImageStat
 
 from .base import AdapterCapabilities, GenerationRequest, GenerationResult
+from .demo_helpers import fuse_multi_view_color
 from ..config import load_config
 from ..export_tiers import build_export_sidecar
 from ..exporters import export_all, make_box_mesh, mesh_topology
@@ -39,7 +40,12 @@ class CpuDemoAdapter:
     def generate(self, request: GenerationRequest) -> GenerationResult:
         image = Image.open(request.processed_image).convert("RGB")
         stat = ImageStat.Stat(image.resize((64, 64)))
-        red, green, blue = [channel / 255 for channel in stat.mean]
+        red, green, blue = fuse_multi_view_color(
+            stat,
+            request.view_images,
+            fallback=(stat.mean[0], stat.mean[1], stat.mean[2]),
+        )
+        red, green, blue = [channel / 255 for channel in (red, green, blue)]
         width, height = image.size
         aspect = max(0.55, min(1.8, width / max(1, height)))
         view_bonus = min(
@@ -47,6 +53,9 @@ class CpuDemoAdapter:
             len([path for path in request.view_images.values() if path.exists()])
             * 0.07,
         )
+        multi_view_fusion = len(
+            [path for path in request.view_images.values() if path.exists()]
+        ) >= 2
         quality_height = {"draft": 0.85, "balanced": 1.0, "high": 1.15}.get(
             request.quality, 0.9
         )
@@ -113,6 +122,7 @@ class CpuDemoAdapter:
                 "view_count": len(
                     [path for path in request.view_images.values() if path.exists()]
                 ),
+                "multi_view_fusion": multi_view_fusion,
                 "quality": request.quality,
                 "decimation_target": request.decimation_target,
                 "face_count": face_count,
