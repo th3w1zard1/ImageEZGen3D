@@ -13,6 +13,8 @@ class JobRequest:
     input_modality: str = "image"
     prompt_text: str | None = None
     image_path: str | None = None
+    texture_image_path: str | None = None
+    source_mesh_path: str | None = None
     adapter_name: str | None = None
     quality: str | None = None
     lane: str | None = None
@@ -30,6 +32,8 @@ class JobRequest:
             "input_modality": self.input_modality,
             "prompt_text": self.prompt_text,
             "image_path": self.image_path,
+            "texture_image_path": self.texture_image_path,
+            "source_mesh_path": self.source_mesh_path,
             "adapter_name": self.adapter_name,
             "quality": self.quality,
             "lane": self.lane,
@@ -52,6 +56,8 @@ class JobRequest:
             input_modality=str(payload.get("input_modality") or "image"),
             prompt_text=_optional_str(payload.get("prompt_text")),
             image_path=_optional_str(payload.get("image_path")),
+            texture_image_path=_optional_str(payload.get("texture_image_path")),
+            source_mesh_path=_optional_str(payload.get("source_mesh_path")),
             adapter_name=_optional_str(payload.get("adapter_name")),
             quality=_optional_str(payload.get("quality")),
             lane=_optional_str(payload.get("lane")),

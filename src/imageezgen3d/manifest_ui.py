@@ -17,6 +17,7 @@ _BACKEND_LABELS: dict[str, str] = {
     "cpu-demo": "Local CPU Preview",
     "text-demo": "Text-to-3D Stub",
     "text-neural": "Text-to-3D Neural",
+    "retexture-demo": "Retexture Demo",
     "hunyuan-zerogpu": "Hosted ZeroGPU",
     "auto": "Auto",
 }
@@ -60,8 +61,11 @@ def lane_label(lane_name: str | None) -> str:
 
 
 def modality_label(modality: str | None) -> str:
-    if (modality or "").strip().lower() == "text":
+    normalized = (modality or "").strip().lower()
+    if normalized == "text":
         return "Text prompt"
+    if normalized == "retexture":
+        return "Retexture"
     return "Image"
 
 

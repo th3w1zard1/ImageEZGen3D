@@ -39,6 +39,16 @@ class JobService:
             request.target_formats,
             self.config.exports.formats,
         )
+        modality = (request.input_modality or "image").strip().lower()
+        if modality == "retexture":
+            if not request.texture_image_path and not request.image_path:
+                raise ValueError(
+                    "Retexture jobs require texture_image_path or image_path."
+                )
+            if request.source_mesh_path:
+                mesh_path = Path(request.source_mesh_path)
+                if not mesh_path.is_file():
+                    raise FileNotFoundError(f"Source mesh not found: {mesh_path}")
         record = self.job_store.create(request=request.to_dict())
         future = self._executor.submit(self._execute_job, record.job_id)
         self._futures[record.job_id] = future
@@ -147,6 +157,7 @@ class JobService:
     def _run_generation(self, request: JobRequest) -> dict[str, Any]:
         modality = (request.input_modality or "image").strip().lower()
         primary_image: Image.Image | None = None
+        source_mesh_path: Path | None = None
         if modality == "image":
             if not request.image_path:
                 raise ValueError("image_path is required for image modality jobs.")
@@ -154,6 +165,22 @@ class JobService:
             if not image_path.is_file():
                 raise FileNotFoundError(f"Image not found: {image_path}")
             primary_image = Image.open(image_path)
+        elif modality == "retexture":
+            texture_path_str = request.texture_image_path or request.image_path
+            if not texture_path_str:
+                raise ValueError(
+                    "texture_image_path or image_path is required for retexture jobs."
+                )
+            texture_path = Path(texture_path_str)
+            if not texture_path.is_file():
+                raise FileNotFoundError(f"Texture image not found: {texture_path}")
+            primary_image = Image.open(texture_path)
+            if request.source_mesh_path:
+                source_mesh_path = Path(request.source_mesh_path)
+                if not source_mesh_path.is_file():
+                    raise FileNotFoundError(
+                        f"Source mesh not found: {source_mesh_path}"
+                    )
         view_images: dict[str, Image.Image] = {}
         if request.view_image_paths:
             for label, path_str in request.view_image_paths.items():
@@ -174,6 +201,7 @@ class JobService:
             prompt_text=request.prompt_text,
             lane=request.lane,
             target_formats=request.target_formats,
+            source_mesh_path=source_mesh_path,
         )
 
     def _mark_run_async_capable(self, run_id: str, job_id: str) -> None:

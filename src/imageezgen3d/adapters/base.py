@@ -28,6 +28,7 @@ class GenerationRequest:
     lane: str = "draft"
     prompt_text: str = ""
     export_formats: tuple[str, ...] | None = None
+    source_mesh_path: Path | None = None
 
 
 @dataclass
