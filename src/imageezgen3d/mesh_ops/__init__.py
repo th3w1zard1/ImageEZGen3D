@@ -1,9 +1,3 @@
-"""Blender-grade mesh operations toolset (trimesh core, optional backends).
-
-Meshy-parity ops: remesh, convert, resize, analyze/repair printability.
-Blender-parity extras: booleans, UV unwrap.
-"""
-
 from __future__ import annotations
 
 from .backends import (

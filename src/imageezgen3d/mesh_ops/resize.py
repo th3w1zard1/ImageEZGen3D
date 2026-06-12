@@ -1,10 +1,3 @@
-"""Resize mesh op (Meshy Resize parity, local implementation).
-
-Mirrors Meshy's parameter contract: exactly one of resize_height,
-resize_longest_side, or auto_size must be provided. auto_size here is an
-honest heuristic (longest side scaled to 1.0 m) — not AI vision estimation.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field

@@ -1,9 +1,3 @@
-"""Boolean mesh ops (Blender-parity extra; not part of the Meshy surface).
-
-Requires a boolean engine: manifold3d (pip install manifold3d) or a Blender
-executable on PATH. Degrades with an explicit backend error otherwise.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field

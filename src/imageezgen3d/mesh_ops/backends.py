@@ -1,11 +1,3 @@
-"""Backend probes and mesh IO helpers for the mesh_ops toolset.
-
-trimesh is the core backend. Optional backends (manifold3d, xatlas, bpy,
-a Blender executable) unlock booleans, UV unwrap, and quad remeshing; every
-probe is runtime-checked so hosted deployments degrade honestly instead of
-failing at import time.
-"""
-
 from __future__ import annotations
 
 import importlib.util

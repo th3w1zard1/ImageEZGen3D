@@ -1,5 +1,3 @@
-"""Format conversion mesh op (Meshy Convert parity, local implementation)."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field

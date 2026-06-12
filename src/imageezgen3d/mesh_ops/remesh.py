@@ -1,11 +1,3 @@
-"""Remesh mesh op (Meshy Remesh parity, local implementation).
-
-Triangle remeshing to a target polycount is real on CPU: subdivision to
-densify when the target exceeds the current count, quadric decimation
-(fast-simplification via trimesh) to reduce. Quad topology requires a
-Blender (bpy) backend; without it the op falls back to triangles and says so.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field

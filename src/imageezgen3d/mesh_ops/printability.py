@@ -1,11 +1,3 @@
-"""Printability analyze/repair mesh ops (Meshy 3D-print parity, local).
-
-Analysis mirrors Meshy's report fields: is_watertight, volume,
-non_manifold_edges, degenerate_faces, holes, plus error/warning rollups.
-Repair fixes what trimesh can fix deterministically on CPU: merge vertices,
-drop degenerate/duplicate faces, fill simple holes, fix winding and normals.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field

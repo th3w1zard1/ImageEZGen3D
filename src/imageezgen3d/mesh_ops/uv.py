@@ -1,10 +1,3 @@
-"""UV unwrap mesh op (Blender-parity extra; not part of the Meshy surface).
-
-Uses xatlas (pip install xatlas) when available. A bpy smart-projection
-backend is documented but not bundled; without a backend the op reports
-exactly why it cannot run.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
