@@ -287,7 +287,7 @@ class MeshyAdapterJobServiceTests(unittest.TestCase):
             creative_lab_stage="build",
         )
         restored = JobRequest.from_dict(request.to_dict())
-        self.assertEqual(restored.action_id, "walk")
+        self.assertEqual(restored.action_id, "Walking_man")
         self.assertEqual(restored.aspect_ratio, "16:9")
         self.assertEqual(restored.creative_lab_flow, "lamp")
         self.assertEqual(restored.creative_lab_stage, "build")
