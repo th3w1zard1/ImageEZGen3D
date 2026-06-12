@@ -12,9 +12,16 @@ from ..config import AppConfig, load_config
 from ..delivery_exports import resolve_target_export_formats
 from ..orchestrator import ImageEZOrchestrator
 from ..storage import atomic_write_json
+from .mesh_op_runner import run_mesh_op_job
+from .meshy_api import meshy_webhook_payload
 from .models import JobPollResponse, JobRequest, JobRecord, JobStatus
 from .store import JobStore
 from .webhooks import deliver_webhook
+
+
+_MESH_OP_MODALITIES = frozenset(
+    {"remesh", "convert", "resize", "print-analyze", "print-repair"}
+)
 
 
 class JobService:
@@ -65,6 +72,15 @@ class JobService:
                 image_path = Path(request.image_path)
                 if not image_path.is_file():
                     raise FileNotFoundError(f"Image not found: {image_path}")
+        elif modality in _MESH_OP_MODALITIES:
+            mesh_path_str = request.mesh_input_path or request.source_mesh_path
+            if not mesh_path_str:
+                raise ValueError(
+                    f"{modality} jobs require mesh_input_path or model_url."
+                )
+            mesh_path = Path(mesh_path_str)
+            if not mesh_path.is_file():
+                raise FileNotFoundError(f"Mesh input not found: {mesh_path}")
         record = self.job_store.create(request=request.to_dict())
         future = self._executor.submit(self._execute_job, record.job_id)
         self._futures[record.job_id] = future
@@ -227,6 +243,8 @@ class JobService:
                 view_path = Path(path_str)
                 if view_path.is_file():
                     view_images[label] = Image.open(view_path)
+        if modality in _MESH_OP_MODALITIES:
+            return run_mesh_op_job(self.run_store, request)
         return self.orchestrator.generate(
             primary_image,
             view_images=view_images or None,
@@ -256,8 +274,11 @@ class JobService:
             return
         payload = json.loads(manifest_path.read_text(encoding="utf-8"))
         parameters = payload.setdefault("parameters", {})
-        generation = parameters.setdefault("generation", {})
-        generation["async_capable"] = True
+        generation = parameters.get("generation")
+        if isinstance(generation, dict):
+            generation["async_capable"] = True
+        else:
+            parameters["generation"] = {"async_capable": True}
         parameters["job_id"] = job_id
         atomic_write_json(manifest_path, payload)
 
@@ -272,12 +293,25 @@ class JobService:
     ) -> tuple[bool | None, str | None]:
         if not record.webhook_url:
             return None, None
-        body = {
+        request = JobRequest.from_dict(record.request)
+        legacy_body = {
             "job_id": record.job_id,
             "status": status,
             "run_id": run_id,
             "error": error,
             "result": result if status == "succeeded" else None,
         }
+        if request.task_type:
+            body = meshy_webhook_payload(
+                task_kind=request.task_type,
+                job_id=record.job_id,
+                status=status,
+                run_id=run_id,
+                error=error,
+                result=result if status == "succeeded" else None,
+            )
+            body["legacy"] = legacy_body
+        else:
+            body = legacy_body
         delivered, webhook_error = deliver_webhook(record.webhook_url, body)
         return delivered, webhook_error
