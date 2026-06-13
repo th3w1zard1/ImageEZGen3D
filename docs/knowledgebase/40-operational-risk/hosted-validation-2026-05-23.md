@@ -858,6 +858,19 @@ After Phase 24 merge (`a852b5b` on `main`, PR #171) and Hub deploy commit `a1491
 - **g7_false_neural_guard_ok:** true on all runs
 - **G7/G8/G9:** remain **OPEN**
 
+## Post-deploy browser attestation Phase 26 (P10 gap)
+
+After Phase 25 merge (`78b5ca3` on `main`, PR #172) against Hub deploy commit `a1491116013b420d4c38a964df053b476ce2e19f` (2026-06-13):
+
+- **Space:** https://th3w1zard1-imageezgen3d.hf.space/
+- **Method:** Playwright browser E2E (headless) — upload Block sample (`assets/examples/teal_block.png`), click **Generate Mesh**, wait for completion
+- **Run id:** `20260613-095610-69c9a820`
+- **Quality intake:** Create tab shows fallback honesty (`CPU preview fallback is active`, `Local CPU Preview` backend)
+- **Artifacts verified:** manifest ☑ GLB ☑ OBJ ☑ (visible in browser UI after generation)
+- **Evidence:** Playwright screenshot `phase26-browser-run.png` (operator-local); complements Phase 25 Gradio API guard stack
+- **Mode:** hosted **CPU fallback**; **not** ZeroGPU/Hunyuan neural validation
+- **G7/G8/G9:** remain **OPEN**
+
 ## Plan 017 validation (manifest-driven UI)
 
 After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b5780929360d96e2ab6f5c197a20a3fe` (2026-05-24):

@@ -59,6 +59,6 @@ Copy into PR descriptions, session notes, or parity register updates after a hos
 
 ## Caveats
 
-- `[REPO]` Hosted CPU fallback validated 2026-05-24 (Block sample, run `20260524-084947-19c70f8f`); see [hosted-validation-2026-05-23.md](hosted-validation-2026-05-23.md).
+- `[REPO]` Hosted CPU fallback validated 2026-06-13 (Block browser E2E, run `20260613-095610-69c9a820`, deploy `a149111`); prior API attestation 2026-05-24 (run `20260524-084947-19c70f8f`); see [hosted-validation-2026-05-23.md](hosted-validation-2026-05-23.md) § Phase 26.
 - `[OPEN]` Hosted ZeroGPU path not verified — adapter remains disabled on Space.
 - Local GPU row applies only when a real GPU adapter is enabled; current default adapter set is cpu-demo + disabled hunyuan placeholder.
