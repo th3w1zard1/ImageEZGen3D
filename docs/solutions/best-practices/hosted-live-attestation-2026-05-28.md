@@ -51,8 +51,12 @@ After Meshy program closure and Phase 20 Gradio index repair (PR #167, #168 on `
 | 24 | Export-tier draft | `20260613-092107-3a5c8011` | Hosted CPU fallback |
 | 24 | Export-tier balanced | `20260613-092112-8764015f` | Hosted CPU fallback |
 | 24 | G7 live probe + preflight bundle | (probe record) | Space rejected `hunyuan-zerogpu`; bundle ok |
+| 25 | Hub redeploy | `a1491116013b420d4c38a964df053b476ce2e19f` | PR #167 server fixes on Space |
+| 25 | Golden smoke (Block) | `20260613-092927-c307caa4` | Hosted CPU fallback |
+| 25 | Golden smoke (Vase) | `20260613-092931-a8c0384d` | Hosted CPU fallback |
+| 25 | Export-tier draft/balanced | `20260613-092936-9c10235e` / `20260613-092940-bfbd5e37` | Hosted CPU fallback |
 
-Details: [hosted-validation-2026-05-23.md](../../knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md) § Phase 20–24. **G7/G8/G9 remain OPEN** — not G7 PASS.
+Details: [hosted-validation-2026-05-23.md](../../knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md) § Phase 20–25. **G7/G8/G9 remain OPEN** — not G7 PASS.
 
 ## Local replay commands
 

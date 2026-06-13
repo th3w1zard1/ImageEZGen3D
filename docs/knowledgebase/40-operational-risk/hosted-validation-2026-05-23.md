@@ -842,6 +842,22 @@ After Phase 23 merge (`1c49162` on `main`, PR #170), attestation against existin
 - **g7_false_neural_guard_ok:** true on golden and export-tier runs
 - **G7/G8/G9:** remain **OPEN**
 
+## Space redeploy + guard stack Phase 25 (post PR #167 server fixes)
+
+After Phase 24 merge (`a852b5b` on `main`, PR #171) and Hub deploy commit `a1491116013b420d4c38a964df053b476ce2e19f` (2026-06-13):
+
+- **Deploy:** `hf_space_sync.py --execute` — lands server-side Gradio layout + manifest validation from PR #167
+- **Space:** https://th3w1zard1-imageezgen3d.hf.space/
+- **Block run id:** `20260613-092927-c307caa4` — golden smoke + verify → ok
+- **Vase run id:** `20260613-092931-a8c0384d` — golden smoke + verify → ok
+- **Export-tier draft:** `20260613-092936-9c10235e` — export-tier smoke + verify → ok
+- **Export-tier balanced:** `20260613-092940-bfbd5e37` — same path → ok
+- **Preflight bundle:** `hunyuan_preflight_bundle.py` → ok (`configured=False`, G7/G8/G9 OPEN)
+- **G7 live probe:** `hosted_probe.ok=true` (Space rejected `hunyuan-zerogpu` while disabled)
+- **Mode:** hosted **CPU fallback**; **not** ZeroGPU/Hunyuan neural validation
+- **g7_false_neural_guard_ok:** true on all runs
+- **G7/G8/G9:** remain **OPEN**
+
 ## Plan 017 validation (manifest-driven UI)
 
 After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b5780929360d96e2ab6f5c197a20a3fe` (2026-05-24):
