@@ -9,6 +9,7 @@ from pathlib import Path
 _MESHY_PYTEST_MODULES = (
     "tests/test_credits.py",
     "tests/test_meshy_http_api.py",
+    "tests/test_meshy_parity_matrix.py",
     "tests/test_workspace_ui.py",
     "tests/test_app.py",
 )

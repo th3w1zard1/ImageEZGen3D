@@ -1,7 +1,7 @@
 # Meshy Parity Matrix
 
 Maps each Meshy capability to the ImageEZGen3D module that implements it locally.
-Updated after Meshy Parity program Phases U–7 (2026-06-13).
+Updated after Meshy Parity program Phases U–18 (2026-06-13): first closure U–7, second wave 12–18 (multi-image API, boolean + multi-color jobs/viewer, hosted re-attestation).
 
 Status values:
 
@@ -40,7 +40,7 @@ Status values:
 | PBR maps (`enable_pbr`) | — | `pbr_map_exports.py` | **real** (reference-grade maps) |
 | Gradio workspace (Model/Image/Print/Animate/Assets) | — | `app.py`, `workspace_ui.py` | **real** (Phase 6) |
 | Model Helper + bear-warrior preset | — | `workspace_ui.py` | **real** |
-| Viewer action bar (Retry, Remesh, UV, …) | — | `app.py`, `workspace_ui.py` | **real** (preview buttons queue jobs or refresh downloads; Retry replays last generate snapshot; Multi-Color 3MF queues `print-multi-color`) |
+| Viewer action bar (Retry, Remesh, UV, boolean, …) | — | `app.py`, `workspace_ui.py` | **real** (all chips wired; `VIEWER_ACTION_STUBS` empty — mesh-ops, boolean second-mesh picker, retexture, Retry/Download, Send to Print/Animate) |
 | Assets gallery (search, phase filters) | — | `app.py`, `workspace_ui.py` | **real** (search, phase filters, grouped gallery; reopen via Open Run) |
 
 Beyond-Meshy extras (Blender-parity):
