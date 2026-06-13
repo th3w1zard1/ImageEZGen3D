@@ -1,0 +1,53 @@
+from __future__ import annotations
+
+import tempfile
+import unittest
+from pathlib import Path
+
+from imageezgen3d.config import AppConfig, AppSettings, StorageSettings
+from imageezgen3d.exporters import make_box_mesh, write_glb
+from imageezgen3d.jobs import JobService
+from imageezgen3d.jobs.gradio_bridge import (
+    build_mesh_op_job_request,
+    run_via_job_queue,
+)
+
+
+class GradioMeshOpBridgeTests(unittest.TestCase):
+    def test_build_mesh_op_job_request_sets_remesh_defaults(self) -> None:
+        request = build_mesh_op_job_request("remesh", "/tmp/mesh.glb")
+        self.assertEqual(request.input_modality, "remesh")
+        self.assertEqual(request.mesh_input_path, "/tmp/mesh.glb")
+        self.assertEqual(request.target_polycount, 30_000)
+
+    def test_build_mesh_op_job_request_normalizes_modality(self) -> None:
+        request = build_mesh_op_job_request(" Print-Analyze ", "/tmp/mesh.glb")
+        self.assertEqual(request.input_modality, "print-analyze")
+        self.assertIsNone(request.target_polycount)
+
+    def test_run_remesh_via_job_queue_returns_glb(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            config = AppConfig(
+                app=AppSettings(output_dir=Path(directory)),
+                storage=StorageSettings(retention_runs=10),
+            )
+            input_glb = Path(directory) / "input.glb"
+            write_glb(
+                make_box_mesh(1.0, 0.74, 1.35, (0.12, 0.58, 0.55, 1.0)),
+                input_glb,
+            )
+            service = JobService(config, max_workers=1)
+            try:
+                request = build_mesh_op_job_request("remesh", str(input_glb))
+                result = run_via_job_queue(service, request, timeout_seconds=120.0)
+                self.assertIn("glb", result["artifacts"])
+                self.assertEqual(
+                    result["parameters"].get("input_modality"),
+                    "remesh",
+                )
+            finally:
+                service.shutdown(wait=True)
+
+
+if __name__ == "__main__":
+    unittest.main()
