@@ -827,6 +827,21 @@ After Phase 22 merge (`b350957` on `main`, PR #169), attestation against existin
 - **g7_false_neural_guard_ok:** true on Block and Vase runs
 - **G7/G8/G9:** remain **OPEN**
 
+## Full hosted guard stack re-attestation Phase 24
+
+After Phase 23 merge (`1c49162` on `main`, PR #170), attestation against existing Space deploy commit `e368ad8003640e0d81545d92ae0e536195d7d9b6` (2026-06-13; no redeploy):
+
+- **Space:** https://th3w1zard1-imageezgen3d.hf.space/
+- **Block run id:** `20260613-092056-22306a7d` — `hosted_golden_smoke.py` + `verify_hosted_golden_smoke_record.py` → ok
+- **Vase run id:** `20260613-092102-ca6e72c5` — same golden smoke path → ok
+- **Export-tier draft:** `20260613-092107-3a5c8011` — `hosted_export_tier_smoke.py` + verify → ok
+- **Export-tier balanced:** `20260613-092112-8764015f` — same export-tier path → ok
+- **Preflight bundle:** `hunyuan_preflight_bundle.py --record-dir /tmp/p24-preflight` → ok (`configured=False`, G7/G8/G9 OPEN)
+- **G7 live probe:** `hunyuan_g7_preflight.py --live-probe` → `hosted_probe.ok=true` (CLI: `hosted_probe_ok=`; Space rejected `hunyuan-zerogpu` while disabled)
+- **Mode:** hosted **CPU fallback** (`Local CPU Preview` / `cpu-demo`); **not** ZeroGPU/Hunyuan neural validation
+- **g7_false_neural_guard_ok:** true on golden and export-tier runs
+- **G7/G8/G9:** remain **OPEN**
+
 ## Plan 017 validation (manifest-driven UI)
 
 After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b5780929360d96e2ab6f5c197a20a3fe` (2026-05-24):

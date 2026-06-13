@@ -28,7 +28,7 @@ PYTHONPATH=src python scripts/hunyuan_admission_audit.py
 PYTHONPATH=src python scripts/hunyuan_admission_audit.py --json
 ```
 
-**Last audit:** 2026-06-13 — Phase 20–23 on `main` (PR #167–#169 + Phase 23 guard re-attestation); adapter `configured=False`; **G1–G6 PASS**; G7/G8/G9 **OPEN**; golden hosted smoke + G7 live probe re-attested; capstone blocker `configured_adapter_neural_forward_not_ready` on non-tier-C hosts. Prior audit 2026-05-28 (Plans 078–112). Scheduled smoke runs the full guard stack while disabled — see [hosted-smoke-guard-stack-2026-05-28.md](../solutions/best-practices/hosted-smoke-guard-stack-2026-05-28.md) and live attestation index [hosted-live-attestation-2026-05-28.md](../solutions/best-practices/hosted-live-attestation-2026-05-28.md). G7 entry point: [g7-enablement-readiness-2026-05-28.md](../solutions/best-practices/g7-enablement-readiness-2026-05-28.md).
+**Last audit:** 2026-06-13 — Phase 20–24 on `main` (PR #167–#170 + Phase 24 full guard stack re-attestation); adapter `configured=False`; **G1–G6 PASS**; G7/G8/G9 **OPEN**; golden + export-tier + preflight bundle re-attested on live Space; capstone blocker `configured_adapter_neural_forward_not_ready` on non-tier-C hosts. Prior audit 2026-05-28 (Plans 078–112). Scheduled smoke runs the full guard stack while disabled — see [hosted-smoke-guard-stack-2026-05-28.md](../solutions/best-practices/hosted-smoke-guard-stack-2026-05-28.md) and live attestation index [hosted-live-attestation-2026-05-28.md](../solutions/best-practices/hosted-live-attestation-2026-05-28.md). G7 entry point: [g7-enablement-readiness-2026-05-28.md](../solutions/best-practices/g7-enablement-readiness-2026-05-28.md).
 
 ## Completed prerequisites
 

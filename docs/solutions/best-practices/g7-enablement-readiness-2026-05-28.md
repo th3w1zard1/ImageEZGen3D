@@ -36,6 +36,8 @@ Export-tier hosted smoke re-attested after Meshy program closure; Hunyuan capsto
 
 **Phase 23 (2026-06-13):** Golden smoke Block/Vase + G7 live probe re-attested after Phase 22 merge; see hosted-validation § Phase 23.
 
+**Phase 24 (2026-06-13):** Full guard stack (golden + export-tier + preflight bundle + G7 live probe) re-attested; see hosted-validation § Phase 24.
+
 ## Recommended next execution slice
 
 1. Run `PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-dir .` locally (do not commit output JSON).
