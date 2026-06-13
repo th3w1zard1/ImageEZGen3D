@@ -1215,7 +1215,7 @@ def build_demo():
                                     variant="secondary",
                                     elem_classes="viewer-mesh-op-btn",
                                 )
-                            viewer_action_stubs = gr.HTML(
+                            gr.HTML(
                                 _workspace_ui.viewer_action_stub_bar_html(),
                             )
 
