@@ -510,9 +510,10 @@ def _meshy_lane_panel_html(lane_key: str) -> str:
         ),
         "print": (
             "Print lane",
-            "Printability analyze and repair",
-            "Analyze printability is free in the Meshy pricing table; repair costs 10 credits "
-            "and maps to mesh_ops printability helpers.",
+            "Printability analyze, repair, and multi-color 3MF",
+            "Analyze printability is free in the Meshy pricing table; repair and multi-color "
+            "3MF export cost 10 credits each and map to mesh_ops printability and "
+            "multi_color_print helpers.",
         ),
         "animate": (
             "Animate lane",
@@ -1219,6 +1220,11 @@ def build_demo():
                                 )
                                 viewer_repair_btn = gr.Button(
                                     "Repair Print",
+                                    variant="secondary",
+                                    elem_classes="viewer-mesh-op-btn",
+                                )
+                                viewer_multi_color_btn = gr.Button(
+                                    "Multi-Color 3MF",
                                     variant="secondary",
                                     elem_classes="viewer-mesh-op-btn",
                                 )
@@ -2145,6 +2151,7 @@ def build_demo():
             (viewer_remesh_btn, "remesh"),
             (viewer_analyze_btn, "print-analyze"),
             (viewer_repair_btn, "print-repair"),
+            (viewer_multi_color_btn, "print-multi-color"),
             (viewer_unwrap_btn, "unwrap-uv"),
         ):
             mesh_op_button.click(

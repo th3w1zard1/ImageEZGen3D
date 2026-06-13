@@ -401,6 +401,8 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         source = Path(app.__file__).read_text(encoding="utf-8")
         self.assertIn("viewer_unwrap_btn", source)
         self.assertIn("viewer_retexture_btn", source)
+        self.assertIn("viewer_multi_color_btn", source)
+        self.assertIn("print-multi-color", source)
         self.assertIn("run_viewer_retexture", source)
         self.assertIn("build_retexture_job_request", source)
 

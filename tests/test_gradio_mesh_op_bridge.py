@@ -31,6 +31,10 @@ class GradioMeshOpBridgeTests(unittest.TestCase):
         self.assertEqual(request.input_modality, "print-analyze")
         self.assertIsNone(request.target_polycount)
 
+    def test_build_mesh_op_job_request_accepts_print_multi_color(self) -> None:
+        request = build_mesh_op_job_request("print-multi-color", "/tmp/mesh.glb")
+        self.assertEqual(request.input_modality, "print-multi-color")
+
     def test_build_mesh_op_job_request_stages_boolean_second_mesh(self) -> None:
         request = build_mesh_op_job_request(
             "boolean-difference",
@@ -112,6 +116,32 @@ class GradioMeshOpBridgeTests(unittest.TestCase):
                 self.assertEqual(
                     result["parameters"].get("input_modality"),
                     "remesh",
+                )
+            finally:
+                service.shutdown(wait=True)
+
+    def test_run_print_multi_color_via_job_queue_returns_3mf(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            config = AppConfig(
+                app=AppSettings(output_dir=Path(directory)),
+                storage=StorageSettings(retention_runs=10),
+            )
+            input_glb = Path(directory) / "input.glb"
+            write_glb(
+                make_box_mesh(1.0, 0.74, 1.35, (0.12, 0.58, 0.55, 1.0)),
+                input_glb,
+            )
+            service = JobService(config, max_workers=1)
+            try:
+                request = build_mesh_op_job_request(
+                    "print-multi-color",
+                    str(input_glb),
+                )
+                result = run_via_job_queue(service, request, timeout_seconds=120.0)
+                self.assertIn("3mf", result["artifacts"])
+                self.assertEqual(
+                    result["parameters"].get("input_modality"),
+                    "print-multi-color",
                 )
             finally:
                 service.shutdown(wait=True)
