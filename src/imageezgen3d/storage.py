@@ -173,6 +173,11 @@ class RunStore:
                     or parameters.get("starter_flow"),
                     "project_brief": parameters.get("project_brief"),
                     "fallback_reason": parameters.get("fallback_reason"),
+                    "input_modality": str(
+                        parameters.get("input_modality")
+                        or parameters.get("task_type")
+                        or "image"
+                    ),
                     "manifest": self.artifact_value(artifacts.get("manifest"))
                     or self.artifact_value(manifest_path),
                     "glb": self.artifact_value(artifacts.get("glb")),

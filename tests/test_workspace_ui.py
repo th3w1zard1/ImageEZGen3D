@@ -59,6 +59,43 @@ class WorkspaceUiTests(unittest.TestCase):
         self.assertIn("600", html)
         self.assertIn("triangle", html)
 
+    def test_filter_asset_runs_by_phase_and_search(self) -> None:
+        runs = [
+            {
+                "run_id": "run-gen",
+                "adapter": "cpu-demo",
+                "starter_flow": "Block",
+                "input_modality": "image",
+            },
+            {
+                "run_id": "run-remesh",
+                "adapter": "cpu-demo",
+                "starter_flow": "Remesh",
+                "input_modality": "remesh",
+            },
+            {
+                "run_id": "run-print",
+                "adapter": "cpu-demo",
+                "input_modality": "print-analyze",
+            },
+        ]
+        mesh_only = workspace_ui.filter_asset_runs(runs, phase="mesh-ops")
+        self.assertEqual([item["run_id"] for item in mesh_only], ["run-remesh"])
+        searched = workspace_ui.filter_asset_runs(runs, search="block")
+        self.assertEqual([item["run_id"] for item in searched], ["run-gen"])
+
+    def test_assets_gallery_groups_generation_and_mesh_ops(self) -> None:
+        html = workspace_ui.assets_gallery_html(
+            [
+                {"run_id": "a", "adapter": "cpu-demo", "input_modality": "image"},
+                {"run_id": "b", "adapter": "cpu-demo", "input_modality": "remesh"},
+            ],
+            total_count=2,
+        )
+        self.assertIn("Generation", html)
+        self.assertIn("Mesh operations", html)
+        self.assertIn("assets-run-card", html)
+
 
 if __name__ == "__main__":
     unittest.main()

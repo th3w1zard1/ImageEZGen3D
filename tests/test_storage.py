@@ -62,6 +62,7 @@ class StorageTests(unittest.TestCase):
             self.assertEqual(
                 runs[0]["project_brief"], "Keep the handle silhouette intact."
             )
+            self.assertEqual(runs[0]["input_modality"], "image")
             self.assertEqual(
                 runs[0]["glb"], str((run_dir / "exports" / "draft.glb").resolve())
             )
