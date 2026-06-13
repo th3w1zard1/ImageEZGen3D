@@ -752,6 +752,19 @@ Pre-merge branch deploy (`feat/hosted-history-session-parity`, 2026-05-24):
 - **Mode:** hosted CPU fallback
 - **Evidence:** live Space browser smoke + Gradio API
 
+## Meshy parity Phase 7 validation (program closure)
+
+After Phase 6 merge (`c03ddf6` on `main`, PR #153) and Hub deploy commit `cf472e57f3779ec74ae5da6fbd16d7b45b26ef0a` (2026-06-13):
+
+- **Space:** https://th3w1zard1-imageezgen3d.hf.space/
+- **Local bundle:** `PYTHONPATH=src python scripts/verify_meshy_parity_bundle.py` → `meshy_parity_bundle=ok` (job stack HTTP smoke + meshy pytest subset)
+- **Block run id:** `20260613-031820-c71bb1a3` — `hosted_golden_smoke.py` + `verify_hosted_golden_smoke_record.py` → ok
+- **Vase run id:** `20260613-031858-103419b3` — same smoke path → ok
+- **Mode:** hosted **CPU fallback** (`Local CPU Preview` / `cpu-demo`); **not** ZeroGPU neural validation (Hunyuan adapter remains disabled)
+- **g7_false_neural_guard_ok:** true on Block and Vase runs
+- **Artifacts verified:** manifest + GLB + OBJ present via Gradio API `/generate`
+- **Meshy program:** Phases U–7 complete; workspace tabs (Model/Image/Print/Animate/Assets), credits ledger, mesh_ops, adapters, and Meshy-shaped HTTP API validated locally; hosted path re-attested after deploy
+
 ## Plan 017 validation (manifest-driven UI)
 
 After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b5780929360d96e2ab6f5c197a20a3fe` (2026-05-24):
