@@ -28,6 +28,8 @@
 
 ## Phase 20 baseline (2026-06-13)
 
+Hunyuan G7 readiness **phase numbers (20–28)** are independent of Meshy parity phase numbers (e.g. Phase 19 closure).
+
 Export-tier hosted smoke re-attested after Meshy program closure; Hunyuan capstones re-run with expected blocker `configured_adapter_neural_forward_not_ready`. Hosted smoke helpers fixed for `preview_extras` output offset and Space `/app/` manifest paths. Evidence: [hosted-validation-2026-05-23.md](../../knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md) § Phase 20.
 
 **Phase 21 (2026-06-13):** Golden smoke Block/Vase re-attested after Phase 20 index repair; see hosted-validation § Phase 21.
@@ -48,7 +50,14 @@ Export-tier hosted smoke re-attested after Meshy program closure; Hunyuan capsto
 
 ## Ops attestation arc closure (Phases 20–27)
 
-Phases 20–27 on `main` (deploy `a149111`) complete the **disabled-adapter honesty** attestation program: guard stack, redeploy, browser E2E, capstone baseline. **Do not repeat** full guard-stack loops on non-GPU hosts unless Space code changes.
+Phases 20–27 on `main` complete the **disabled-adapter honesty** attestation program on two deploy bands:
+
+| Deploy commit | Phases | Scope |
+| --- | --- | --- |
+| `e368ad8003640e0d81545d92ae0e536195d7d9b6` | 20–24 | Guard stack re-attestation (pre-redeploy Space) |
+| `a1491116013b420d4c38a964df053b476ce2e19f` | 25–27 | Redeploy (PR #167 server fixes), browser E2E, ops closure |
+
+**Do not repeat** full guard-stack loops on non-GPU hosts unless Space runtime code changes. Phase 28 **paused** the program pending tier-C GPU — the arc is **complete**, not ongoing.
 
 | Done on this host | Blocked until tier-C GPU |
 | --- | --- |
@@ -65,17 +74,17 @@ PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-
 # Must exit 0 with g9_enablement_evidence_ready=true before Space enablement
 ```
 
-Then follow runbook steps 4–7 in **Recommended next execution slice** below.
+Then follow **Recommended next execution slice** steps 4–7 below (enablement PR → hosted neural record → G7 validation section → scheduled smoke).
 
 ## Program pause (Phase 28, 2026-06-13)
 
 **Ops attestation track paused** on non-GPU CI hosts after Phase 27. Phase 28 recorded `--strict` capstone exit **1** with `configured_adapter_neural_forward_not_ready`. Do **not** run further Phases 20–27-style guard-stack `/lfg` loops unless Space runtime code changes.
 
-**Resume criteria:** tier-C GPU workstation; `hunyuan_enablement_evidence_capstones.py --strict` exits 0 with `g9_enablement_evidence_ready=true`; then enablement runbook + hosted neural G7 record.
+**Resume `/lfg` on the tier-C enablement track only:** tier-C GPU workstation; `hunyuan_enablement_evidence_capstones.py --strict` exits 0 with `g9_enablement_evidence_ready=true`; then enablement runbook + hosted neural G7 record.
 
 ## Recommended next execution slice
 
-1. Run `PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-dir .` locally (do not commit output JSON).
+1. *(Optional — skip if Phase 27/28 baseline unchanged)* Run `PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-dir .` locally (do not commit output JSON).
 2. On tier-C workstation: `PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-dir . --strict` until `g9_enablement_evidence_ready=true` and `parity_ok=true`.
 3. Optional drill-down: `hunyuan_configured_inference_probe.py` and `hunyuan_g7_enablement_preflight_bundle.py` for sub-gate detail.
 4. Follow [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) for the enablement PR (`IMAGEEZ_HUNYUAN_CONFIGURED=true` on Space only with G7 evidence).

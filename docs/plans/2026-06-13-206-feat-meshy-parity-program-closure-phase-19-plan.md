@@ -1,5 +1,5 @@
 ---
-status: active
+status: completed
 execution: code
 phase: "19"
 program: meshy-parity-closure

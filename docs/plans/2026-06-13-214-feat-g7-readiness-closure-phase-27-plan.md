@@ -9,7 +9,7 @@ program: hunyuan-g7-readiness
 
 ## Problem
 
-Phases 20–26 completed post-Meshy attestation (guard stack, redeploy, browser E2E) on deploy `a149111`, but the ops program lacks an explicit **closure** section and a refreshed **local capstone baseline** anchored to current `main`. Operators need a single handoff path to tier-C `--strict` work without another redundant full guard-stack loop on this host.
+Phases 20–26 completed post-Meshy attestation on deploy `e368ad8` (Phases 20–24) and `a149111` (Phases 25–26: redeploy + browser E2E), but the ops program lacked an explicit **closure** section and a refreshed **local capstone baseline** anchored to current `main`.
 
 ## Requirements
 
