@@ -44,6 +44,7 @@ from imageezgen3d.gradio_artifact_layout import (  # noqa: E402
     sync_session_artifact_keys,
 )
 from imageezgen3d.storage import RunStore  # noqa: E402
+from imageezgen3d import workspace_ui as _workspace_ui  # noqa: E402
 
 
 _EXAMPLE_SPECS = (
@@ -430,13 +431,84 @@ def _comprehension_exit_markdown(result: dict[str, Any]) -> str:
     return _manifest_ui.comprehension_exit_markdown(result)
 
 
+def _credit_preview_html(
+    input_modality_name: str | None,
+    generation_lane_name: str | None,
+    *,
+    quality_name: str | None = None,
+) -> str:
+    return _workspace_ui.credit_footer_html(
+        {
+            "input_modality": input_modality_name or "image",
+            "lane": generation_lane_name or "draft",
+            "enable_pbr": (generation_lane_name or "draft") == "refine",
+            "quality": quality_name,
+        }
+    )
+
+
+def _run_inspect_extras_html(payload: dict[str, Any]) -> str:
+    parameters = payload.get("parameters", {})
+    if not isinstance(parameters, dict):
+        parameters = {}
+    mesh_report = payload.get("mesh_report")
+    if isinstance(mesh_report, dict):
+        merged_parameters = dict(parameters)
+        merged_parameters.setdefault("mesh_report", mesh_report)
+    else:
+        merged_parameters = parameters
+    artifacts = payload.get("artifacts", {})
+    if not isinstance(artifacts, dict):
+        artifacts = {}
+    parts = [
+        _workspace_ui.mesh_stats_card_html(merged_parameters),
+        _workspace_ui.pbr_channel_strip_html(artifacts),
+        _workspace_ui.viewer_action_bar_html(),
+    ]
+    return "\n".join(part for part in parts if part)
+
+
 def _history_inspect_html(payload: dict[str, Any], missing_keys: list[str]) -> str:
     card = _manifest_ui.run_status_card_html(payload)
     artifacts = payload.get("artifacts", {})
     if not isinstance(artifacts, dict):
         artifacts = {}
     strip = _manifest_ui.artifact_strip_html(artifacts, missing=missing_keys)
-    return "\n".join(part for part in (card, strip) if part)
+    extras = _run_inspect_extras_html(payload)
+    return "\n".join(part for part in (card, strip, extras) if part)
+
+
+def _meshy_lane_panel_html(lane_key: str) -> str:
+    copy = {
+        "image": (
+            "Image lane",
+            "2D generation and retexture",
+            "Use text-to-image and image-to-image demo adapters through the job API; "
+            "retexture jobs accept an existing mesh plus a style prompt.",
+        ),
+        "print": (
+            "Print lane",
+            "Printability analyze and repair",
+            "Analyze printability is free in the Meshy pricing table; repair costs 10 credits "
+            "and maps to mesh_ops printability helpers.",
+        ),
+        "animate": (
+            "Animate lane",
+            "Auto-rig and animation library",
+            "Rigging and animation demo adapters expose Meshy-shaped task types; pick a catalog "
+            "animation such as Walking_man when submitting animate jobs.",
+        ),
+    }
+    title, eyebrow, body = copy[lane_key]
+    return "\n".join(
+        [
+            '<section class="meshy-lane-panel">',
+            f'<p class="surface-eyebrow">{escape(eyebrow)}</p>',
+            f"<h2>{escape(title)}</h2>",
+            f'<p class="meshy-lane-copy">{escape(body)}</p>',
+            "</section>",
+        ]
+    )
 
 
 def _hero_shell_html(
@@ -472,7 +544,7 @@ def _hero_shell_html(
         [
             '<section class="hero-shell">',
             '<div class="hero-copy">',
-            '<p class="surface-eyebrow">Create</p>',
+            '<p class="surface-eyebrow">Model</p>',
             f"<h1>{escape(title)}</h1>",
             (
                 '<p class="hero-copy-text">'
@@ -816,8 +888,8 @@ def build_demo():
     with gr.Blocks(title=config.app.title) as demo:
         session_state = gr.State({})
 
-        with gr.Tabs(elem_classes="workspace-tabs"):
-            with gr.Tab("Create"):
+        with gr.Tabs(elem_classes="workspace-tabs meshy-workspace-tabs"):
+            with gr.Tab("Model", elem_id="meshy-tab-model"):
                 with gr.Row(equal_height=False, elem_classes="workspace-layout"):
                     with gr.Column(scale=8, min_width=760, elem_classes="main-column"):
                         with gr.Group(elem_classes="workspace-panel composer-panel"):
@@ -931,8 +1003,12 @@ def build_demo():
                                         generate = gr.Button(
                                             "Generate Mesh",
                                             variant="primary",
-                                            elem_classes="generate-button composer-cta",
+                                            elem_classes="generate-button composer-cta meshy-generate-cta",
                                         )
+                                    credit_footer = gr.HTML(
+                                        _credit_preview_html("image", "draft"),
+                                        elem_classes="credit-footer-shell",
+                                    )
                                     gr.Markdown(
                                         "Generate early, then refine with presets or advanced controls.",
                                         elem_classes="subtle-note action-note",
@@ -1069,6 +1145,20 @@ def build_demo():
                                 _runtime_banner(resolution),
                                 elem_classes="status-panel runtime-panel",
                             )
+                            with gr.Accordion(
+                                "Model Helper",
+                                open=False,
+                                elem_classes="model-helper-accordion",
+                            ):
+                                model_helper = gr.Markdown(
+                                    _workspace_ui.model_helper_markdown(),
+                                    elem_classes="model-helper-panel",
+                                )
+                                apply_bear_preset = gr.Button(
+                                    "Use bear-warrior preset",
+                                    variant="secondary",
+                                    elem_classes="model-helper-apply",
+                                )
 
                         with gr.Group(elem_classes="workspace-panel preview-panel"):
                             gr.HTML(
@@ -1087,6 +1177,9 @@ def build_demo():
                             status = gr.Markdown(
                                 "No generated output yet. Generate a run to populate the preview and downloads.",
                                 elem_classes="status-panel",
+                            )
+                            preview_extras = gr.HTML(
+                                elem_classes="preview-extras-shell",
                             )
 
                         with gr.Group(elem_classes="workspace-panel validation-panel"):
@@ -1127,7 +1220,20 @@ def build_demo():
                                             elem_classes="artifact-file",
                                         )
 
-            with gr.Tab("History"):
+            with gr.Tab("Image", elem_id="meshy-tab-image"):
+                with gr.Group(elem_classes="workspace-panel meshy-lane-shell"):
+                    gr.HTML(_meshy_lane_panel_html("image"))
+                    gr.Markdown(_workspace_ui.model_helper_markdown())
+
+            with gr.Tab("Print", elem_id="meshy-tab-print"):
+                with gr.Group(elem_classes="workspace-panel meshy-lane-shell"):
+                    gr.HTML(_meshy_lane_panel_html("print"))
+
+            with gr.Tab("Animate", elem_id="meshy-tab-animate"):
+                with gr.Group(elem_classes="workspace-panel meshy-lane-shell"):
+                    gr.HTML(_meshy_lane_panel_html("animate"))
+
+            with gr.Tab("Assets", elem_id="meshy-tab-assets"):
                 history_summary = gr.HTML(
                     _history_overview_html(history_runs, resolution=resolution),
                     elem_classes="history-overview-shell",
@@ -1468,6 +1574,7 @@ def build_demo():
                 return (
                     fallback_model,
                     _error_report(str(exc)),
+                    "",
                     *session_artifact_values(state, download_keys),
                     state,
                     history_dropdown,
@@ -1492,6 +1599,7 @@ def build_demo():
                 return (
                     None,
                     _stale_artifact_report(result["run_id"], missing_keys),
+                    "",
                     *((None,) * len(download_keys)),
                     state,
                     history_dropdown,
@@ -1513,6 +1621,7 @@ def build_demo():
             return (
                 state["model"],
                 _format_report(result),
+                _run_inspect_extras_html(result),
                 *artifact_download_values(
                     artifacts,
                     download_keys,
@@ -1524,6 +1633,29 @@ def build_demo():
                 history_message,
                 history_overview,
                 create_overview,
+            )
+
+        def update_credit_preview(
+            input_modality_name,
+            generation_lane_name,
+            quality_name,
+        ):
+            return _credit_preview_html(
+                input_modality_name,
+                generation_lane_name,
+                quality_name=quality_name,
+            )
+
+        def apply_bear_warrior_preset():
+            preset = _workspace_ui.BEAR_WARRIOR_PRESET
+            prompt = str(preset["prompt"])
+            return (
+                "text",
+                prompt,
+                "production",
+                prompt,
+                _workspace_ui.model_helper_markdown(preset),
+                _credit_preview_html("text", "production"),
             )
 
         primary.change(
@@ -1594,6 +1726,7 @@ def build_demo():
             outputs=[
                 model,
                 status,
+                preview_extras,
                 *[create_artifact_files[key] for key in download_keys],
                 session_state,
                 history_run,
@@ -1603,6 +1736,24 @@ def build_demo():
                 create_history_summary,
             ],
             api_name="generate",
+        )
+        credit_preview_inputs = [input_modality, generation_lane, quality]
+        for control in (input_modality, generation_lane, quality):
+            control.change(
+                update_credit_preview,
+                inputs=credit_preview_inputs,
+                outputs=[credit_footer],
+            )
+        apply_bear_preset.click(
+            apply_bear_warrior_preset,
+            outputs=[
+                input_modality,
+                text_prompt,
+                generation_lane,
+                project_brief,
+                model_helper,
+                credit_footer,
+            ],
         )
         history_refresh.click(
             history_updates,
@@ -2767,6 +2918,117 @@ _CSS = """
     min-height: 84px !important;
     height: 84px !important;
     padding: 0 !important;
+}
+
+/* ─── Meshy workspace extras ────────────────────────────────────────────── */
+.meshy-workspace-tabs > .tab-nav button[role="tab"][aria-selected="true"] {
+    border-bottom-color: #84cc16 !important;
+}
+
+.credit-footer-shell .credit-footer {
+    margin-top: 12px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--iez-line);
+    background: linear-gradient(135deg, rgba(132, 204, 22, 0.08), rgba(0, 112, 243, 0.04));
+}
+
+.credit-footer-value {
+    margin: 4px 0;
+    font-size: 1.05rem;
+}
+
+.credit-footer-task,
+.credit-footer-note {
+    margin: 4px 0 0;
+    color: var(--iez-muted);
+    font-size: 0.88rem;
+}
+
+.meshy-generate-cta {
+    background: linear-gradient(135deg, #0070f3, #84cc16) !important;
+}
+
+.preview-extras-shell,
+.history-inspect-shell {
+    display: grid;
+    gap: 14px;
+}
+
+.mesh-stats-card,
+.pbr-channel-strip,
+.viewer-action-bar,
+.meshy-lane-panel {
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--iez-line);
+    background: var(--iez-surface-2);
+}
+
+.mesh-stats-list {
+    margin: 8px 0 0;
+    padding-left: 18px;
+}
+
+.pbr-channel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.pbr-tile {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px dashed var(--iez-line);
+    text-align: center;
+    font-size: 0.78rem;
+}
+
+.pbr-tile-ready {
+    border-style: solid;
+    background: var(--iez-surface);
+}
+
+.pbr-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.pbr-file {
+    display: block;
+    color: var(--iez-muted);
+    overflow-wrap: anywhere;
+}
+
+.viewer-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.viewer-action-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--iez-line);
+    background: var(--iez-surface);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.viewer-action-note,
+.meshy-lane-copy {
+    margin: 10px 0 0;
+    color: var(--iez-muted);
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+.model-helper-panel {
+    font-size: 0.92rem;
 }
 
 /* ─── Misc Gradio overrides ─────────────────────────────────────────────── */
