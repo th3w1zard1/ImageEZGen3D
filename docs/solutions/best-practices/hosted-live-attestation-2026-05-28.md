@@ -32,6 +32,20 @@ Pair with [hosted-smoke-guard-stack-2026-05-28.md](hosted-smoke-guard-stack-2026
 
 All records had `g7_false_neural_guard_ok=true` where applicable.
 
+## Phase 20–21 live runs (2026-06-13)
+
+After Meshy program closure and Phase 20 Gradio index repair (PR #167, #168 on `main`); Space deploy `e368ad8003640e0d81545d92ae0e536195d7d9b6`:
+
+| Phase | Check | Run id(s) | Mode reported |
+| --- | --- | --- | --- |
+| 20 | Export-tier draft | `20260613-080815-cb81682c` | Hosted CPU fallback |
+| 20 | Export-tier balanced | `20260613-080821-b95f913f` | Hosted CPU fallback |
+| 21 | Golden smoke (Block) | `20260613-081414-7d4c8891` | Hosted CPU fallback |
+| 21 | Golden smoke (Vase) | `20260613-081427-d4e091d3` | Hosted CPU fallback |
+| 21 | G7 live probe | (probe record) | Space rejected `hunyuan-zerogpu`; `hosted_probe.ok=true` |
+
+Details: [hosted-validation-2026-05-23.md](../../knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md) § Phase 20–21. **G7/G8/G9 remain OPEN** — not G7 PASS.
+
 ## Local replay commands
 
 ```bash

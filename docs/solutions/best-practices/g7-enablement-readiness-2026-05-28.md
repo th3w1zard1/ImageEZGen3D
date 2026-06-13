@@ -32,6 +32,8 @@ Export-tier hosted smoke re-attested after Meshy program closure; Hunyuan capsto
 
 **Phase 21 (2026-06-13):** Golden smoke Block/Vase re-attested after Phase 20 index repair; see hosted-validation § Phase 21.
 
+**Phase 22 (2026-06-13):** Hosted-live-attestation index synced with Phase 20–21 run ids; local capstone baseline recorded (expected `configured_adapter_neural_forward_not_ready` on non-GPU host). See hosted-validation § Phase 22.
+
 ## Recommended next execution slice
 
 1. Run `PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-dir .` locally (do not commit output JSON).

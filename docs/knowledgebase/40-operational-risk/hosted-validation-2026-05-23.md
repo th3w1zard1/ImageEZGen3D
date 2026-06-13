@@ -805,6 +805,16 @@ After Phase 20 merge (`0ade945` on `main`, PR #167), attestation against existin
 - **Artifacts verified:** manifest + GLB + OBJ present via Gradio API `/generate`
 - **G7/G8/G9:** remain **OPEN**
 
+## Hunyuan enablement capstone baseline Phase 22 (local, no GPU)
+
+After Phase 21 merge (`a50a9c5` on `main`, PR #168) on CI host without CUDA (2026-06-13):
+
+- **Capstones:** `hunyuan_enablement_evidence_capstones.py --record-dir /tmp/phase22-capstones` → `enablement_evidence_capstones_ok=true`, `parity_ok=true`, `g9_enablement_evidence_ready=false`
+- **Blocker:** `configured_adapter_neural_forward_not_ready` (expected on non-tier-C host)
+- **Admission audit:** `hunyuan_admission_audit.py` → G1–G6 PASS; G7/G8/G9 OPEN; adapter `configured=False`
+- **Mode:** local/CI baseline only — **not** tier-C `--strict` workstation evidence; **not** hosted neural G7 validation
+- **Next:** tier-C GPU workstation `--strict` capstones per [hunyuan-g9-enablement-runbook.md](../hunyuan-g9-enablement-runbook.md)
+
 ## Plan 017 validation (manifest-driven UI)
 
 After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b5780929360d96e2ab6f5c197a20a3fe` (2026-05-24):
