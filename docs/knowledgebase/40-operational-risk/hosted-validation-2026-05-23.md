@@ -815,6 +815,18 @@ After Phase 21 merge (`a50a9c5` on `main`, PR #168) on CI host without CUDA (202
 - **Mode:** local/CI baseline only — **not** tier-C `--strict` workstation evidence; **not** hosted neural G7 validation
 - **Next:** tier-C GPU workstation `--strict` capstones per [hunyuan-g9-enablement-runbook.md](../hunyuan-g9-enablement-runbook.md)
 
+## Hosted smoke guard re-attestation Phase 23 (post Phase 22 index sync)
+
+After Phase 22 merge (`b350957` on `main`, PR #169), attestation against existing Space deploy commit `e368ad8003640e0d81545d92ae0e536195d7d9b6` (2026-06-13; no redeploy):
+
+- **Space:** https://th3w1zard1-imageezgen3d.hf.space/
+- **Block run id:** `20260613-091037-26cc856b` — `hosted_golden_smoke.py` + `verify_hosted_golden_smoke_record.py` → ok
+- **Vase run id:** `20260613-091123-f271693b` — same golden smoke path → ok
+- **G7 live probe:** `hunyuan_g7_preflight.py --live-probe` → `hosted_probe.ok=true` (CLI: `hosted_probe_ok=`; Space rejected `hunyuan-zerogpu` while disabled)
+- **Mode:** hosted **CPU fallback** (`Local CPU Preview` / `cpu-demo`); **not** ZeroGPU/Hunyuan neural validation
+- **g7_false_neural_guard_ok:** true on Block and Vase runs
+- **G7/G8/G9:** remain **OPEN**
+
 ## Plan 017 validation (manifest-driven UI)
 
 After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b5780929360d96e2ab6f5c197a20a3fe` (2026-05-24):
