@@ -1,5 +1,5 @@
 ---
-status: active
+status: completed
 execution: ops
 phase: "24"
 program: hunyuan-g7-readiness

@@ -44,6 +44,8 @@ Export-tier hosted smoke re-attested after Meshy program closure; Hunyuan capsto
 
 **Phase 27 (2026-06-13):** Ops arc closure — capstone/preflight baseline refresh + Vase golden smoke; see hosted-validation § Phase 27.
 
+**Phase 28 (2026-06-13):** Tier-C `--strict` gate attestation (exit 1 on non-GPU host); plan hygiene; **program paused**; see hosted-validation § Phase 28.
+
 ## Ops attestation arc closure (Phases 20–27)
 
 Phases 20–27 on `main` (deploy `a149111`) complete the **disabled-adapter honesty** attestation program: guard stack, redeploy, browser E2E, capstone baseline. **Do not repeat** full guard-stack loops on non-GPU hosts unless Space code changes.
@@ -64,6 +66,12 @@ PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-
 ```
 
 Then follow runbook steps 4–7 in **Recommended next execution slice** below.
+
+## Program pause (Phase 28, 2026-06-13)
+
+**Ops attestation track paused** on non-GPU CI hosts after Phase 27. Phase 28 recorded `--strict` capstone exit **1** with `configured_adapter_neural_forward_not_ready`. Do **not** run further Phases 20–27-style guard-stack `/lfg` loops unless Space runtime code changes.
+
+**Resume criteria:** tier-C GPU workstation; `hunyuan_enablement_evidence_capstones.py --strict` exits 0 with `g9_enablement_evidence_ready=true`; then enablement runbook + hosted neural G7 record.
 
 ## Recommended next execution slice
 

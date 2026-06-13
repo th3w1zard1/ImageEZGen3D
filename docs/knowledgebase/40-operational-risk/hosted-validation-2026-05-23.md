@@ -881,6 +881,15 @@ After Phase 26 merge (`241a050` on `main`, PR #173) — **ops attestation arc Ph
 - **Mode:** local baseline + hosted **CPU fallback**; **not** tier-C `--strict`; **not** G7 neural validation
 - **Next:** tier-C GPU workstation only — see [g7-enablement-readiness-2026-05-28.md](../../solutions/best-practices/g7-enablement-readiness-2026-05-28.md) § Tier-C handoff
 
+## Tier-C gate attestation + program pause Phase 28
+
+After Phase 27 merge (`abd5aa8` on `main`, PR #174) — **Hunyuan G7 ops program paused** on this host pending tier-C GPU:
+
+- **Strict capstones:** `hunyuan_enablement_evidence_capstones.py --record-dir /tmp/phase28-strict --strict` → exit **1**, `g9_enablement_evidence_ready=false`, blocker `configured_adapter_neural_forward_not_ready` (no CUDA on CI host; expected)
+- **Plan hygiene:** Phase 20–27 plan docs marked `status: completed`
+- **Mode:** gate attestation only — **not** G7 PASS; **not** enablement
+- **Resume `/lfg` G7 track:** tier-C workstation with `--strict` capstones passing, then runbook enablement PR
+
 ## Plan 017 validation (manifest-driven UI)
 
 After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b5780929360d96e2ab6f5c197a20a3fe` (2026-05-24):

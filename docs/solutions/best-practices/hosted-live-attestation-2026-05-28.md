@@ -57,8 +57,9 @@ After Meshy program closure and Phase 20 Gradio index repair (PR #167, #168 on `
 | 25 | Export-tier draft/balanced | `20260613-092936-9c10235e` / `20260613-092940-bfbd5e37` | Hosted CPU fallback |
 | 26 | Browser E2E (Block) | `20260613-095610-69c9a820` | Hosted CPU fallback — Playwright UI path |
 | 27 | Vase golden smoke + local capstone refresh | `20260613-100431-f294b98c` | Ops arc closure; tier-C handoff next |
+| 28 | Tier-C `--strict` gate (expected fail, no GPU) | exit 1, blocker recorded | **Program paused** until GPU workstation |
 
-Details: [hosted-validation-2026-05-23.md](../../knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md) § Phase 20–27. **G7/G8/G9 remain OPEN** — not G7 PASS. **Ops attestation arc (Phases 20–27) closed** on deploy `a149111`; next work is tier-C `--strict` capstones.
+Details: [hosted-validation-2026-05-23.md](../../knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md) § Phase 20–28. **G7/G8/G9 remain OPEN**. Ops track **paused** on non-GPU hosts after Phase 28.
 
 ## Local replay commands
 
