@@ -792,6 +792,19 @@ After Phase 19 merge (`c14a4a2` on `main`) and Hub deploy commit `e368ad8003640e
 - **Code fixes landed:** Gradio artifact index offset for `preview_extras`; hosted manifest validation skips Space `/app/` paths; backend rail HTML scan for `/generate` tail drift
 - **G7/G8/G9:** remain **OPEN** — do not set `IMAGEEZ_HUNYUAN_CONFIGURED=true` until tier-C neural forward + hosted G7 evidence
 
+## Hosted golden smoke Phase 21 validation (after Phase 20 index repair)
+
+After Phase 20 merge (`0ade945` on `main`, PR #167), attestation against existing Space deploy commit `e368ad8003640e0d81545d92ae0e536195d7d9b6` (2026-06-13; no redeploy in Phase 21; index repair validated via updated smoke scripts):
+
+- **Space:** https://th3w1zard1-imageezgen3d.hf.space/
+- **Block run id:** `20260613-081414-7d4c8891` — `hosted_golden_smoke.py` + `verify_hosted_golden_smoke_record.py` → ok
+- **Vase run id:** `20260613-081427-d4e091d3` — same golden smoke path → ok
+- **G7 live probe:** `hunyuan_g7_preflight.py --live-probe` → `hosted_probe.ok=true` (CLI: `hosted_probe_ok=`; Space rejected `hunyuan-zerogpu` while disabled)
+- **Mode:** hosted **CPU fallback** (`Local CPU Preview` / `cpu-demo`); **not** ZeroGPU/Hunyuan neural validation
+- **g7_false_neural_guard_ok:** true on Block and Vase runs
+- **Artifacts verified:** manifest + GLB + OBJ present via Gradio API `/generate`
+- **G7/G8/G9:** remain **OPEN**
+
 ## Plan 017 validation (manifest-driven UI)
 
 After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b5780929360d96e2ab6f5c197a20a3fe` (2026-05-24):

@@ -30,6 +30,8 @@
 
 Export-tier hosted smoke re-attested after Meshy program closure; Hunyuan capstones re-run with expected blocker `configured_adapter_neural_forward_not_ready`. Hosted smoke helpers fixed for `preview_extras` output offset and Space `/app/` manifest paths. Evidence: [hosted-validation-2026-05-23.md](../../knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md) § Phase 20.
 
+**Phase 21 (2026-06-13):** Golden smoke Block/Vase re-attested after Phase 20 index repair; see hosted-validation § Phase 21.
+
 ## Recommended next execution slice
 
 1. Run `PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-dir .` locally (do not commit output JSON).
