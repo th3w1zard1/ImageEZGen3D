@@ -6,6 +6,29 @@ from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 _PARITY_MATRIX = _REPO_ROOT / "docs/reference/meshy/PARITY-MATRIX.md"
+_PLANS_DIR = _REPO_ROOT / "docs/plans"
+
+
+def _plan_frontmatter(path: Path) -> dict[str, str]:
+    text = path.read_text(encoding="utf-8")
+    match = re.match(r"^---\n(.*?)\n---", text, re.DOTALL)
+    if not match:
+        return {}
+    frontmatter: dict[str, str] = {}
+    for line in match.group(1).splitlines():
+        if ":" not in line:
+            continue
+        key, value = line.split(":", maxsplit=1)
+        frontmatter[key.strip()] = value.strip().strip('"')
+    return frontmatter
+
+
+def _meshy_parity_plan_paths() -> list[Path]:
+    return sorted(
+        path
+        for path in _PLANS_DIR.glob("*.md")
+        if _plan_frontmatter(path).get("program") == "meshy-parity"
+    )
 
 
 def _table_row_cells(row: str) -> list[str]:
@@ -70,6 +93,20 @@ class MeshyParityMatrixTests(unittest.TestCase):
         beyond_section = text.split("Beyond-Meshy extras", maxsplit=1)[-1]
         real_rows = re.findall(r"\| [^|]+ \| [^|]+ \| \*\*real\*\*", beyond_section)
         self.assertGreaterEqual(len(real_rows), 2)
+
+    def test_meshy_parity_plans_are_marked_completed(self) -> None:
+        plan_paths = _meshy_parity_plan_paths()
+        self.assertGreaterEqual(len(plan_paths), 9)
+        incomplete = [
+            path.name
+            for path in plan_paths
+            if _plan_frontmatter(path).get("status") != "completed"
+        ]
+        self.assertEqual(
+            incomplete,
+            [],
+            msg=f"meshy-parity plans must be completed: {incomplete}",
+        )
 
 
 if __name__ == "__main__":
