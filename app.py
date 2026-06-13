@@ -1289,6 +1289,24 @@ def build_demo():
                                 _history_notice_text(history_runs),
                                 elem_classes="status-panel",
                             )
+                            assets_search = gr.Textbox(
+                                label="Search runs",
+                                placeholder="Run id, starter, adapter, modality…",
+                                elem_classes="assets-search composer-control",
+                            )
+                            assets_phase_filter = gr.Radio(
+                                label="Phase filter",
+                                choices=_workspace_ui.ASSETS_PHASE_FILTER_LABELS,
+                                value=_workspace_ui.ASSETS_PHASE_FILTER_LABELS[0],
+                                elem_classes="assets-phase-filter composer-control",
+                            )
+                            assets_gallery = gr.HTML(
+                                _workspace_ui.assets_gallery_html(
+                                    history_runs,
+                                    total_count=len(history_runs),
+                                ),
+                                elem_classes="assets-gallery-shell",
+                            )
                             history_run = gr.Radio(
                                 label="Recent runs",
                                 choices=history_choices,
@@ -1391,6 +1409,34 @@ def build_demo():
                 _history_notice_text(runs),
                 _history_overview_html(runs),
                 _history_overview_html(runs, resolution=resolution),
+                _workspace_ui.assets_gallery_html(runs, total_count=len(runs)),
+            )
+
+        def apply_assets_filters(search, phase_label):
+            runs = orchestrator.store.list_runs(limit=_HISTORY_LIMIT)
+            phase = _workspace_ui.ASSETS_PHASE_FILTER_BY_LABEL.get(
+                phase_label,
+                "all",
+            )
+            filtered = _workspace_ui.filter_asset_runs(
+                runs,
+                search=search,
+                phase=phase,
+            )
+            labels = [_history_choice_label(item) for item in filtered]
+            value = labels[0] if labels else None
+            compare_value = labels[1] if len(labels) > 1 else value
+            return (
+                cast(Any, gr).Radio(choices=labels, value=value),
+                cast(Any, gr).Radio(choices=labels, value=compare_value),
+                _workspace_ui.assets_filter_notice_text(
+                    filtered,
+                    total_count=len(runs),
+                    search=search,
+                    phase=phase,
+                ),
+                _history_overview_html(filtered, resolution=resolution),
+                _workspace_ui.assets_gallery_html(filtered, total_count=len(runs)),
             )
 
         def preview_primary(primary_image, starter_key, quality_name):
@@ -1607,6 +1653,7 @@ def build_demo():
                     history_message,
                     history_overview,
                     create_overview,
+                    assets_gallery_html,
                 ) = history_updates()
                 return (
                     fallback_model,
@@ -1619,6 +1666,7 @@ def build_demo():
                     history_message,
                     history_overview,
                     create_overview,
+                    assets_gallery_html,
                 )
             state["last_run_id"] = result["run_id"]
             artifacts, missing_keys = _verified_artifact_state(
@@ -1632,6 +1680,7 @@ def build_demo():
                     history_message,
                     history_overview,
                     create_overview,
+                    assets_gallery_html,
                 ) = history_updates()
                 return (
                     None,
@@ -1644,6 +1693,7 @@ def build_demo():
                     history_message,
                     history_overview,
                     create_overview,
+                    assets_gallery_html,
                 )
             state["model"] = artifacts.get("glb") or artifacts.get("obj")
             sync_session_artifact_keys(state, artifacts, download_keys)
@@ -1654,6 +1704,7 @@ def build_demo():
                 history_message,
                 history_overview,
                 create_overview,
+                assets_gallery_html,
             ) = history_updates()
             return (
                 state["model"],
@@ -1670,6 +1721,7 @@ def build_demo():
                 history_message,
                 history_overview,
                 create_overview,
+                assets_gallery_html,
             )
 
         def run_viewer_mesh_op(modality: str, state):
@@ -1683,6 +1735,7 @@ def build_demo():
                     history_message,
                     history_overview,
                     create_overview,
+                    assets_gallery_html,
                 ) = history_updates()
                 return (
                     fallback_model,
@@ -1697,6 +1750,7 @@ def build_demo():
                     history_message,
                     history_overview,
                     create_overview,
+                    assets_gallery_html,
                 )
             try:
                 job_request = build_mesh_op_job_request(modality, str(mesh_path))
@@ -1708,6 +1762,7 @@ def build_demo():
                     history_message,
                     history_overview,
                     create_overview,
+                    assets_gallery_html,
                 ) = history_updates()
                 return (
                     fallback_model,
@@ -1720,6 +1775,7 @@ def build_demo():
                     history_message,
                     history_overview,
                     create_overview,
+                    assets_gallery_html,
                 )
             state["last_run_id"] = result["run_id"]
             artifacts, missing_keys = _verified_artifact_state(
@@ -1733,6 +1789,7 @@ def build_demo():
                     history_message,
                     history_overview,
                     create_overview,
+                    assets_gallery_html,
                 ) = history_updates()
                 return (
                     fallback_model,
@@ -1745,6 +1802,7 @@ def build_demo():
                     history_message,
                     history_overview,
                     create_overview,
+                    assets_gallery_html,
                 )
             next_model = artifacts.get("glb") or artifacts.get("obj")
             if next_model:
@@ -1762,6 +1820,7 @@ def build_demo():
                 history_message,
                 history_overview,
                 create_overview,
+                assets_gallery_html,
             ) = history_updates()
             return (
                 state.get("model") or fallback_model,
@@ -1778,6 +1837,7 @@ def build_demo():
                 history_message,
                 history_overview,
                 create_overview,
+                assets_gallery_html,
             )
 
         def update_credit_preview(
@@ -1879,6 +1939,7 @@ def build_demo():
                 history_notice,
                 history_summary,
                 create_history_summary,
+                assets_gallery,
             ],
             api_name="generate",
         )
@@ -1893,6 +1954,7 @@ def build_demo():
             history_notice,
             history_summary,
             create_history_summary,
+            assets_gallery,
         ]
         for mesh_op_button, mesh_op_modality in (
             (viewer_remesh_btn, "remesh"),
@@ -1925,16 +1987,25 @@ def build_demo():
                 credit_footer,
             ],
         )
+        assets_filter_outputs = [
+            history_run,
+            history_compare_run,
+            history_notice,
+            history_summary,
+            assets_gallery,
+        ]
+        assets_filter_inputs = [assets_search, assets_phase_filter]
+        for assets_control in assets_filter_inputs:
+            assets_control.change(
+                apply_assets_filters,
+                inputs=assets_filter_inputs,
+                outputs=assets_filter_outputs,
+            )
         history_refresh.click(
-            history_updates,
-            outputs=[
-                history_run,
-                history_compare_run,
-                history_notice,
-                history_summary,
-                create_history_summary,
-            ],
-            api_name="history_updates",
+            apply_assets_filters,
+            inputs=assets_filter_inputs,
+            outputs=assets_filter_outputs,
+            api_name="assets_filter_updates",
         )
         history_compare_btn.click(
             compare_history_runs,
@@ -1965,6 +2036,7 @@ def build_demo():
                 history_notice,
                 history_summary,
                 create_history_summary,
+                assets_gallery,
             ],
         )
 
@@ -3177,6 +3249,72 @@ _CSS = """
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 4px;
+}
+
+.assets-gallery-shell,
+.assets-gallery {
+    display: grid;
+    gap: 12px;
+}
+
+.assets-group {
+    display: grid;
+    gap: 8px;
+}
+
+.assets-run-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+}
+
+.assets-run-card {
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--iez-line);
+    background: var(--iez-surface);
+}
+
+.assets-run-id {
+    margin: 0;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.78rem;
+    overflow-wrap: anywhere;
+}
+
+.assets-run-meta,
+.assets-run-flow {
+    margin: 6px 0 0;
+    font-size: 0.82rem;
+    color: var(--iez-muted);
+}
+
+.assets-run-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.assets-run-badge {
+    display: inline-flex;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--iez-line);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.assets-run-badge-fallback {
+    border-color: rgba(196, 127, 44, 0.35);
+    color: #9a6700;
+}
+
+.assets-gallery-empty {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px dashed var(--iez-line);
+    color: var(--iez-muted);
 }
 
 .viewer-action-row {
