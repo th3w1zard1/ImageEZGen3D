@@ -25,6 +25,7 @@ class JobRequest:
     enable_pbr: bool | None = None
     texture_prompt: str | None = None
     mesh_input_path: str | None = None
+    second_mesh_path: str | None = None
     mesh_output_path: str | None = None
     resize_height: float | None = None
     resize_longest_side: float | None = None
@@ -73,6 +74,7 @@ class JobRequest:
             "target_polycount",
             "texture_prompt",
             "mesh_input_path",
+            "second_mesh_path",
             "mesh_output_path",
             "origin_at",
         ):
@@ -107,6 +109,7 @@ class JobRequest:
             enable_pbr=_optional_bool(payload.get("enable_pbr")),
             texture_prompt=_optional_str(payload.get("texture_prompt")),
             mesh_input_path=_optional_str(payload.get("mesh_input_path")),
+            second_mesh_path=_optional_str(payload.get("second_mesh_path")),
             mesh_output_path=_optional_str(payload.get("mesh_output_path")),
             resize_height=_optional_float(payload.get("resize_height")),
             resize_longest_side=_optional_float(payload.get("resize_longest_side")),

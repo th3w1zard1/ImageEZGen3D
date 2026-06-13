@@ -12,7 +12,7 @@ from ..config import AppConfig, load_config
 from ..delivery_exports import resolve_target_export_formats
 from ..orchestrator import ImageEZOrchestrator
 from ..storage import atomic_write_json
-from .mesh_op_runner import run_mesh_op_job
+from .mesh_op_runner import BOOLEAN_MODALITIES, run_mesh_op_job
 from .meshy_api import meshy_webhook_payload
 from .models import JobPollResponse, JobRequest, JobRecord, JobStatus
 from .store import JobStore
@@ -20,7 +20,15 @@ from .webhooks import deliver_webhook
 
 
 _MESH_OP_MODALITIES = frozenset(
-    {"remesh", "convert", "resize", "print-analyze", "print-repair", "unwrap-uv"}
+    {
+        "remesh",
+        "convert",
+        "resize",
+        "print-analyze",
+        "print-repair",
+        "unwrap-uv",
+        *BOOLEAN_MODALITIES,
+    }
 )
 
 
@@ -81,6 +89,17 @@ class JobService:
             mesh_path = Path(mesh_path_str)
             if not mesh_path.is_file():
                 raise FileNotFoundError(f"Mesh input not found: {mesh_path}")
+            if modality in BOOLEAN_MODALITIES:
+                second_path_str = request.second_mesh_path
+                if not second_path_str:
+                    raise ValueError(
+                        f"{modality} jobs require second_mesh_path."
+                    )
+                second_path = Path(second_path_str)
+                if not second_path.is_file():
+                    raise FileNotFoundError(
+                        f"Second mesh input not found: {second_path}"
+                    )
         record = self.job_store.create(request=request.to_dict())
         future = self._executor.submit(self._execute_job, record.job_id)
         self._futures[record.job_id] = future

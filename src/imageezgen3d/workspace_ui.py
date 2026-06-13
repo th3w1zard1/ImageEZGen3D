@@ -190,7 +190,17 @@ def mesh_stats_card_html(parameters: Mapping[str, Any] | None) -> str:
 
 
 MESH_OP_MODALITIES = frozenset(
-    {"remesh", "convert", "resize", "print-analyze", "print-repair", "unwrap-uv"}
+    {
+        "remesh",
+        "convert",
+        "resize",
+        "print-analyze",
+        "print-repair",
+        "unwrap-uv",
+        "boolean-union",
+        "boolean-difference",
+        "boolean-intersection",
+    }
 )
 PRINT_MODALITIES = frozenset({"print-analyze", "print-repair"})
 
