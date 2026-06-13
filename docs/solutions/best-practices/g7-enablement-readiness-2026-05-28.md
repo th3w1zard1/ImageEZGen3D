@@ -48,6 +48,8 @@ Export-tier hosted smoke re-attested after Meshy program closure; Hunyuan capsto
 
 **Phase 28 (2026-06-13):** Tier-C `--strict` gate attestation (exit 1 on non-GPU host); plan hygiene; **program paused**; see hosted-validation § Phase 28.
 
+**Meshy plan registry (Phases 30–31, 2026-06-13):** All Meshy implementation plans marked completed; Phase 32 adds repo-wide plan registry guard. Meshy `/lfg` track is closed — do not re-open from stale frontmatter.
+
 ## Ops attestation arc closure (Phases 20–27)
 
 Phases 20–27 on `main` complete the **disabled-adapter honesty** attestation program on two deploy bands:

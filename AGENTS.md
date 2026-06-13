@@ -6,6 +6,7 @@
 - Start at [docs/solutions/README.md](docs/solutions/README.md) for the index. Prefer solutions for distilled lessons; use `docs/knowledgebase/` for full runbooks.
 - After jobs/automation changes, run `PYTHONPATH=src python scripts/verify_job_stack_smoke.py` (add `--http` when touching `jobs/http_api.py`).
 - After Meshy parity surface changes (adapters, mesh_ops, credits, workspace UI, or `meshy_api`), run `PYTHONPATH=src python scripts/verify_meshy_parity_bundle.py` (job stack HTTP smoke + meshy pytest subset).
+- Meshy parity plan registry is **closed** (Phases 19–31 on `main`); `docs/plans/` entries must stay `status: completed` (`tests/test_program_plan_registry.py`). Do not run bare `/lfg` plan-closure or guard-stack loops on non-GPU hosts — Hunyuan G7 enablement requires tier-C GPU (below).
 
 ## Runtime and Deployment Validation
 
