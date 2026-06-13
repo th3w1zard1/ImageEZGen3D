@@ -34,7 +34,7 @@ class GradioJobBridgeTests(unittest.TestCase):
                 text_prompt_value="",
                 generation_lane_name="draft",
             )
-            self.assertEqual(request.input_modality, "image")
+            self.assertEqual(request.input_modality, "multi-image-to-3d")
             self.assertTrue(Path(request.image_path or "").is_file())
             self.assertIn("front", request.view_image_paths or {})
 
