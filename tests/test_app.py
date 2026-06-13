@@ -125,6 +125,8 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
 
         self.assertIn("run-status-card", html)
         self.assertIn("artifact-strip", html)
+        self.assertIn("mesh-stats-card", html)
+        self.assertIn("viewer-action-bar", html)
         self.assertIn("run-123", html)
 
     def test_prompt_templates_target_known_starters(self) -> None:
@@ -145,22 +147,22 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         self.assertIn("High mode", summary)
         self.assertIn("Capture hint:", summary)
 
-    def test_create_tab_places_composer_before_starter_cards(self) -> None:
+    def test_model_tab_places_composer_before_starter_cards(self) -> None:
         source = Path(app.__file__).read_text(encoding="utf-8")
-        create_section = source.split('with gr.Tab("Create"):')[1].split(
-            'with gr.Tab("History")'
+        create_section = source.split('with gr.Tab("Model", elem_id="meshy-tab-model"):')[1].split(
+            'with gr.Tab("Image", elem_id="meshy-tab-image"):'
         )[0]
         composer_idx = create_section.index('elem_classes="composer-grid"')
         starter_idx = create_section.index('elem_classes="starter-card-row"')
         self.assertLess(composer_idx, starter_idx)
 
-    def test_create_and_history_tabs_expose_export_tier_downloads(self) -> None:
+    def test_model_and_assets_tabs_expose_export_tier_downloads(self) -> None:
         source = Path(app.__file__).read_text(encoding="utf-8")
-        create_section = source.split('with gr.Tab("Create"):')[1].split(
-            'with gr.Tab("History")'
+        create_section = source.split('with gr.Tab("Model", elem_id="meshy-tab-model"):')[1].split(
+            'with gr.Tab("Image", elem_id="meshy-tab-image"):'
         )[0]
-        history_section = source.split('with gr.Tab("History"):')[1].split(
-            'with gr.Tab("Guide")'
+        history_section = source.split('with gr.Tab("Assets", elem_id="meshy-tab-assets"):')[1].split(
+            'with gr.Tab("Guide"):'
         )[0]
 
         self.assertIn("UI_ARTIFACT_LABELS[key]", create_section)
@@ -356,6 +358,37 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
 
         self.assertIn("## What happened", report)
         self.assertIn("Output tier: **Balanced**", report)
+
+    def test_credit_preview_html_for_text_lane(self) -> None:
+        html = app._credit_preview_html("text", "production")
+        self.assertIn("credit-footer", html)
+        self.assertIn("credits", html)
+
+    def test_run_inspect_extras_html_composes_viewer_sections(self) -> None:
+        html = app._run_inspect_extras_html(
+            {
+                "parameters": {"topology": "triangle", "face_count": 42},
+                "artifacts": {"pbr_base_color": "/tmp/base.png"},
+            }
+        )
+        self.assertIn("mesh-stats-card", html)
+        self.assertIn("pbr-channel-strip", html)
+        self.assertIn("viewer-action-bar", html)
+
+    def test_run_inspect_extras_reads_top_level_mesh_report(self) -> None:
+        html = app._run_inspect_extras_html(
+            {
+                "parameters": {"topology": "triangle"},
+                "mesh_report": {
+                    "face_count": 900,
+                    "vertex_count": 450,
+                    "status": "ok",
+                },
+                "artifacts": {},
+            }
+        )
+        self.assertIn("900", html)
+        self.assertIn("ok", html)
 
 
 if __name__ == "__main__":
