@@ -196,13 +196,14 @@ MESH_OP_MODALITIES = frozenset(
         "resize",
         "print-analyze",
         "print-repair",
+        "print-multi-color",
         "unwrap-uv",
         "boolean-union",
         "boolean-difference",
         "boolean-intersection",
     }
 )
-PRINT_MODALITIES = frozenset({"print-analyze", "print-repair"})
+PRINT_MODALITIES = frozenset({"print-analyze", "print-repair", "print-multi-color"})
 
 ASSETS_PHASE_FILTER_CHOICES: tuple[tuple[str, str], ...] = (
     ("all", "All runs"),

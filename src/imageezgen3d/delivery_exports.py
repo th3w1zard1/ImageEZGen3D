@@ -17,6 +17,7 @@ KNOWN_EXPORT_FORMATS: frozenset[str] = frozenset(
     (*DEFAULT_CORE_FORMATS, *DELIVERY_FORMATS)
 )
 _THREEMF_NS = "http://schemas.microsoft.com/3dmanufacturing/core/2015/02"
+_THREEMF_MATERIAL_NS = "http://schemas.microsoft.com/3dmanufacturing/material/2015/02"
 _XML_NS = "http://www.w3.org/XML/1998/namespace"
 
 FBX_GEOMETRY_NOTES = (
@@ -231,6 +232,114 @@ def write_3mf(mesh: SimpleMesh, path: Path) -> None:
     with path.open("rb") as handle:
         if handle.read(2) != b"PK":
             raise RuntimeError("3MF export did not produce a ZIP-based package.")
+
+
+def _color_to_display_hex(color: tuple[float, float, float, float]) -> str:
+    r, g, b, a = color
+    return (
+        f"#{int(round(r * 255)):02X}"
+        f"{int(round(g * 255)):02X}"
+        f"{int(round(b * 255)):02X}"
+        f"{int(round(a * 255)):02X}"
+    )
+
+
+def write_multi_color_3mf(
+    mesh: SimpleMesh,
+    path: Path,
+    *,
+    face_material_indices: list[int],
+    palette: list[tuple[float, float, float, float]],
+) -> None:
+    """Write a multi-material 3MF ZIP package for slicer multi-color workflows."""
+    if len(mesh.faces) != len(face_material_indices):
+        raise ValueError("face_material_indices length must match triangle count.")
+    if not palette:
+        raise ValueError("palette must include at least one color.")
+
+    model = Element(
+        f"{{{_THREEMF_NS}}}model",
+        attrib={
+            "unit": "millimeter",
+            f"{{{_XML_NS}}}lang": "en-US",
+        },
+    )
+    resources = SubElement(model, f"{{{_THREEMF_NS}}}resources")
+    materials_id = "2"
+    basematerials = SubElement(
+        resources,
+        f"{{{_THREEMF_MATERIAL_NS}}}basematerials",
+        attrib={"id": materials_id},
+    )
+    for index, color in enumerate(palette):
+        SubElement(
+            basematerials,
+            f"{{{_THREEMF_MATERIAL_NS}}}base",
+            attrib={
+                "name": f"Color{index + 1}",
+                "displaycolor": _color_to_display_hex(color),
+            },
+        )
+    obj = SubElement(
+        resources,
+        f"{{{_THREEMF_NS}}}object",
+        attrib={"id": "1", "type": "model"},
+    )
+    mesh_element = SubElement(obj, f"{{{_THREEMF_NS}}}mesh")
+    vertices_element = SubElement(mesh_element, f"{{{_THREEMF_NS}}}vertices")
+    for x, y, z in mesh.vertices:
+        SubElement(
+            vertices_element,
+            f"{{{_THREEMF_NS}}}vertex",
+            attrib={"x": f"{x:.6f}", "y": f"{y:.6f}", "z": f"{z:.6f}"},
+        )
+    triangles_element = SubElement(mesh_element, f"{{{_THREEMF_NS}}}triangles")
+    for face_index, (a, b, c) in enumerate(mesh.faces):
+        material_index = face_material_indices[face_index]
+        if material_index < 0 or material_index >= len(palette):
+            raise ValueError(
+                f"face material index {material_index} out of range for palette."
+            )
+        SubElement(
+            triangles_element,
+            f"{{{_THREEMF_NS}}}triangle",
+            attrib={
+                "v1": str(a),
+                "v2": str(b),
+                "v3": str(c),
+                "pid": materials_id,
+                "p1": str(material_index),
+            },
+        )
+    build = SubElement(model, f"{{{_THREEMF_NS}}}build")
+    SubElement(build, f"{{{_THREEMF_NS}}}item", attrib={"objectid": "1"})
+    model_xml = tostring(model, encoding="utf-8", xml_declaration=True)
+    content_types = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+        '<Default Extension="rels" '
+        'ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+        '<Default Extension="model" '
+        'ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/>'
+        "</Types>"
+    )
+    relationships = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        '<Relationship Target="/3D/3dmodel.model" Id="rel0" '
+        'Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/>'
+        "</Relationships>"
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("[Content_Types].xml", content_types)
+        archive.writestr("_rels/.rels", relationships)
+        archive.writestr("3D/3dmodel.model", model_xml)
+    if not path.exists() or path.stat().st_size == 0:
+        raise RuntimeError("Multi-color 3MF export produced an empty artifact.")
+    with path.open("rb") as handle:
+        if handle.read(2) != b"PK":
+            raise RuntimeError("Multi-color 3MF export did not produce a ZIP package.")
 
 
 def _delivery_format_notes(fmt: str) -> str:

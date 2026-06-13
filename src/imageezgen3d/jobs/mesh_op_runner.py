@@ -6,6 +6,7 @@ from typing import Any
 
 from ..mesh_ops.booleans import boolean_mesh
 from ..mesh_ops.convert import convert_mesh, supported_convert_formats
+from ..mesh_ops.multi_color_print import multi_color_print
 from ..mesh_ops.printability import analyze_printability, repair_printability
 from ..mesh_ops.remesh import remesh_mesh
 from ..mesh_ops.resize import resize_mesh
@@ -86,6 +87,16 @@ def run_mesh_op_job(store: RunStore, request: JobRequest) -> dict[str, Any]:
         output_path = export_dir / "repaired.glb"
         repair_report = repair_printability(input_path, output_path)
         report = repair_report.to_dict()
+    elif modality == "print-multi-color":
+        output_path = export_dir / "multi_color.3mf"
+        print_report = multi_color_print(
+            input_path,
+            output_path,
+            max_colors=request.max_colors,
+            max_depth=request.max_depth,
+        )
+        report = print_report.to_dict()
+        artifact_key = "3mf"
     elif modality == "unwrap-uv":
         output_path = export_dir / "unwrapped.glb"
         unwrap_report = unwrap_uv(input_path, output_path)

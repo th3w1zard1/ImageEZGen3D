@@ -83,6 +83,45 @@ def match_meshy_route(segments: list[str], method: str) -> MeshyRouteMatch | Non
         )
 
     if (
+        method == "POST"
+        and len(segments) == 4
+        and segments[0] == "openapi"
+        and segments[1] == "v1"
+        and segments[2] == "print"
+        and segments[3] == "multi-color"
+    ):
+        return MeshyRouteMatch(action="create", task_kind="print-multi-color")
+
+    if (
+        method == "GET"
+        and len(segments) == 5
+        and segments[0] == "openapi"
+        and segments[1] == "v1"
+        and segments[2] == "print"
+        and segments[3] == "multi-color"
+    ):
+        return MeshyRouteMatch(
+            action="retrieve",
+            task_kind="print-multi-color",
+            task_id=segments[4],
+        )
+
+    if (
+        method == "GET"
+        and len(segments) == 6
+        and segments[0] == "openapi"
+        and segments[1] == "v1"
+        and segments[2] == "print"
+        and segments[3] == "multi-color"
+        and segments[5] == "stream"
+    ):
+        return MeshyRouteMatch(
+            action="stream",
+            task_kind="print-multi-color",
+            task_id=segments[4],
+        )
+
+    if (
         method == "GET"
         and len(segments) == 4
         and segments[0] == "openapi"
@@ -268,6 +307,20 @@ def job_request_from_meshy(task_kind: str, payload: dict[str, Any]) -> JobReques
             task_type=task_kind,
         )
 
+    if task_kind == "print-multi-color":
+        from ..mesh_ops.multi_color_print import validate_max_colors, validate_max_depth
+
+        mesh_input = _resolve_mesh_input(payload)
+        if not mesh_input:
+            raise ValueError("Either model_url or input_task_id must be provided.")
+        return JobRequest(
+            input_modality="print-multi-color",
+            mesh_input_path=mesh_input,
+            max_colors=validate_max_colors(_optional_int(payload.get("max_colors"))),
+            max_depth=validate_max_depth(_optional_int(payload.get("max_depth"))),
+            task_type=task_kind,
+        )
+
     raise ValueError(f"Unsupported Meshy task kind: {task_kind}")
 
 
@@ -343,7 +396,7 @@ def _meshy_result_fields(manifest: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(artifacts, dict):
         artifacts = {}
     model_urls: dict[str, str] = {}
-    for key in ("glb", "obj", "stl", "fbx", "usdz", "png", "image", "prototype"):
+    for key in ("glb", "obj", "stl", "fbx", "usdz", "3mf", "png", "image", "prototype"):
         value = artifacts.get(key)
         if isinstance(value, str) and value:
             model_urls[key] = value

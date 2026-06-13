@@ -83,6 +83,28 @@ class MeshOpRunnerTests(unittest.TestCase):
             report = result["parameters"]["mesh_op_report"]
             self.assertEqual(report["operation"], "union")
 
+    def test_print_multi_color_mesh_op_writes_3mf(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = RunStore(directory)
+            input_glb = Path(directory) / "input.glb"
+            write_glb(
+                make_box_mesh(1.0, 0.74, 1.35, (0.12, 0.58, 0.55, 1.0)),
+                input_glb,
+            )
+            request = JobRequest(
+                input_modality="print-multi-color",
+                mesh_input_path=str(input_glb),
+                max_colors=4,
+                max_depth=4,
+                task_type="print-multi-color",
+            )
+            result = run_mesh_op_job(store, request)
+            self.assertEqual(result["parameters"]["input_modality"], "print-multi-color")
+            self.assertIn("3mf", result["artifacts"])
+            report = result["parameters"]["mesh_op_report"]
+            self.assertEqual(report["op"], "multi-color-print")
+            self.assertGreaterEqual(report["colors_used"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()
