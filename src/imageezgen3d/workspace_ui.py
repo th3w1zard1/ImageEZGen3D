@@ -104,6 +104,7 @@ WIRED_VIEWER_MESH_OPS: tuple[tuple[str, str], ...] = (
     ("remesh", "Remesh"),
     ("print-analyze", "Analyze Print"),
     ("print-repair", "Repair Print"),
+    ("print-multi-color", "Multi-Color 3MF"),
     ("unwrap-uv", "Unwrap UV"),
 )
 

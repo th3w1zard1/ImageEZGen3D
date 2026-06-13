@@ -34,13 +34,20 @@ class WorkspaceUiTests(unittest.TestCase):
         html = workspace_ui.viewer_action_bar_html()
         self.assertIn("Retry", html)
         self.assertIn("Send to Animate", html)
+        self.assertIn("Multi-Color 3MF", html)
         self.assertIn("viewer-action-bar", html)
 
     def test_wired_viewer_mesh_ops_cover_remesh_and_print(self) -> None:
         modalities = {item[0] for item in workspace_ui.WIRED_VIEWER_MESH_OPS}
         self.assertEqual(
             modalities,
-            {"remesh", "print-analyze", "print-repair", "unwrap-uv"},
+            {
+                "remesh",
+                "print-analyze",
+                "print-repair",
+                "print-multi-color",
+                "unwrap-uv",
+            },
         )
 
     def test_wired_viewer_generation_ops_include_retexture(self) -> None:
