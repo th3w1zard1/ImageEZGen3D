@@ -1,7 +1,7 @@
 ---
 title: "feat: Meshy-class parity gap program (master roadmap)"
 type: feat
-status: active
+status: completed
 date: 2026-06-03
 origin: docs/knowledgebase/competitive-product-benchmark-2026.md
 ---

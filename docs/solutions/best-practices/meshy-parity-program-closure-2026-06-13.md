@@ -64,6 +64,10 @@ Record outcomes in [hosted-validation-2026-05-23.md](../../knowledgebase/40-oper
 
 Implementation for Phases 10–17 (`program: meshy-parity` plans 196–204) was already landed and reflected in `PARITY-MATRIX.md`, but plan frontmatter still showed `status: active`. Phase 30 marks those plans **completed** and adds `test_meshy_parity_plans_are_marked_completed` so agents do not re-open finished slices.
 
+## Phase 31 — legacy gap-program plan closure (2026-06-13)
+
+June 2026 Meshy gap-program plans (`185`, `189`–`192`) for preview/refine lanes, `target_formats`, PBR map exports, and retexture hooks were landed before the June 13 viewer/API wave but remained `status: active`. Phase 31 closes them and adds `test_legacy_meshy_gap_plans_are_marked_completed`. Enablement runbook glossary clarifies `workstation_evidence_ready` vs `g9_enablement_evidence_ready`.
+
 ## Next frontier (out of Meshy parity)
 
 Hunyuan G7 enablement — run `python scripts/hunyuan_preflight_bundle.py` and close G1–G8 per [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md).
@@ -73,3 +77,4 @@ Hunyuan G7 enablement — run `python scripts/hunyuan_preflight_bundle.py` and c
 - [meshy-class-automation-stack-2026-05-28.md](meshy-class-automation-stack-2026-05-28.md) — jobs/automation layer
 - Plan: [206-feat-meshy-parity-program-closure-phase-19-plan.md](../../plans/2026-06-13-206-feat-meshy-parity-program-closure-phase-19-plan.md)
 - Plan: [217-feat-meshy-plan-status-closure-phase-30-plan.md](../../plans/2026-06-13-217-feat-meshy-plan-status-closure-phase-30-plan.md)
+- Plan: [218-feat-meshy-legacy-plan-closure-phase-31-plan.md](../../plans/2026-06-13-218-feat-meshy-legacy-plan-closure-phase-31-plan.md)

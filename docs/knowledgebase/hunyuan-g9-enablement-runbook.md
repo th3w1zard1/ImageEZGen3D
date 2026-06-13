@@ -54,7 +54,17 @@ PYTHONPATH=src python scripts/hunyuan_neural_enablement_preflight_bundle.py --re
 PYTHONPATH=src python scripts/verify_neural_enablement_preflight_bundle.py --record-dir .
 ```
 
-Writes admission, enablement, workstation, G9 bundle, neural enablement, G9 evidence (`g9-enablement-evidence.json`), admission + G9 evidence bundle (`admission-g9-enablement-evidence-bundle.json`), and (with `--live-probe`) `hunyuan-g7-live-probe.json` under `--record-dir`, then verifies record + cross-artifact parity. With `--hosted-neural --status-file`, also writes `hunyuan-g7-hosted-neural.json` for post-enablement G7 evidence parity (Phase AP). When `g9-enablement-evidence.json` is present, parity also checks G9 evidence ↔ neural alignment (Phase AS), G9 evidence ↔ admission audit alignment when `hunyuan-admission-audit.json` is present (Phase AT), and bundle nested evidence ↔ standalone G9 evidence when `admission-g9-enablement-evidence-bundle.json` is present (Phase AW). Expect `workstation_evidence_ready=false` and `neural_enablement_ready=false` on CI; on tier-C GPU workstation re-run with `--strict` until `g9_enablement_evidence_ready=true` and `parity_ok=true` on the G9/admission capstone (Phases AY–AZ) and matching parity on the neural capstone (Phase AZ).
+### Evidence field glossary
+
+| Field | Meaning on CI / non-GPU hosts | Tier-C operator target |
+| --- | --- | --- |
+| `workstation_evidence_ready` | Neural workstation probe not satisfied (expected `false`) | `true` after live GPU probe |
+| `neural_enablement_ready` | Adapter neural forward path not proven (expected `false`) | `true` after configured forward pass |
+| `g9_enablement_evidence_ready` | Combined G9/admission capstone gate (expected `false` here) | `true` before Space enablement PR |
+
+`--strict` on capstone scripts exits **1** when the row's CI-expected value is `false`. Do not treat `workstation_evidence_ready=false` alone as a separate blocker label — the operator-facing enablement gate is **`g9_enablement_evidence_ready=true`** plus **`parity_ok=true`** on tier-C.
+
+The capstone bundle above writes admission, enablement, workstation, G9 bundle, neural enablement, G9 evidence (`g9-enablement-evidence.json`), admission + G9 evidence bundle (`admission-g9-enablement-evidence-bundle.json`), and (with `--live-probe`) `hunyuan-g7-live-probe.json` under `--record-dir`, then verifies record + cross-artifact parity. With `--hosted-neural --status-file`, also writes `hunyuan-g7-hosted-neural.json` for post-enablement G7 evidence parity (Phase AP). When `g9-enablement-evidence.json` is present, parity also checks G9 evidence ↔ neural alignment (Phase AS), G9 evidence ↔ admission audit alignment when `hunyuan-admission-audit.json` is present (Phase AT), and bundle nested evidence ↔ standalone G9 evidence when `admission-g9-enablement-evidence-bundle.json` is present (Phase AW). Expect `workstation_evidence_ready=false` and `neural_enablement_ready=false` on CI; on tier-C GPU workstation re-run with `--strict` until `g9_enablement_evidence_ready=true` and `parity_ok=true` on the G9/admission capstone (Phases AY–AZ) and matching parity on the neural capstone (Phase AZ).
 
 **Legacy G9-only bundle (subset of the neural capstone):**
 

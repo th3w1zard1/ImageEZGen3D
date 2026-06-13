@@ -1,7 +1,7 @@
 ---
 title: "feat: target_formats on job payload and export API (Phase R)"
 type: feat
-status: active
+status: completed
 date: 2026-06-03
 origin: docs/plans/2026-06-03-185-feat-meshy-parity-gap-program-plan.md
 ---

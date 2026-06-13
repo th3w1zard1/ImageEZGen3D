@@ -7,6 +7,13 @@ from pathlib import Path
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 _PARITY_MATRIX = _REPO_ROOT / "docs/reference/meshy/PARITY-MATRIX.md"
 _PLANS_DIR = _REPO_ROOT / "docs/plans"
+_LEGACY_MESHY_GAP_PLAN_FILES = (
+    "2026-06-03-185-feat-meshy-parity-gap-program-plan.md",
+    "2026-06-03-189-feat-meshy-target-formats-api-plan.md",
+    "2026-06-03-190-feat-meshy-pbr-map-file-export-plan.md",
+    "2026-06-03-191-feat-meshy-preview-refine-lanes-plan.md",
+    "2026-06-03-192-feat-meshy-retexture-adapter-hook-plan.md",
+)
 
 
 def _plan_frontmatter(path: Path) -> dict[str, str]:
@@ -106,6 +113,18 @@ class MeshyParityMatrixTests(unittest.TestCase):
             incomplete,
             [],
             msg=f"meshy-parity plans must be completed: {incomplete}",
+        )
+
+    def test_legacy_meshy_gap_plans_are_marked_completed(self) -> None:
+        incomplete = [
+            name
+            for name in _LEGACY_MESHY_GAP_PLAN_FILES
+            if _plan_frontmatter(_PLANS_DIR / name).get("status") != "completed"
+        ]
+        self.assertEqual(
+            incomplete,
+            [],
+            msg=f"legacy meshy gap plans must be completed: {incomplete}",
         )
 
 
