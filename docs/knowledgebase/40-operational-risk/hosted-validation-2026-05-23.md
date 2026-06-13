@@ -779,6 +779,19 @@ After Phase 17 merge (`c176f8b` on `main`, PR #164) and Hub deploy commit `26a6b
 - **Artifacts verified:** manifest + GLB + OBJ present via Gradio API `/generate`
 - **Meshy program:** Phases 12–17 landed viewer Retry/Download/Send-to, boolean mesh-op UX, multi-image-to-3d, multi-color print API + viewer button; hosted path re-attested after deploy
 
+## Hunyuan G7 readiness Phase 20 validation (export-tier + capstone baseline)
+
+After Phase 19 merge (`c14a4a2` on `main`) and Hub deploy commit `e368ad8003640e0d81545d92ae0e536195d7d9b6` (2026-06-13):
+
+- **Space:** https://th3w1zard1-imageezgen3d.hf.space/
+- **Hosted export-tier smoke:** draft run `20260613-080815-cb81682c`, balanced run `20260613-080821-b95f913f` — `hosted_export_tier_smoke.py` + `verify_hosted_export_tier_smoke_record.py` → ok
+- **Hunyuan preflight:** `hunyuan_preflight_bundle.py` → ok (`configured=False`, G7/G8/G9 OPEN)
+- **Enablement capstones:** `hunyuan_enablement_evidence_capstones.py --record-dir /tmp/...` → `g9_enablement_evidence_ready=false`, `parity_ok=true`, blocker `configured_adapter_neural_forward_not_ready`
+- **Mode:** hosted **CPU fallback** (`Local CPU Preview` / `cpu-demo`); **not** ZeroGPU/Hunyuan neural validation
+- **g7_false_neural_guard_ok:** true on export-tier runs
+- **Code fixes landed:** Gradio artifact index offset for `preview_extras`; hosted manifest validation skips Space `/app/` paths; backend rail HTML scan for `/generate` tail drift
+- **G7/G8/G9:** remain **OPEN** — do not set `IMAGEEZ_HUNYUAN_CONFIGURED=true` until tier-C neural forward + hosted G7 evidence
+
 ## Plan 017 validation (manifest-driven UI)
 
 After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b5780929360d96e2ab6f5c197a20a3fe` (2026-05-24):

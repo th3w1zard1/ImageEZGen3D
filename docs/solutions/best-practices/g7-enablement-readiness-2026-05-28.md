@@ -26,6 +26,10 @@
 - When `true`, `generate()` calls the GPU shell and raises **`NotImplementedError`** until inference is wired — not a G7 PASS.
 - Do **not** set this on the live Space until weights, tier-C deps, and hosted neural E2E are ready.
 
+## Phase 20 baseline (2026-06-13)
+
+Export-tier hosted smoke re-attested after Meshy program closure; Hunyuan capstones re-run with expected blocker `configured_adapter_neural_forward_not_ready`. Hosted smoke helpers fixed for `preview_extras` output offset and Space `/app/` manifest paths. Evidence: [hosted-validation-2026-05-23.md](../../knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md) § Phase 20.
+
 ## Recommended next execution slice
 
 1. Run `PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-dir .` locally (do not commit output JSON).
