@@ -58,7 +58,7 @@ After Meshy-facing changes, run:
 PYTHONPATH=src python scripts/verify_meshy_parity_bundle.py
 ```
 
-Hosted re-attestation: `scripts/hosted_golden_smoke.py` + Space deploy per `AGENTS.md`. See Phase 7 notes in `docs/knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md`.
+Hosted re-attestation: `scripts/hosted_golden_smoke.py` + Space deploy per `AGENTS.md`. Last Meshy program attestation: Phase 18 (2026-06-13) in [hosted-validation-2026-05-23.md](../../knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md). See Phase 7 notes in the same doc for the initial Meshy closure pass.
 
 ## Out of scope (by design)
 
