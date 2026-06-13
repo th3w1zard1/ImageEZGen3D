@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from ..mesh_ops.booleans import boolean_mesh
 from ..mesh_ops.convert import convert_mesh, supported_convert_formats
 from ..mesh_ops.printability import analyze_printability, repair_printability
 from ..mesh_ops.remesh import remesh_mesh
@@ -12,6 +13,15 @@ from ..mesh_ops.uv import unwrap_uv
 from ..credits import apply_credit_estimate_to_parameters
 from ..storage import RunStore
 from .models import JobRequest
+
+BOOLEAN_MODALITIES = frozenset(
+    {"boolean-union", "boolean-difference", "boolean-intersection"}
+)
+_BOOLEAN_OPERATION_BY_MODALITY = {
+    "boolean-union": "union",
+    "boolean-difference": "difference",
+    "boolean-intersection": "intersection",
+}
 
 
 def run_mesh_op_job(store: RunStore, request: JobRequest) -> dict[str, Any]:
@@ -26,6 +36,9 @@ def run_mesh_op_job(store: RunStore, request: JobRequest) -> dict[str, Any]:
         "task_type": request.task_type or modality,
         "mesh_input_path": str(input_path),
     }
+    if modality in BOOLEAN_MODALITIES:
+        second_path = _require_second_mesh(request)
+        manifest.parameters["second_mesh_path"] = str(second_path)
     store.save_manifest(run_dir, manifest)
 
     report: dict[str, Any]
@@ -77,6 +90,17 @@ def run_mesh_op_job(store: RunStore, request: JobRequest) -> dict[str, Any]:
         output_path = export_dir / "unwrapped.glb"
         unwrap_report = unwrap_uv(input_path, output_path)
         report = unwrap_report.to_dict()
+    elif modality in BOOLEAN_MODALITIES:
+        second_path = _require_second_mesh(request)
+        operation = _BOOLEAN_OPERATION_BY_MODALITY[modality]
+        output_path = export_dir / f"boolean_{operation}.glb"
+        boolean_report = boolean_mesh(
+            input_path,
+            second_path,
+            output_path,
+            operation=operation,
+        )
+        report = boolean_report.to_dict()
     else:
         raise ValueError(f"Unsupported mesh operation modality: {modality}")
 
@@ -98,6 +122,18 @@ def run_mesh_op_job(store: RunStore, request: JobRequest) -> dict[str, Any]:
     }
     payload["run_id"] = run_dir.name
     return payload
+
+
+def _require_second_mesh(request: JobRequest) -> Path:
+    path_str = request.second_mesh_path
+    if not path_str:
+        raise ValueError(
+            "second_mesh_path is required for boolean mesh operation jobs."
+        )
+    path = Path(path_str)
+    if not path.is_file():
+        raise FileNotFoundError(f"Second mesh input not found: {path}")
+    return path
 
 
 def _require_mesh_input(request: JobRequest) -> Path:

@@ -30,6 +30,15 @@ class GradioMeshOpBridgeTests(unittest.TestCase):
         self.assertEqual(request.input_modality, "print-analyze")
         self.assertIsNone(request.target_polycount)
 
+    def test_build_mesh_op_job_request_stages_boolean_second_mesh(self) -> None:
+        request = build_mesh_op_job_request(
+            "boolean-difference",
+            "/tmp/first.glb",
+            second_mesh_path="/tmp/second.glb",
+        )
+        self.assertEqual(request.input_modality, "boolean-difference")
+        self.assertEqual(request.second_mesh_path, "/tmp/second.glb")
+
     def test_build_retexture_job_request_stages_texture_image(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             intake_root = Path(directory) / "intake"

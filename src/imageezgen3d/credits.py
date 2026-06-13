@@ -92,6 +92,14 @@ def estimate_credits(parameters: Mapping[str, Any]) -> CreditEstimate:
     if modality == "unwrap-uv":
         return CreditEstimate(1, "UV Unwrap", "mesh-op")
 
+    if modality in ("boolean-union", "boolean-difference", "boolean-intersection"):
+        label = {
+            "boolean-union": "Boolean Union",
+            "boolean-difference": "Boolean Difference",
+            "boolean-intersection": "Boolean Intersection",
+        }[modality]
+        return CreditEstimate(1, label, "mesh-op")
+
     if modality in ("print-analyze", "analyze-printability"):
         return CreditEstimate(0, "Analyze Printability", "print-free")
 

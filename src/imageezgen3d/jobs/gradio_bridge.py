@@ -98,6 +98,7 @@ def build_mesh_op_job_request(
     modality: str,
     mesh_input_path: str,
     *,
+    second_mesh_path: str | None = None,
     target_polycount: int | None = None,
 ) -> JobRequest:
     normalized = modality.strip().lower()
@@ -107,6 +108,7 @@ def build_mesh_op_job_request(
     return JobRequest(
         input_modality=normalized,
         mesh_input_path=mesh_input_path,
+        second_mesh_path=second_mesh_path,
         target_polycount=polycount,
     )
 

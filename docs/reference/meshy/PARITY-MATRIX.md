@@ -47,7 +47,7 @@ Beyond-Meshy extras (Blender-parity):
 
 | Capability | Module | Status |
 | --- | --- | --- |
-| Boolean union/difference/intersect | `mesh_ops/booleans.py` | **partial** (library only; no mesh-op job route) |
+| Boolean union/difference/intersect | `mesh_ops/booleans.py`, `jobs/mesh_op_runner.py` | **real** (mesh-op job modalities; needs manifold3d or Blender engine) |
 | UV unwrap | `mesh_ops/uv.py`, `jobs/mesh_op_runner.py` | **real** (mesh-op job + viewer button; needs xatlas) |
 
 ## Verification

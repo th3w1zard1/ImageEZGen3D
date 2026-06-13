@@ -42,6 +42,11 @@ class CreditEstimateTests(unittest.TestCase):
         self.assertEqual(estimate.consumed_credits, 1)
         self.assertEqual(estimate.task_label, "UV Unwrap")
 
+    def test_boolean_union_mesh_op_cost(self) -> None:
+        estimate = estimate_credits({"input_modality": "boolean-union"})
+        self.assertEqual(estimate.consumed_credits, 1)
+        self.assertEqual(estimate.task_label, "Boolean Union")
+
     def test_creative_lab_lamp_build(self) -> None:
         estimate = estimate_credits(
             {
