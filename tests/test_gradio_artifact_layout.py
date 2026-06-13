@@ -33,8 +33,9 @@ class GradioArtifactLayoutTests(unittest.TestCase):
         formats = load_config().exports.formats
         indices = generate_output_indices(formats)
         download_count = len(resolve_gradio_download_keys(formats))
-        self.assertEqual(indices["manifest"], 2)
-        self.assertEqual(indices["create_history_summary"], 2 + download_count + 5)
+        self.assertEqual(indices["manifest"], 3)
+        self.assertEqual(indices["create_history_summary"], 3 + download_count + 5)
+        self.assertEqual(indices["assets_gallery"], 3 + download_count + 6)
 
     def test_generate_download_index_matches_fbx_slot(self) -> None:
         formats = load_config().exports.formats

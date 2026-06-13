@@ -12,6 +12,9 @@ UI_ARTIFACT_PREFIX_KEYS: tuple[str, ...] = (
 UI_DELIVERY_FORMAT_ORDER: tuple[str, ...] = ("fbx", "usdz", "3mf")
 UI_ARTIFACT_SUFFIX_KEYS: tuple[str, ...] = ("export_sidecar", "raw_glb", "bundle")
 
+# `/generate` returns model + status + preview_extras before download slots (see app.py).
+GENERATE_LEADING_OUTPUT_COUNT = 3
+
 UI_ARTIFACT_LABELS: dict[str, str] = {
     "manifest": "Manifest",
     "glb": "GLB",
@@ -93,15 +96,18 @@ def generate_download_index(
     keys = resolve_gradio_download_keys(config_formats)
     if key not in keys:
         raise KeyError(f"Unknown generate download key: {key}")
-    return 2 + keys.index(key)
+    return GENERATE_LEADING_OUTPUT_COUNT + keys.index(key)
 
 
 def generate_output_indices(
     config_formats: tuple[str, ...] | list[str] | None,
 ) -> dict[str, int]:
     download_keys = resolve_gradio_download_keys(config_formats)
-    indices = {key: 2 + offset for offset, key in enumerate(download_keys)}
-    tail_base = 2 + len(download_keys)
+    indices = {
+        key: GENERATE_LEADING_OUTPUT_COUNT + offset
+        for offset, key in enumerate(download_keys)
+    }
+    tail_base = GENERATE_LEADING_OUTPUT_COUNT + len(download_keys)
     indices.update(
         {
             "session_state": tail_base,
@@ -110,6 +116,7 @@ def generate_output_indices(
             "history_notice": tail_base + 3,
             "history_summary": tail_base + 4,
             "create_history_summary": tail_base + 5,
+            "assets_gallery": tail_base + 6,
         }
     )
     return indices

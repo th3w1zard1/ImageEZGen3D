@@ -19,6 +19,7 @@ from imageezgen3d.hosted_golden_smoke import (
     _GENERATE_EXPORT_SIDECAR_INDEX,
     _GENERATE_FBX_INDEX,
     _GENERATE_USDZ_INDEX,
+    extract_backend_rail_html_from_generate_result,
     parse_run_id,
     run_hosted_golden_smoke,
     validate_backend_rail_html,
@@ -98,6 +99,17 @@ class HostedGoldenSmokeTests(unittest.TestCase):
     def test_validate_backend_rail_html_rejects_missing_marker(self) -> None:
         issues = validate_backend_rail_html("<p>overview only</p>")
         self.assertTrue(any("What backend ran" in issue for issue in issues))
+
+    def test_extract_backend_rail_html_scans_generate_outputs(self) -> None:
+        rail = backend_rail_chips_html(
+            adapter_key="cpu-demo",
+            fallback_reason="ZeroGPU adapter not enabled",
+        )
+        result = ("model", "status", "<p>other</p>", rail, "<section class='assets-gallery'>")
+        self.assertEqual(
+            extract_backend_rail_html_from_generate_result(result),
+            rail,
+        )
 
     def test_validate_g7_not_false_neural_claim_accepts_cpu_fallback(self) -> None:
         self.assertEqual(validate_g7_not_false_neural_claim(_valid_status()), [])

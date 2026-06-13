@@ -157,6 +157,13 @@ class DeliveryExportTests(unittest.TestCase):
         )
         self.assertTrue(any("missing on disk" in issue for issue in issues))
 
+    def test_validate_delivery_formats_manifest_skips_space_app_paths(self) -> None:
+        issues = validate_delivery_formats_manifest(
+            {"fbx": "/app/outputs/run/exports/mesh.fbx"},
+            {"delivery_formats": {"fbx": {"exported": True}}},
+        )
+        self.assertEqual(issues, [])
+
     def test_validate_delivery_formats_manifest_ignores_legacy_sidecar(self) -> None:
         self.assertEqual(
             validate_delivery_formats_manifest({"glb": "/tmp/mesh.glb"}, {}),

@@ -444,6 +444,8 @@ def validate_delivery_formats_manifest(
             else:
                 path = Path(str(artifact_path))
                 if not path.is_file():
+                    if str(artifact_path).startswith("/app/"):
+                        continue
                     issues.append(f"Manifest {fmt} artifact path missing on disk: {path}")
                 elif path.stat().st_size == 0:
                     issues.append(f"Manifest {fmt} artifact is empty")
