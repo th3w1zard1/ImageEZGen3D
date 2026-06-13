@@ -33,6 +33,22 @@ class MeshyApiTranslationTests(unittest.TestCase):
         self.assertEqual(job.input_modality, "animate")
         self.assertEqual(job.action_id, "Walking_man")
 
+    def test_multi_image_to_3d_maps_views_and_modality(self) -> None:
+        job = job_request_from_meshy(
+            "multi-image-to-3d",
+            {
+                "image_urls": ["/tmp/front.png", "/tmp/back.png"],
+                "enable_pbr": False,
+            },
+        )
+        self.assertEqual(job.input_modality, "multi-image-to-3d")
+        self.assertEqual(job.task_type, "multi-image-to-3d")
+        self.assertEqual(
+            job.view_image_paths,
+            {"front": "/tmp/front.png", "back": "/tmp/back.png"},
+        )
+        self.assertEqual(job.image_path, "/tmp/front.png")
+
     def test_status_mapping(self) -> None:
         self.assertEqual(meshy_status("queued"), "PENDING")
         self.assertEqual(meshy_status("running"), "IN_PROGRESS")

@@ -7,6 +7,7 @@ from .export_tiers import DECIMATION_TARGET_BY_QUALITY, resolve_decimation_targe
 
 InputModality = Literal[
     "image",
+    "multi-image-to-3d",
     "text",
     "retexture",
     "text-to-image",
@@ -216,6 +217,9 @@ def build_pipeline_spec(
 ) -> GenerationPipelineSpec:
     modality_raw = (input_modality or "image").strip().lower().replace("_", "-")
     modality_map: dict[str, InputModality] = {
+        "image": "image",
+        "image-to-3d": "image",
+        "multi-image-to-3d": "multi-image-to-3d",
         "text": "text",
         "retexture": "retexture",
         "text-to-image": "text-to-image",
@@ -235,7 +239,7 @@ def build_pipeline_spec(
     prompt = (prompt_text or "").strip()
     if modality in ("text", "text-to-image") and not prompt:
         raise ValueError("Enter a text prompt before generating.")
-    if modality in ("image", "retexture", "image-to-image", "creative-lab"):
+    if modality in ("image", "multi-image-to-3d", "retexture", "image-to-image", "creative-lab"):
         prompt = prompt  # optional context from brief; stored when non-empty
 
     return GenerationPipelineSpec(

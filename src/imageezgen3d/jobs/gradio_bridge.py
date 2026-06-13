@@ -10,6 +10,22 @@ from .models import JobRequest
 from .service import JobService
 
 
+def resolve_generation_input_modality(
+    input_modality_name: str | None,
+    primary_image: Image.Image | None,
+    view_images: dict[str, Image.Image | None] | None,
+) -> str:
+    modality = str(input_modality_name or "image").strip().lower()
+    if modality != "image":
+        return modality
+    extra_views = sum(
+        1 for image in (view_images or {}).values() if image is not None
+    )
+    if extra_views > 0:
+        return "multi-image-to-3d"
+    return modality
+
+
 def stage_gradio_images(
     intake_dir: Path,
     primary_image: Image.Image | None,
@@ -47,6 +63,11 @@ def build_job_request_from_gradio(
     text_prompt_value: str | None,
     generation_lane_name: str | None,
 ) -> JobRequest:
+    resolved_modality = resolve_generation_input_modality(
+        input_modality_name,
+        primary_image,
+        view_images,
+    )
     intake_dir = intake_root / uuid.uuid4().hex
     image_path, view_paths = stage_gradio_images(
         intake_dir,
@@ -54,7 +75,7 @@ def build_job_request_from_gradio(
         view_images,
     )
     return JobRequest(
-        input_modality=str(input_modality_name or "image"),
+        input_modality=resolved_modality,
         prompt_text=text_prompt_value,
         image_path=image_path,
         adapter_name=adapter_name,

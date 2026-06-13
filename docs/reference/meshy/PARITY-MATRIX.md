@@ -15,7 +15,7 @@ Status values:
 | --- | --- | --- | --- |
 | Text to 3D (preview/refine) | 20 + 10 | `adapters/text_demo.py`, `adapters/text_neural.py`, lanes in `generation_pipeline.py` | demo (`text_neural` **gated**) |
 | Image to 3D | 20–30 | `adapters/cpu_demo.py`, `adapters/hunyuan.py` | demo (`hunyuan` **gated**) |
-| Multi-Image to 3D | 20–30 | `view_image_paths` on `JobRequest`, orchestrator multi-view intake | **partial** (fusion hook; no dedicated Meshy route label) |
+| Multi-Image to 3D | 20–30 | `view_image_paths`, orchestrator multi-view intake, Meshy `/openapi/v1/multi-image-to-3d` | **real** (dedicated modality + API translation; demo fusion) |
 | Remesh | 5 | `mesh_ops/remesh.py`, `jobs/mesh_op_runner.py`, `meshy_api` `/openapi/v1/remesh` | **real** (job + API + viewer button) |
 | Convert (GLB/FBX/OBJ/STL/USDZ/BLEND/3MF) | 1 | `delivery_exports.py`, `mesh_ops/convert.py`, mesh-op jobs | **real** |
 | Resize (height / longest-side / auto) | 1 | `mesh_ops/resize.py`, mesh-op jobs | **real** |

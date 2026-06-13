@@ -137,7 +137,7 @@ def job_request_from_meshy(task_kind: str, payload: dict[str, Any]) -> JobReques
             task_type=task_kind,
         )
 
-    if task_kind in ("image-to-3d", "multi-image-to-3d"):
+    if task_kind == "image-to-3d":
         texture_prompt = _optional_str(payload.get("texture_prompt"))
         texture_image = _resolve_local_asset(
             payload, "texture_image_url", "texture_image_path"
@@ -145,6 +145,32 @@ def job_request_from_meshy(task_kind: str, payload: dict[str, Any]) -> JobReques
         return JobRequest(
             input_modality="image",
             image_path=_resolve_local_asset(payload, "image_url", "image_path"),
+            prompt_text=texture_prompt,
+            texture_image_path=texture_image,
+            lane="refine" if payload.get("enable_pbr") else "preview",
+            topology=_optional_str(payload.get("topology")),
+            target_polycount=_optional_int(payload.get("target_polycount")),
+            enable_pbr=_optional_bool(payload.get("enable_pbr")),
+            task_type=task_kind,
+        )
+
+    if task_kind == "multi-image-to-3d":
+        texture_prompt = _optional_str(payload.get("texture_prompt"))
+        texture_image = _resolve_local_asset(
+            payload, "texture_image_url", "texture_image_path"
+        )
+        view_paths = _resolve_image_urls(payload)
+        primary_path = _resolve_local_asset(payload, "image_url", "image_path")
+        if not primary_path and view_paths:
+            primary_path = next(iter(view_paths.values()))
+        if not primary_path and not view_paths:
+            raise ValueError(
+                "multi-image-to-3d requires image_urls or a local image_path/image_url."
+            )
+        return JobRequest(
+            input_modality="multi-image-to-3d",
+            image_path=primary_path,
+            view_image_paths=view_paths or None,
             prompt_text=texture_prompt,
             texture_image_path=texture_image,
             lane="refine" if payload.get("enable_pbr") else "preview",
@@ -367,6 +393,32 @@ def _resolve_mesh_input(payload: dict[str, Any]) -> str | None:
     if direct:
         return direct
     return _optional_str(payload.get("input_task_id"))
+
+
+def _resolve_image_urls(payload: dict[str, Any]) -> dict[str, str]:
+    raw_urls = payload.get("image_urls")
+    if not isinstance(raw_urls, list):
+        return {}
+    labels = ("front", "back", "left", "right")
+    view_paths: dict[str, str] = {}
+    for index, item in enumerate(raw_urls[:4]):
+        path = _resolve_url_item(item)
+        if not path:
+            continue
+        label = labels[index] if index < len(labels) else f"view_{index}"
+        view_paths[label] = path
+    return view_paths
+
+
+def _resolve_url_item(value: object) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    if text.startswith(("http://", "https://", "data:")):
+        return None
+    return text
 
 
 def _optional_str(value: object) -> str | None:
