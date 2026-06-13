@@ -14,6 +14,7 @@ from imageezgen3d.jobs.gradio_bridge import (
     build_mesh_op_job_request,
     build_retexture_job_request,
     capture_retry_snapshot,
+    resolve_generation_input_modality,
     run_via_job_queue,
 )
 
@@ -38,6 +39,20 @@ class GradioMeshOpBridgeTests(unittest.TestCase):
         )
         self.assertEqual(request.input_modality, "boolean-difference")
         self.assertEqual(request.second_mesh_path, "/tmp/second.glb")
+
+    def test_resolve_generation_input_modality_promotes_labeled_views(self) -> None:
+        self.assertEqual(
+            resolve_generation_input_modality(
+                "image",
+                Image.new("RGB", (8, 8)),
+                {"front": Image.new("RGB", (8, 8)), "back": None},
+            ),
+            "multi-image-to-3d",
+        )
+        self.assertEqual(
+            resolve_generation_input_modality("image", Image.new("RGB", (8, 8)), {}),
+            "image",
+        )
 
     def test_build_retexture_job_request_stages_texture_image(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

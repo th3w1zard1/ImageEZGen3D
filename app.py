@@ -35,6 +35,7 @@ from imageezgen3d.jobs.gradio_bridge import (  # noqa: E402
     build_mesh_op_job_request,
     build_retexture_job_request,
     capture_retry_snapshot,
+    resolve_generation_input_modality,
     run_via_job_queue,
 )
 from imageezgen3d.preprocess import normalize_image, validate_image  # noqa: E402
@@ -1648,6 +1649,11 @@ def build_demo():
                 "left": left_image,
                 "right": right_image,
             }
+            resolved_modality = resolve_generation_input_modality(
+                input_modality_name,
+                primary_image,
+                views,
+            )
             fallback_model = state.get("model")
             try:
                 if queue_as_job_enabled:
@@ -1678,7 +1684,7 @@ def build_demo():
                         starter_flow=starter_flow,
                         starter_flow_label=_starter_spec(starter_flow)["label"],
                         reference_brief=reference_brief_file,
-                        input_modality=input_modality_name,
+                        input_modality=resolved_modality,
                         prompt_text=text_prompt_value,
                         lane=generation_lane_name,
                     )

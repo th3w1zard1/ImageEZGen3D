@@ -330,6 +330,13 @@ class ImageEZOrchestrator:
         )
         if pipeline_spec.input_modality == "image" and primary_image is None:
             raise ValueError("Upload a primary image before generating a 3D draft.")
+        if pipeline_spec.input_modality == "multi-image-to-3d":
+            view_count = sum(1 for image in (view_images or {}).values() if image is not None)
+            if primary_image is None and view_count == 0:
+                raise ValueError(
+                    "Upload a primary image or at least one labeled view "
+                    "before running multi-image to 3D."
+                )
         if pipeline_spec.input_modality == "retexture" and primary_image is None:
             raise ValueError(
                 "Upload a texture reference image before running retexture."
@@ -455,7 +462,7 @@ class ImageEZOrchestrator:
                 if pipeline_spec.input_modality == "retexture":
                     manifest.parameters["task_type"] = "retexture"
 
-                if pipeline_spec.input_modality == "image":
+                if pipeline_spec.input_modality in ("image", "multi-image-to-3d"):
                     for label, image in (view_images or {}).items():
                         if image is None:
                             continue
@@ -465,6 +472,9 @@ class ImageEZOrchestrator:
                         image.save(view_path)
                         saved_views[label] = view_path
                         self.store.record_artifact(manifest, f"view_{label}", view_path)
+                    if pipeline_spec.input_modality == "multi-image-to-3d":
+                        manifest.parameters["view_image_count"] = len(saved_views)
+                        manifest.parameters["task_type"] = "multi-image-to-3d"
             elif pipeline_spec.input_modality in ("text", "text-to-image"):
                 prompt_path = self.store.artifact_path(run_dir, "inputs", "prompt.txt")
                 prompt_path.write_text(pipeline_spec.prompt_text + "\n", encoding="utf-8")

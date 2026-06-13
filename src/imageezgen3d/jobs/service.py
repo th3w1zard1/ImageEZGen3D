@@ -217,6 +217,12 @@ class JobService:
             if not image_path.is_file():
                 raise FileNotFoundError(f"Image not found: {image_path}")
             primary_image = Image.open(image_path)
+        elif modality == "multi-image-to-3d":
+            if request.image_path:
+                image_path = Path(request.image_path)
+                if not image_path.is_file():
+                    raise FileNotFoundError(f"Image not found: {image_path}")
+                primary_image = Image.open(image_path)
         elif modality == "retexture":
             texture_path_str = request.texture_image_path or request.image_path
             if not texture_path_str:
@@ -262,6 +268,14 @@ class JobService:
                 view_path = Path(path_str)
                 if view_path.is_file():
                     view_images[label] = Image.open(view_path)
+        if modality == "multi-image-to-3d" and primary_image is None:
+            if view_images:
+                primary_image = next(iter(view_images.values()))
+            else:
+                raise ValueError(
+                    "image_path or view_image_paths is required for "
+                    "multi-image-to-3d jobs."
+                )
         if modality in _MESH_OP_MODALITIES:
             return run_mesh_op_job(self.run_store, request)
         return self.orchestrator.generate(

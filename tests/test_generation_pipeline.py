@@ -80,6 +80,15 @@ class GenerationPipelineTests(unittest.TestCase):
                 prompt_text="",
             )
 
+    def test_multi_image_modality_maps_explicit_label(self) -> None:
+        spec = build_pipeline_spec(
+            input_modality="multi-image-to-3d",
+            lane="draft",
+            quality=None,
+            prompt_text="",
+        )
+        self.assertEqual(spec.input_modality, "multi-image-to-3d")
+
     def test_staged_shape_texture_progression(self) -> None:
         tracker = PipelineStageTracker()
         tracker.mark_shape_running("hunyuan-zerogpu")
