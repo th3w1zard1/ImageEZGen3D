@@ -26,18 +26,15 @@ class WorkspaceUiTests(unittest.TestCase):
         self.assertIn("pbr_base_color.png", html)
         self.assertNotIn("<img", html)
 
-    def test_viewer_action_stub_bar_excludes_wired_labels(self) -> None:
-        html = workspace_ui.viewer_action_stub_bar_html()
-        self.assertNotIn(">Remesh<", html)
-        self.assertNotIn(">Edit Texture<", html)
-        self.assertNotIn(">Unwrap UV<", html)
+    def test_viewer_action_stub_bar_empty_when_all_wired(self) -> None:
+        self.assertEqual(workspace_ui.VIEWER_ACTION_STUBS, ())
+        self.assertEqual(workspace_ui.viewer_action_stub_bar_html(), "")
+
+    def test_viewer_action_bar_lists_all_wired_actions(self) -> None:
+        html = workspace_ui.viewer_action_bar_html()
+        self.assertIn("Retry", html)
         self.assertIn("Send to Animate", html)
         self.assertIn("viewer-action-bar", html)
-
-    def test_viewer_action_bar_lists_meshy_actions(self) -> None:
-        html = workspace_ui.viewer_action_bar_html()
-        self.assertIn("Remesh", html)
-        self.assertIn("Send to Animate", html)
 
     def test_wired_viewer_mesh_ops_cover_remesh_and_print(self) -> None:
         modalities = {item[0] for item in workspace_ui.WIRED_VIEWER_MESH_OPS}

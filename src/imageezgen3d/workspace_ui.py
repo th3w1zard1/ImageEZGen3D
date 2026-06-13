@@ -111,12 +111,17 @@ WIRED_VIEWER_GENERATION_OPS: tuple[tuple[str, str], ...] = (
     ("retexture", "Edit Texture"),
 )
 
-VIEWER_ACTION_STUBS: tuple[str, ...] = (
-    "Retry",
-    "Download",
-    "Send to Print",
-    "Send to Animate",
+WIRED_VIEWER_UTILITY_OPS: tuple[tuple[str, str], ...] = (
+    ("retry", "Retry"),
+    ("download", "Download"),
 )
+
+WIRED_VIEWER_HANDOFF_OPS: tuple[tuple[str, str], ...] = (
+    ("print-analyze", "Send to Print"),
+    ("animate", "Send to Animate"),
+)
+
+VIEWER_ACTION_STUBS: tuple[str, ...] = ()
 
 
 def _viewer_action_bar_html(actions: tuple[str, ...], *, note: str) -> str:
@@ -134,18 +139,23 @@ def _viewer_action_bar_html(actions: tuple[str, ...], *, note: str) -> str:
 
 
 def viewer_action_stub_bar_html() -> str:
+    if not VIEWER_ACTION_STUBS:
+        return ""
     return _viewer_action_bar_html(
         VIEWER_ACTION_STUBS,
-        note=(
-            "Remesh, printability, UV unwrap, and Edit Texture are wired as buttons above; "
-            "remaining labels mirror Meshy workspace affordances pending wiring."
-        ),
+        note="Additional Meshy workspace affordances pending wiring.",
     )
 
 
 def viewer_action_bar_html() -> str:
     wired_labels = tuple(
-        label for _, label in WIRED_VIEWER_MESH_OPS + WIRED_VIEWER_GENERATION_OPS
+        label
+        for _, label in (
+            WIRED_VIEWER_MESH_OPS
+            + WIRED_VIEWER_GENERATION_OPS
+            + WIRED_VIEWER_UTILITY_OPS
+            + WIRED_VIEWER_HANDOFF_OPS
+        )
     )
     actions = wired_labels + VIEWER_ACTION_STUBS
     return _viewer_action_bar_html(

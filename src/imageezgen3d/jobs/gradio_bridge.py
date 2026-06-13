@@ -111,6 +111,49 @@ def build_mesh_op_job_request(
     )
 
 
+def build_animate_job_request(
+    source_mesh_path: str,
+    *,
+    action_id: str = "Walking_man",
+) -> JobRequest:
+    return JobRequest(
+        input_modality="animate",
+        source_mesh_path=source_mesh_path,
+        action_id=action_id,
+        adapter_name="animation-demo",
+        quality="draft",
+        lane="draft",
+        task_type="animations",
+    )
+
+
+def capture_retry_snapshot(
+    *,
+    starter_flow: str | None,
+    project_brief_text: str | None,
+    reference_brief_file: str | None,
+    adapter_name: str | None,
+    quality_name: str | None,
+    seed_value: int | None,
+    input_modality_name: str | None,
+    text_prompt_value: str | None,
+    generation_lane_name: str | None,
+    queue_as_job_enabled: bool,
+) -> dict[str, Any]:
+    return {
+        "starter_flow": starter_flow,
+        "project_brief_text": project_brief_text,
+        "reference_brief_file": reference_brief_file,
+        "adapter_name": adapter_name,
+        "quality_name": quality_name,
+        "seed_value": int(seed_value or 0),
+        "input_modality_name": input_modality_name,
+        "text_prompt_value": text_prompt_value,
+        "generation_lane_name": generation_lane_name,
+        "queue_as_job_enabled": bool(queue_as_job_enabled),
+    }
+
+
 def run_via_job_queue(
     service: JobService,
     request: JobRequest,

@@ -10,8 +10,10 @@ from imageezgen3d.config import AppConfig, AppSettings, StorageSettings
 from imageezgen3d.exporters import make_box_mesh, write_glb
 from imageezgen3d.jobs import JobService
 from imageezgen3d.jobs.gradio_bridge import (
+    build_animate_job_request,
     build_mesh_op_job_request,
     build_retexture_job_request,
+    capture_retry_snapshot,
     run_via_job_queue,
 )
 
@@ -42,6 +44,30 @@ class GradioMeshOpBridgeTests(unittest.TestCase):
             self.assertEqual(request.source_mesh_path, "/tmp/mesh.glb")
             self.assertTrue(Path(request.texture_image_path or "").is_file())
             self.assertEqual(request.prompt_text, "brushed bronze")
+
+    def test_build_animate_job_request_targets_animation_demo(self) -> None:
+        request = build_animate_job_request("/tmp/mesh.glb", action_id="Walking_man")
+        self.assertEqual(request.input_modality, "animate")
+        self.assertEqual(request.source_mesh_path, "/tmp/mesh.glb")
+        self.assertEqual(request.action_id, "Walking_man")
+        self.assertEqual(request.adapter_name, "animation-demo")
+
+    def test_capture_retry_snapshot_records_generate_inputs(self) -> None:
+        snapshot = capture_retry_snapshot(
+            starter_flow="single-photo-draft",
+            project_brief_text="Keep silhouette",
+            reference_brief_file=None,
+            adapter_name="cpu-demo",
+            quality_name="draft",
+            seed_value=9,
+            input_modality_name="image",
+            text_prompt_value="",
+            generation_lane_name="draft",
+            queue_as_job_enabled=True,
+        )
+        self.assertEqual(snapshot["starter_flow"], "single-photo-draft")
+        self.assertEqual(snapshot["seed_value"], 9)
+        self.assertTrue(snapshot["queue_as_job_enabled"])
 
     def test_run_remesh_via_job_queue_returns_glb(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -404,6 +404,16 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         self.assertIn("run_viewer_retexture", source)
         self.assertIn("build_retexture_job_request", source)
 
+    def test_build_demo_wires_retry_download_and_sendto(self) -> None:
+        source = Path(app.__file__).read_text(encoding="utf-8")
+        self.assertIn("viewer_retry_btn", source)
+        self.assertIn("viewer_download_btn", source)
+        self.assertIn("viewer_send_print_btn", source)
+        self.assertIn("viewer_send_animate_btn", source)
+        self.assertIn("run_retry", source)
+        self.assertIn("capture_retry_snapshot", source)
+        self.assertIn("build_animate_job_request", source)
+
     def test_run_inspect_extras_reads_top_level_mesh_report(self) -> None:
         html = app._run_inspect_extras_html(
             {
