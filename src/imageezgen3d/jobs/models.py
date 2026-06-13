@@ -31,6 +31,8 @@ class JobRequest:
     resize_longest_side: float | None = None
     auto_size: bool | None = None
     origin_at: str | None = None
+    max_colors: int | None = None
+    max_depth: int | None = None
     adapter_name: str | None = None
     quality: str | None = None
     lane: str | None = None
@@ -77,6 +79,8 @@ class JobRequest:
             "second_mesh_path",
             "mesh_output_path",
             "origin_at",
+            "max_colors",
+            "max_depth",
         ):
             value = getattr(self, key)
             if value is not None:
@@ -115,6 +119,8 @@ class JobRequest:
             resize_longest_side=_optional_float(payload.get("resize_longest_side")),
             auto_size=_optional_bool(payload.get("auto_size")),
             origin_at=_optional_str(payload.get("origin_at")),
+            max_colors=_optional_int(payload.get("max_colors")),
+            max_depth=_optional_int(payload.get("max_depth")),
             adapter_name=_optional_str(payload.get("adapter_name")),
             quality=_optional_str(payload.get("quality")),
             lane=_optional_str(payload.get("lane")),

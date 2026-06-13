@@ -24,7 +24,7 @@ Status values:
 | Animation (preset catalog) | 3 | `adapters/animation_demo.py`, `docs/reference/meshy/animation-library.json` | **demo** |
 | Text to Image | 3–9 | `adapters/text_to_image_demo.py` | **demo** |
 | Image to Image | 3–12 | `adapters/image_to_image_demo.py` | **demo** |
-| Multi-Color Print (3MF) | 10 | `delivery_exports.py` (3MF export) | **partial** (export only; no multi-color print task) |
+| Multi-Color Print (3MF) | 10 | `mesh_ops/multi_color_print.py`, `delivery_exports.write_multi_color_3mf`, mesh-op jobs, Meshy `/openapi/v1/print/multi-color` | **real** |
 | Analyze Printability | free | `mesh_ops/printability.py` (analyze), mesh-op jobs | **real** |
 | Repair Printability | 10 | `mesh_ops/printability.py` (repair), mesh-op jobs | **real** |
 | Creative Lab — Keychain | 6 + 20 | `adapters/creative_lab.py` | **demo** |

@@ -49,6 +49,28 @@ class MeshyApiTranslationTests(unittest.TestCase):
         )
         self.assertEqual(job.image_path, "/tmp/front.png")
 
+    def test_print_multi_color_maps_parameters(self) -> None:
+        job = job_request_from_meshy(
+            "print-multi-color",
+            {
+                "model_url": "/tmp/mesh.glb",
+                "max_colors": 8,
+                "max_depth": 5,
+            },
+        )
+        self.assertEqual(job.input_modality, "print-multi-color")
+        self.assertEqual(job.task_type, "print-multi-color")
+        self.assertEqual(job.mesh_input_path, "/tmp/mesh.glb")
+        self.assertEqual(job.max_colors, 8)
+        self.assertEqual(job.max_depth, 5)
+
+    def test_print_multi_color_rejects_invalid_max_colors(self) -> None:
+        with self.assertRaisesRegex(ValueError, "max_colors"):
+            job_request_from_meshy(
+                "print-multi-color",
+                {"model_url": "/tmp/mesh.glb", "max_colors": 32},
+            )
+
     def test_status_mapping(self) -> None:
         self.assertEqual(meshy_status("queued"), "PENDING")
         self.assertEqual(meshy_status("running"), "IN_PROGRESS")
@@ -165,6 +187,49 @@ class MeshyHttpApiTests(unittest.TestCase):
                         status = poll_payload["status"]
                 self.assertEqual(status, "SUCCEEDED")
                 self.assertIn("glb", poll_payload.get("model_urls", {}))
+            finally:
+                server.shutdown()
+                server.server_close()
+                service.shutdown(wait=True)
+
+    def test_multi_color_print_meshy_route(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            tmp = Path(directory)
+            mesh_path = self._sample_glb(tmp / "exports" / "sample.glb")
+            service, server, port = self._start_server(tmp)
+            base = f"http://127.0.0.1:{port}"
+            try:
+                body = json.dumps(
+                    {
+                        "model_url": str(mesh_path),
+                        "max_colors": 4,
+                        "max_depth": 4,
+                    }
+                ).encode("utf-8")
+                submit_req = request.Request(
+                    f"{base}/openapi/v1/print/multi-color",
+                    data=body,
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with request.urlopen(submit_req, timeout=5) as resp:
+                    submit_payload = json.loads(resp.read().decode("utf-8"))
+                self.assertEqual(submit_payload["type"], "print-multi-color")
+                task_id = submit_payload["id"]
+                deadline = time.monotonic() + 60.0
+                status = submit_payload["status"]
+                while status != "SUCCEEDED" and time.monotonic() < deadline:
+                    time.sleep(0.05)
+                    with request.urlopen(
+                        f"{base}/openapi/v1/print/multi-color/{task_id}",
+                        timeout=5,
+                    ) as poll_resp:
+                        poll_payload = json.loads(poll_resp.read().decode("utf-8"))
+                        status = poll_payload["status"]
+                self.assertEqual(status, "SUCCEEDED")
+                self.assertEqual(poll_payload.get("type"), "print-multi-color")
+                self.assertEqual(poll_payload.get("consumed_credits"), 10)
+                self.assertIn("3mf", poll_payload.get("model_urls", {}))
             finally:
                 server.shutdown()
                 server.server_close()

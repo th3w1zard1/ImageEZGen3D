@@ -106,6 +106,9 @@ def estimate_credits(parameters: Mapping[str, Any]) -> CreditEstimate:
     if modality in ("print-repair", "repair-printability"):
         return CreditEstimate(10, "Repair Printability", "print-repair")
 
+    if modality in ("print-multi-color", "multi-color-print"):
+        return CreditEstimate(10, "Multi-Color Print (3MF)", "print-multi-color")
+
     if modality == "creative-lab" or str(parameters.get("task_type", "")).startswith(
         "creative-lab:"
     ):

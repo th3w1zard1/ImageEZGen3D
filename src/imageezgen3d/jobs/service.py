@@ -26,6 +26,7 @@ _MESH_OP_MODALITIES = frozenset(
         "resize",
         "print-analyze",
         "print-repair",
+        "print-multi-color",
         "unwrap-uv",
         *BOOLEAN_MODALITIES,
     }

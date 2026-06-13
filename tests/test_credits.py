@@ -47,6 +47,11 @@ class CreditEstimateTests(unittest.TestCase):
         self.assertEqual(estimate.consumed_credits, 1)
         self.assertEqual(estimate.task_label, "Boolean Union")
 
+    def test_print_multi_color_cost(self) -> None:
+        estimate = estimate_credits({"input_modality": "print-multi-color"})
+        self.assertEqual(estimate.consumed_credits, 10)
+        self.assertEqual(estimate.task_label, "Multi-Color Print (3MF)")
+
     def test_creative_lab_lamp_build(self) -> None:
         estimate = estimate_credits(
             {
