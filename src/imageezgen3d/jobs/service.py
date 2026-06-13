@@ -20,7 +20,7 @@ from .webhooks import deliver_webhook
 
 
 _MESH_OP_MODALITIES = frozenset(
-    {"remesh", "convert", "resize", "print-analyze", "print-repair"}
+    {"remesh", "convert", "resize", "print-analyze", "print-repair", "unwrap-uv"}
 )
 
 

@@ -89,6 +89,9 @@ def estimate_credits(parameters: Mapping[str, Any]) -> CreditEstimate:
     if modality == "resize":
         return CreditEstimate(1, "Resize", "mesh-op")
 
+    if modality == "unwrap-uv":
+        return CreditEstimate(1, "UV Unwrap", "mesh-op")
+
     if modality in ("print-analyze", "analyze-printability"):
         return CreditEstimate(0, "Analyze Printability", "print-free")
 

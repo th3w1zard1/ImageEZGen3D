@@ -8,6 +8,7 @@ from ..mesh_ops.convert import convert_mesh, supported_convert_formats
 from ..mesh_ops.printability import analyze_printability, repair_printability
 from ..mesh_ops.remesh import remesh_mesh
 from ..mesh_ops.resize import resize_mesh
+from ..mesh_ops.uv import unwrap_uv
 from ..credits import apply_credit_estimate_to_parameters
 from ..storage import RunStore
 from .models import JobRequest
@@ -72,6 +73,10 @@ def run_mesh_op_job(store: RunStore, request: JobRequest) -> dict[str, Any]:
         output_path = export_dir / "repaired.glb"
         repair_report = repair_printability(input_path, output_path)
         report = repair_report.to_dict()
+    elif modality == "unwrap-uv":
+        output_path = export_dir / "unwrapped.glb"
+        unwrap_report = unwrap_uv(input_path, output_path)
+        report = unwrap_report.to_dict()
     else:
         raise ValueError(f"Unsupported mesh operation modality: {modality}")
 

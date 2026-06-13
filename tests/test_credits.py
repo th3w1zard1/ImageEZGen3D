@@ -37,6 +37,11 @@ class CreditEstimateTests(unittest.TestCase):
         estimate = estimate_credits({"input_modality": "print-analyze"})
         self.assertEqual(estimate.consumed_credits, 0)
 
+    def test_unwrap_uv_mesh_op_cost(self) -> None:
+        estimate = estimate_credits({"input_modality": "unwrap-uv"})
+        self.assertEqual(estimate.consumed_credits, 1)
+        self.assertEqual(estimate.task_label, "UV Unwrap")
+
     def test_creative_lab_lamp_build(self) -> None:
         estimate = estimate_credits(
             {

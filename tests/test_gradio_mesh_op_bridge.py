@@ -4,11 +4,14 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from PIL import Image
+
 from imageezgen3d.config import AppConfig, AppSettings, StorageSettings
 from imageezgen3d.exporters import make_box_mesh, write_glb
 from imageezgen3d.jobs import JobService
 from imageezgen3d.jobs.gradio_bridge import (
     build_mesh_op_job_request,
+    build_retexture_job_request,
     run_via_job_queue,
 )
 
@@ -24,6 +27,21 @@ class GradioMeshOpBridgeTests(unittest.TestCase):
         request = build_mesh_op_job_request(" Print-Analyze ", "/tmp/mesh.glb")
         self.assertEqual(request.input_modality, "print-analyze")
         self.assertIsNone(request.target_polycount)
+
+    def test_build_retexture_job_request_stages_texture_image(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            intake_root = Path(directory) / "intake"
+            texture = Image.new("RGB", (32, 32), (120, 80, 40))
+            request = build_retexture_job_request(
+                intake_root=intake_root,
+                source_mesh_path="/tmp/mesh.glb",
+                texture_image=texture,
+                prompt_text="brushed bronze",
+            )
+            self.assertEqual(request.input_modality, "retexture")
+            self.assertEqual(request.source_mesh_path, "/tmp/mesh.glb")
+            self.assertTrue(Path(request.texture_image_path or "").is_file())
+            self.assertEqual(request.prompt_text, "brushed bronze")
 
     def test_run_remesh_via_job_queue_returns_glb(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -69,6 +69,31 @@ def build_job_request_from_gradio(
     )
 
 
+def build_retexture_job_request(
+    *,
+    intake_root: Path,
+    source_mesh_path: str,
+    texture_image: Image.Image | None,
+    prompt_text: str | None = None,
+    project_brief: str | None = None,
+) -> JobRequest:
+    intake_dir = intake_root / uuid.uuid4().hex
+    texture_path, _ = stage_gradio_images(intake_dir, texture_image, None)
+    if not texture_path:
+        raise ValueError(
+            "Upload a texture reference image before running Edit Texture."
+        )
+    return JobRequest(
+        input_modality="retexture",
+        source_mesh_path=source_mesh_path,
+        texture_image_path=texture_path,
+        prompt_text=(prompt_text or project_brief or "").strip() or None,
+        adapter_name="retexture-demo",
+        quality="draft",
+        lane="draft",
+    )
+
+
 def build_mesh_op_job_request(
     modality: str,
     mesh_input_path: str,

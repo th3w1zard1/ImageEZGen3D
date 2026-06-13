@@ -397,6 +397,13 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         self.assertIn("assets_search", source)
         self.assertIn("assets_gallery", source)
 
+    def test_build_demo_wires_viewer_uv_and_retexture(self) -> None:
+        source = Path(app.__file__).read_text(encoding="utf-8")
+        self.assertIn("viewer_unwrap_btn", source)
+        self.assertIn("viewer_retexture_btn", source)
+        self.assertIn("run_viewer_retexture", source)
+        self.assertIn("build_retexture_job_request", source)
+
     def test_run_inspect_extras_reads_top_level_mesh_report(self) -> None:
         html = app._run_inspect_extras_html(
             {

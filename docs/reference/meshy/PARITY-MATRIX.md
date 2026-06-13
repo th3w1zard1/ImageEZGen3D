@@ -40,7 +40,7 @@ Status values:
 | PBR maps (`enable_pbr`) | — | `pbr_map_exports.py` | **real** (reference-grade maps) |
 | Gradio workspace (Model/Image/Print/Animate/Assets) | — | `app.py`, `workspace_ui.py` | **real** (Phase 6) |
 | Model Helper + bear-warrior preset | — | `workspace_ui.py` | **real** |
-| Viewer action bar (Retry, Remesh, UV, …) | — | `app.py`, `workspace_ui.py` | **partial** (Remesh + print analyze/repair wired as preview buttons → mesh-op jobs; remaining chips stub) |
+| Viewer action bar (Retry, Remesh, UV, …) | — | `app.py`, `workspace_ui.py` | **partial** (Remesh, print analyze/repair, UV unwrap, Edit Texture wired; Retry/Download/Send-* stub) |
 | Assets gallery (search, phase filters) | — | `app.py`, `workspace_ui.py` | **real** (search, phase filters, grouped gallery; reopen via Open Run) |
 
 Beyond-Meshy extras (Blender-parity):
@@ -48,7 +48,7 @@ Beyond-Meshy extras (Blender-parity):
 | Capability | Module | Status |
 | --- | --- | --- |
 | Boolean union/difference/intersect | `mesh_ops/booleans.py` | **partial** (library only; no mesh-op job route) |
-| UV unwrap | `mesh_ops/uv.py` | **partial** (library only; viewer chip **stub**) |
+| UV unwrap | `mesh_ops/uv.py`, `jobs/mesh_op_runner.py` | **real** (mesh-op job + viewer button; needs xatlas) |
 
 ## Verification
 
