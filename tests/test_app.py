@@ -416,6 +416,13 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         self.assertIn("capture_retry_snapshot", source)
         self.assertIn("build_animate_job_request", source)
 
+    def test_build_demo_wires_viewer_boolean_mesh_ops(self) -> None:
+        source = Path(app.__file__).read_text(encoding="utf-8")
+        self.assertIn("viewer_boolean_second_mesh", source)
+        self.assertIn("viewer_boolean_union_btn", source)
+        self.assertIn("run_viewer_boolean_mesh_op", source)
+        self.assertIn("boolean-difference", source)
+
     def test_run_inspect_extras_reads_top_level_mesh_report(self) -> None:
         html = app._run_inspect_extras_html(
             {
