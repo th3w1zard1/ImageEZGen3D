@@ -40,7 +40,7 @@ Status values:
 | PBR maps (`enable_pbr`) | — | `pbr_map_exports.py` | **real** (reference-grade maps) |
 | Gradio workspace (Model/Image/Print/Animate/Assets) | — | `app.py`, `workspace_ui.py` | **real** (Phase 6) |
 | Model Helper + bear-warrior preset | — | `workspace_ui.py` | **real** |
-| Viewer action bar (Retry, Remesh, UV, …) | — | `workspace_ui.viewer_action_bar_html` | **stub** (labels only; no click → job) |
+| Viewer action bar (Retry, Remesh, UV, …) | — | `app.py`, `workspace_ui.py` | **partial** (Remesh + print analyze/repair wired as preview buttons → mesh-op jobs; remaining chips stub) |
 | Assets gallery (search, phase filters) | — | `app.py` Assets tab | **partial** (history reopen; no Meshy-style filters) |
 
 Beyond-Meshy extras (Blender-parity):

@@ -31,6 +31,7 @@ from imageezgen3d.orchestrator import (  # noqa: E402
 from imageezgen3d.jobs import JobService  # noqa: E402
 from imageezgen3d.jobs.gradio_bridge import (  # noqa: E402
     build_job_request_from_gradio,
+    build_mesh_op_job_request,
     run_via_job_queue,
 )
 from imageezgen3d.preprocess import normalize_image, validate_image  # noqa: E402
@@ -447,7 +448,7 @@ def _credit_preview_html(
     )
 
 
-def _run_inspect_extras_html(payload: dict[str, Any]) -> str:
+def _mesh_inspect_parameters(payload: dict[str, Any]) -> dict[str, Any]:
     parameters = payload.get("parameters", {})
     if not isinstance(parameters, dict):
         parameters = {}
@@ -455,15 +456,29 @@ def _run_inspect_extras_html(payload: dict[str, Any]) -> str:
     if isinstance(mesh_report, dict):
         merged_parameters = dict(parameters)
         merged_parameters.setdefault("mesh_report", mesh_report)
-    else:
-        merged_parameters = parameters
+        return merged_parameters
+    return parameters
+
+
+def _preview_mesh_extras_html(payload: dict[str, Any]) -> str:
     artifacts = payload.get("artifacts", {})
     if not isinstance(artifacts, dict):
         artifacts = {}
     parts = [
-        _workspace_ui.mesh_stats_card_html(merged_parameters),
+        _workspace_ui.mesh_stats_card_html(_mesh_inspect_parameters(payload)),
         _workspace_ui.pbr_channel_strip_html(artifacts),
-        _workspace_ui.viewer_action_bar_html(),
+    ]
+    return "\n".join(part for part in parts if part)
+
+
+def _run_inspect_extras_html(payload: dict[str, Any]) -> str:
+    artifacts = payload.get("artifacts", {})
+    if not isinstance(artifacts, dict):
+        artifacts = {}
+    parts = [
+        _workspace_ui.mesh_stats_card_html(_mesh_inspect_parameters(payload)),
+        _workspace_ui.pbr_channel_strip_html(artifacts),
+        _workspace_ui.viewer_action_stub_bar_html(),
     ]
     return "\n".join(part for part in parts if part)
 
@@ -1181,6 +1196,28 @@ def build_demo():
                             preview_extras = gr.HTML(
                                 elem_classes="preview-extras-shell",
                             )
+                            with gr.Row(
+                                equal_height=False,
+                                elem_classes="viewer-mesh-op-row",
+                            ):
+                                viewer_remesh_btn = gr.Button(
+                                    "Remesh",
+                                    variant="secondary",
+                                    elem_classes="viewer-mesh-op-btn",
+                                )
+                                viewer_analyze_btn = gr.Button(
+                                    "Analyze Print",
+                                    variant="secondary",
+                                    elem_classes="viewer-mesh-op-btn",
+                                )
+                                viewer_repair_btn = gr.Button(
+                                    "Repair Print",
+                                    variant="secondary",
+                                    elem_classes="viewer-mesh-op-btn",
+                                )
+                            gr.HTML(
+                                _workspace_ui.viewer_action_stub_bar_html(),
+                            )
 
                         with gr.Group(elem_classes="workspace-panel validation-panel"):
                             gr.HTML(
@@ -1621,9 +1658,117 @@ def build_demo():
             return (
                 state["model"],
                 _format_report(result),
-                _run_inspect_extras_html(result),
+                _preview_mesh_extras_html(result),
                 *artifact_download_values(
                     artifacts,
+                    download_keys,
+                    bundle_path=state["bundle"],
+                ),
+                state,
+                history_dropdown,
+                history_compare_dropdown,
+                history_message,
+                history_overview,
+                create_overview,
+            )
+
+        def run_viewer_mesh_op(modality: str, state):
+            state = dict(state or {})
+            fallback_model = state.get("model")
+            mesh_path = state.get("model")
+            if not mesh_path or not Path(mesh_path).is_file():
+                (
+                    history_dropdown,
+                    history_compare_dropdown,
+                    history_message,
+                    history_overview,
+                    create_overview,
+                ) = history_updates()
+                return (
+                    fallback_model,
+                    _error_report(
+                        "Generate a model first, then run Remesh or printability actions."
+                    ),
+                    "",
+                    *session_artifact_values(state, download_keys),
+                    state,
+                    history_dropdown,
+                    history_compare_dropdown,
+                    history_message,
+                    history_overview,
+                    create_overview,
+                )
+            try:
+                job_request = build_mesh_op_job_request(modality, str(mesh_path))
+                result = run_via_job_queue(job_service, job_request)
+            except (ValueError, RuntimeError) as exc:
+                (
+                    history_dropdown,
+                    history_compare_dropdown,
+                    history_message,
+                    history_overview,
+                    create_overview,
+                ) = history_updates()
+                return (
+                    fallback_model,
+                    _error_report(str(exc)),
+                    _preview_mesh_extras_html({"parameters": {}, "artifacts": {}}),
+                    *session_artifact_values(state, download_keys),
+                    state,
+                    history_dropdown,
+                    history_compare_dropdown,
+                    history_message,
+                    history_overview,
+                    create_overview,
+                )
+            state["last_run_id"] = result["run_id"]
+            artifacts, missing_keys = _verified_artifact_state(
+                orchestrator.store,
+                result.get("artifacts"),
+            )
+            if missing_keys:
+                (
+                    history_dropdown,
+                    history_compare_dropdown,
+                    history_message,
+                    history_overview,
+                    create_overview,
+                ) = history_updates()
+                return (
+                    fallback_model,
+                    _stale_artifact_report(result["run_id"], missing_keys),
+                    "",
+                    *session_artifact_values(state, download_keys),
+                    state,
+                    history_dropdown,
+                    history_compare_dropdown,
+                    history_message,
+                    history_overview,
+                    create_overview,
+                )
+            next_model = artifacts.get("glb") or artifacts.get("obj")
+            if next_model:
+                state["model"] = next_model
+            merged_artifacts = {
+                key: artifacts.get(key) or state.get(key)
+                for key in download_keys
+                if key != "bundle" and (artifacts.get(key) or state.get(key))
+            }
+            sync_session_artifact_keys(state, merged_artifacts, download_keys)
+            state["bundle"] = str(orchestrator.store.archive_run(result["run_id"]))
+            (
+                history_dropdown,
+                history_compare_dropdown,
+                history_message,
+                history_overview,
+                create_overview,
+            ) = history_updates()
+            return (
+                state.get("model") or fallback_model,
+                _format_report(result),
+                _preview_mesh_extras_html(result),
+                *artifact_download_values(
+                    merged_artifacts,
                     download_keys,
                     bundle_path=state["bundle"],
                 ),
@@ -1737,6 +1882,31 @@ def build_demo():
             ],
             api_name="generate",
         )
+        viewer_mesh_op_outputs = [
+            model,
+            status,
+            preview_extras,
+            *[create_artifact_files[key] for key in download_keys],
+            session_state,
+            history_run,
+            history_compare_run,
+            history_notice,
+            history_summary,
+            create_history_summary,
+        ]
+        for mesh_op_button, mesh_op_modality in (
+            (viewer_remesh_btn, "remesh"),
+            (viewer_analyze_btn, "print-analyze"),
+            (viewer_repair_btn, "print-repair"),
+        ):
+            mesh_op_button.click(
+                lambda state, mesh_op_modality=mesh_op_modality: run_viewer_mesh_op(
+                    mesh_op_modality,
+                    state,
+                ),
+                inputs=[session_state],
+                outputs=viewer_mesh_op_outputs,
+            )
         credit_preview_inputs = [input_modality, generation_lane, quality]
         for control in (input_modality, generation_lane, quality):
             control.change(
@@ -3000,6 +3170,13 @@ _CSS = """
     display: block;
     color: var(--iez-muted);
     overflow-wrap: anywhere;
+}
+
+.viewer-mesh-op-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
 }
 
 .viewer-action-row {

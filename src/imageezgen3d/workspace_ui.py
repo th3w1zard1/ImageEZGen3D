@@ -100,16 +100,23 @@ def pbr_channel_strip_html(artifacts: Mapping[str, Any] | None) -> str:
     )
 
 
-def viewer_action_bar_html() -> str:
-    actions = (
-        "Retry",
-        "Edit Texture",
-        "Remesh",
-        "Unwrap UV",
-        "Download",
-        "Send to Print",
-        "Send to Animate",
-    )
+WIRED_VIEWER_MESH_OPS: tuple[tuple[str, str], ...] = (
+    ("remesh", "Remesh"),
+    ("print-analyze", "Analyze Print"),
+    ("print-repair", "Repair Print"),
+)
+
+VIEWER_ACTION_STUBS: tuple[str, ...] = (
+    "Retry",
+    "Edit Texture",
+    "Unwrap UV",
+    "Download",
+    "Send to Print",
+    "Send to Animate",
+)
+
+
+def _viewer_action_bar_html(actions: tuple[str, ...], *, note: str) -> str:
     buttons = "".join(
         f'<span class="viewer-action-chip">{escape(label)}</span>' for label in actions
     )
@@ -117,9 +124,28 @@ def viewer_action_bar_html() -> str:
         [
             '<section class="viewer-action-bar" aria-label="Viewer actions">',
             f'<div class="viewer-action-row">{buttons}</div>',
-            '<p class="viewer-action-note">Actions queue Meshy-shaped jobs when wired; labels mirror the target workspace affordances.</p>',
+            f'<p class="viewer-action-note">{escape(note)}</p>',
             "</section>",
         ]
+    )
+
+
+def viewer_action_stub_bar_html() -> str:
+    return _viewer_action_bar_html(
+        VIEWER_ACTION_STUBS,
+        note=(
+            "Remesh and printability actions are wired as buttons above; "
+            "remaining labels mirror Meshy workspace affordances pending wiring."
+        ),
+    )
+
+
+def viewer_action_bar_html() -> str:
+    wired_labels = tuple(label for _, label in WIRED_VIEWER_MESH_OPS)
+    actions = wired_labels + VIEWER_ACTION_STUBS
+    return _viewer_action_bar_html(
+        actions,
+        note="Actions queue Meshy-shaped jobs when wired; labels mirror the target workspace affordances.",
     )
 
 

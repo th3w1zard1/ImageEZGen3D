@@ -375,6 +375,22 @@ class RepoLocalWorkspaceTests(unittest.TestCase):
         self.assertIn("pbr-channel-strip", html)
         self.assertIn("viewer-action-bar", html)
 
+    def test_preview_mesh_extras_html_omits_viewer_action_bar(self) -> None:
+        html = app._preview_mesh_extras_html(
+            {
+                "parameters": {"topology": "triangle", "face_count": 42},
+                "artifacts": {"pbr_base_color": "/tmp/base.png"},
+            }
+        )
+        self.assertIn("mesh-stats-card", html)
+        self.assertNotIn("viewer-action-bar", html)
+
+    def test_build_demo_wires_viewer_mesh_op_buttons(self) -> None:
+        source = Path(app.__file__).read_text(encoding="utf-8")
+        self.assertIn("run_viewer_mesh_op", source)
+        self.assertIn("viewer_remesh_btn", source)
+        self.assertIn("build_mesh_op_job_request", source)
+
     def test_run_inspect_extras_reads_top_level_mesh_report(self) -> None:
         html = app._run_inspect_extras_html(
             {

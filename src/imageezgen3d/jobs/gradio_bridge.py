@@ -69,6 +69,23 @@ def build_job_request_from_gradio(
     )
 
 
+def build_mesh_op_job_request(
+    modality: str,
+    mesh_input_path: str,
+    *,
+    target_polycount: int | None = None,
+) -> JobRequest:
+    normalized = modality.strip().lower()
+    polycount = target_polycount
+    if polycount is None and normalized == "remesh":
+        polycount = 30_000
+    return JobRequest(
+        input_modality=normalized,
+        mesh_input_path=mesh_input_path,
+        target_polycount=polycount,
+    )
+
+
 def run_via_job_queue(
     service: JobService,
     request: JobRequest,
