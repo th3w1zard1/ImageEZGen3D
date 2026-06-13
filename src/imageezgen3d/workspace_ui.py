@@ -108,6 +108,12 @@ WIRED_VIEWER_MESH_OPS: tuple[tuple[str, str], ...] = (
     ("unwrap-uv", "Unwrap UV"),
 )
 
+WIRED_VIEWER_BOOLEAN_OPS: tuple[tuple[str, str], ...] = (
+    ("boolean-union", "Boolean Union"),
+    ("boolean-difference", "Boolean Difference"),
+    ("boolean-intersection", "Boolean Intersect"),
+)
+
 WIRED_VIEWER_GENERATION_OPS: tuple[tuple[str, str], ...] = (
     ("retexture", "Edit Texture"),
 )
@@ -153,6 +159,7 @@ def viewer_action_bar_html() -> str:
         label
         for _, label in (
             WIRED_VIEWER_MESH_OPS
+            + WIRED_VIEWER_BOOLEAN_OPS
             + WIRED_VIEWER_GENERATION_OPS
             + WIRED_VIEWER_UTILITY_OPS
             + WIRED_VIEWER_HANDOFF_OPS

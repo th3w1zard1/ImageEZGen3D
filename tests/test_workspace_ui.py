@@ -35,7 +35,20 @@ class WorkspaceUiTests(unittest.TestCase):
         self.assertIn("Retry", html)
         self.assertIn("Send to Animate", html)
         self.assertIn("Multi-Color 3MF", html)
+        self.assertIn("Boolean Union", html)
+        self.assertIn("Boolean Intersect", html)
         self.assertIn("viewer-action-bar", html)
+
+    def test_wired_viewer_boolean_ops_cover_all_modalities(self) -> None:
+        modalities = {item[0] for item in workspace_ui.WIRED_VIEWER_BOOLEAN_OPS}
+        self.assertEqual(
+            modalities,
+            {
+                "boolean-union",
+                "boolean-difference",
+                "boolean-intersection",
+            },
+        )
 
     def test_wired_viewer_mesh_ops_cover_remesh_and_print(self) -> None:
         modalities = {item[0] for item in workspace_ui.WIRED_VIEWER_MESH_OPS}

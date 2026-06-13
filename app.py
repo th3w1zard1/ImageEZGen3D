@@ -1258,6 +1258,31 @@ def build_demo():
                                     variant="secondary",
                                     elem_classes="viewer-mesh-op-btn",
                                 )
+                            with gr.Row(
+                                equal_height=False,
+                                elem_classes="viewer-boolean-row",
+                            ):
+                                viewer_boolean_second_mesh = gr.File(
+                                    label="Boolean second mesh",
+                                    file_types=[".glb", ".gltf", ".obj", ".stl"],
+                                    type="filepath",
+                                    elem_classes="viewer-boolean-mesh-file",
+                                )
+                                viewer_boolean_union_btn = gr.Button(
+                                    "Boolean Union",
+                                    variant="secondary",
+                                    elem_classes="viewer-mesh-op-btn",
+                                )
+                                viewer_boolean_difference_btn = gr.Button(
+                                    "Boolean Difference",
+                                    variant="secondary",
+                                    elem_classes="viewer-mesh-op-btn",
+                                )
+                                viewer_boolean_intersection_btn = gr.Button(
+                                    "Boolean Intersect",
+                                    variant="secondary",
+                                    elem_classes="viewer-mesh-op-btn",
+                                )
                             stub_html = _workspace_ui.viewer_action_stub_bar_html()
                             if stub_html:
                                 gr.HTML(stub_html)
@@ -1905,6 +1930,38 @@ def build_demo():
                 fallback_model=fallback_model,
             )
 
+        def run_viewer_boolean_mesh_op(modality: str, second_mesh_file, state):
+            state = dict(state or {})
+            fallback_model = state.get("model")
+            mesh_path = state.get("model")
+            if not mesh_path or not Path(mesh_path).is_file():
+                return _viewer_job_error_outputs(
+                    "Generate a model first, then run boolean mesh operations.",
+                    state,
+                    fallback_model,
+                )
+            second_mesh_path = str(second_mesh_file or "").strip()
+            if not second_mesh_path or not Path(second_mesh_path).is_file():
+                return _viewer_job_error_outputs(
+                    "Upload a second mesh file, then run a boolean operation.",
+                    state,
+                    fallback_model,
+                )
+            try:
+                job_request = build_mesh_op_job_request(
+                    modality,
+                    str(mesh_path),
+                    second_mesh_path=second_mesh_path,
+                )
+                result = run_via_job_queue(job_service, job_request)
+            except (ValueError, RuntimeError, FileNotFoundError) as exc:
+                return _viewer_job_error_outputs(str(exc), state, fallback_model)
+            return _finalize_queued_run_result(
+                result,
+                state,
+                fallback_model=fallback_model,
+            )
+
         def run_viewer_retexture(
             primary_image,
             project_brief,
@@ -2160,6 +2217,20 @@ def build_demo():
                     state,
                 ),
                 inputs=[session_state],
+                outputs=viewer_mesh_op_outputs,
+            )
+        for boolean_button, boolean_modality in (
+            (viewer_boolean_union_btn, "boolean-union"),
+            (viewer_boolean_difference_btn, "boolean-difference"),
+            (viewer_boolean_intersection_btn, "boolean-intersection"),
+        ):
+            boolean_button.click(
+                lambda state, second_mesh, mesh_op_modality=boolean_modality: run_viewer_boolean_mesh_op(
+                    mesh_op_modality,
+                    second_mesh,
+                    state,
+                ),
+                inputs=[session_state, viewer_boolean_second_mesh],
                 outputs=viewer_mesh_op_outputs,
             )
         viewer_retexture_btn.click(

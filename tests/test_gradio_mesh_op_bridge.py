@@ -17,6 +17,7 @@ from imageezgen3d.jobs.gradio_bridge import (
     resolve_generation_input_modality,
     run_via_job_queue,
 )
+from imageezgen3d.mesh_ops.backends import boolean_engine
 
 
 class GradioMeshOpBridgeTests(unittest.TestCase):
@@ -142,6 +143,38 @@ class GradioMeshOpBridgeTests(unittest.TestCase):
                 self.assertEqual(
                     result["parameters"].get("input_modality"),
                     "print-multi-color",
+                )
+            finally:
+                service.shutdown(wait=True)
+
+    @unittest.skipUnless(boolean_engine() is not None, "boolean engine not installed")
+    def test_run_boolean_union_via_job_queue_returns_glb(self) -> None:
+        import trimesh
+
+        with tempfile.TemporaryDirectory() as directory:
+            config = AppConfig(
+                app=AppSettings(output_dir=Path(directory)),
+                storage=StorageSettings(retention_runs=10),
+            )
+            first_mesh = trimesh.creation.box(extents=(2.0, 2.0, 2.0))
+            second_mesh = trimesh.creation.box(extents=(2.0, 2.0, 2.0))
+            second_mesh.apply_translation((1.0, 0.0, 0.0))
+            first_glb = Path(directory) / "first.glb"
+            second_glb = Path(directory) / "second.glb"
+            first_mesh.export(str(first_glb))
+            second_mesh.export(str(second_glb))
+            service = JobService(config, max_workers=1)
+            try:
+                request = build_mesh_op_job_request(
+                    "boolean-union",
+                    str(first_glb),
+                    second_mesh_path=str(second_glb),
+                )
+                result = run_via_job_queue(service, request, timeout_seconds=120.0)
+                self.assertIn("glb", result["artifacts"])
+                self.assertEqual(
+                    result["parameters"].get("input_modality"),
+                    "boolean-union",
                 )
             finally:
                 service.shutdown(wait=True)
