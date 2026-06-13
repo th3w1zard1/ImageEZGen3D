@@ -765,6 +765,20 @@ After Phase 6 merge (`c03ddf6` on `main`, PR #153) and Hub deploy commit `cf472e
 - **Artifacts verified:** manifest + GLB + OBJ present via Gradio API `/generate`
 - **Meshy program:** Phases U–7 complete; workspace tabs (Model/Image/Print/Animate/Assets), credits ledger, mesh_ops, adapters, and Meshy-shaped HTTP API validated locally; hosted path re-attested after deploy
 
+## Meshy parity Phase 18 validation (hosted re-attestation after Phases 12–17)
+
+After Phase 17 merge (`c176f8b` on `main`, PR #164) and Hub deploy commit `26a6b9ffa9661aa0e838905d5c206e9bad732726` (2026-06-13):
+
+- **Space:** https://th3w1zard1-imageezgen3d.hf.space/
+- **Local bundle:** `PYTHONPATH=src python scripts/verify_meshy_parity_bundle.py` → `meshy_parity_bundle=ok`
+- **Block run id:** `20260613-073614-13874d80` — `hosted_golden_smoke.py` + `verify_hosted_golden_smoke_record.py` → ok
+- **Vase run id:** `20260613-073635-ab08bdd9` — same smoke path → ok
+- **G7 live probe:** `hunyuan_g7_preflight.py --live-probe` → `hosted_probe.ok=true` (Space rejected `hunyuan-zerogpu` while disabled)
+- **Mode:** hosted **CPU fallback** (`Local CPU Preview` / `cpu-demo`); **not** ZeroGPU neural validation (Hunyuan adapter remains disabled)
+- **g7_false_neural_guard_ok:** true on Block and Vase runs
+- **Artifacts verified:** manifest + GLB + OBJ present via Gradio API `/generate`
+- **Meshy program:** Phases 12–17 landed viewer Retry/Download/Send-to, boolean mesh-op UX, multi-image-to-3d, multi-color print API + viewer button; hosted path re-attested after deploy
+
 ## Plan 017 validation (manifest-driven UI)
 
 After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b5780929360d96e2ab6f5c197a20a3fe` (2026-05-24):
