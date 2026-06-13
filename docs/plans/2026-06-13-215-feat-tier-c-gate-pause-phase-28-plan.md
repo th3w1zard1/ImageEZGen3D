@@ -1,5 +1,5 @@
 ---
-status: active
+status: completed
 execution: ops
 phase: "28"
 program: hunyuan-g7-readiness
@@ -9,7 +9,7 @@ program: hunyuan-g7-readiness
 
 ## Problem
 
-Phase 27 closed the ops attestation arc (Phases 20–27) on deploy `a149111`. Phase plan docs 207–214 remain `status: active`. The next gate is tier-C `--strict` capstones on a GPU workstation — this CI host has no CUDA. Agents need an explicit **pause** record and plan hygiene so `/lfg` does not spin redundant guard-stack loops.
+Phase 27 closed the ops attestation arc (Phases 20–27). The next gate is tier-C `--strict` capstones on a GPU workstation — this CI host has no CUDA. Phase 28 recorded the expected strict failure, marked Phase 20–27 plans `status: completed`, and paused the ops program so `/lfg` does not spin redundant guard-stack loops.
 
 ## Requirements
 
