@@ -29,6 +29,8 @@ class WorkspaceUiTests(unittest.TestCase):
     def test_viewer_action_stub_bar_excludes_wired_labels(self) -> None:
         html = workspace_ui.viewer_action_stub_bar_html()
         self.assertNotIn(">Remesh<", html)
+        self.assertNotIn(">Edit Texture<", html)
+        self.assertNotIn(">Unwrap UV<", html)
         self.assertIn("Send to Animate", html)
         self.assertIn("viewer-action-bar", html)
 
@@ -41,8 +43,12 @@ class WorkspaceUiTests(unittest.TestCase):
         modalities = {item[0] for item in workspace_ui.WIRED_VIEWER_MESH_OPS}
         self.assertEqual(
             modalities,
-            {"remesh", "print-analyze", "print-repair"},
+            {"remesh", "print-analyze", "print-repair", "unwrap-uv"},
         )
+
+    def test_wired_viewer_generation_ops_include_retexture(self) -> None:
+        labels = {item[1] for item in workspace_ui.WIRED_VIEWER_GENERATION_OPS}
+        self.assertIn("Edit Texture", labels)
 
     def test_mesh_stats_card_reads_mesh_report(self) -> None:
         html = workspace_ui.mesh_stats_card_html(
@@ -84,6 +90,14 @@ class WorkspaceUiTests(unittest.TestCase):
             {item["run_id"] for item in mesh_only},
             {"run-remesh", "run-print"},
         )
+        uv_only = workspace_ui.filter_asset_runs(
+            [
+                *runs,
+                {"run_id": "run-uv", "adapter": "cpu-demo", "input_modality": "unwrap-uv"},
+            ],
+            phase="mesh-ops",
+        )
+        self.assertIn("run-uv", {item["run_id"] for item in uv_only})
         print_only = workspace_ui.filter_asset_runs(runs, phase="print")
         self.assertEqual([item["run_id"] for item in print_only], ["run-print"])
         searched = workspace_ui.filter_asset_runs(runs, search="block")

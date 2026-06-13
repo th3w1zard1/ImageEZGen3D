@@ -104,12 +104,15 @@ WIRED_VIEWER_MESH_OPS: tuple[tuple[str, str], ...] = (
     ("remesh", "Remesh"),
     ("print-analyze", "Analyze Print"),
     ("print-repair", "Repair Print"),
+    ("unwrap-uv", "Unwrap UV"),
+)
+
+WIRED_VIEWER_GENERATION_OPS: tuple[tuple[str, str], ...] = (
+    ("retexture", "Edit Texture"),
 )
 
 VIEWER_ACTION_STUBS: tuple[str, ...] = (
     "Retry",
-    "Edit Texture",
-    "Unwrap UV",
     "Download",
     "Send to Print",
     "Send to Animate",
@@ -134,14 +137,16 @@ def viewer_action_stub_bar_html() -> str:
     return _viewer_action_bar_html(
         VIEWER_ACTION_STUBS,
         note=(
-            "Remesh and printability actions are wired as buttons above; "
+            "Remesh, printability, UV unwrap, and Edit Texture are wired as buttons above; "
             "remaining labels mirror Meshy workspace affordances pending wiring."
         ),
     )
 
 
 def viewer_action_bar_html() -> str:
-    wired_labels = tuple(label for _, label in WIRED_VIEWER_MESH_OPS)
+    wired_labels = tuple(
+        label for _, label in WIRED_VIEWER_MESH_OPS + WIRED_VIEWER_GENERATION_OPS
+    )
     actions = wired_labels + VIEWER_ACTION_STUBS
     return _viewer_action_bar_html(
         actions,
@@ -175,7 +180,7 @@ def mesh_stats_card_html(parameters: Mapping[str, Any] | None) -> str:
 
 
 MESH_OP_MODALITIES = frozenset(
-    {"remesh", "convert", "resize", "print-analyze", "print-repair"}
+    {"remesh", "convert", "resize", "print-analyze", "print-repair", "unwrap-uv"}
 )
 PRINT_MODALITIES = frozenset({"print-analyze", "print-repair"})
 

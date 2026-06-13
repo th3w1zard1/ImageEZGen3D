@@ -32,6 +32,7 @@ from imageezgen3d.jobs import JobService  # noqa: E402
 from imageezgen3d.jobs.gradio_bridge import (  # noqa: E402
     build_job_request_from_gradio,
     build_mesh_op_job_request,
+    build_retexture_job_request,
     run_via_job_queue,
 )
 from imageezgen3d.preprocess import normalize_image, validate_image  # noqa: E402
@@ -1215,6 +1216,16 @@ def build_demo():
                                     variant="secondary",
                                     elem_classes="viewer-mesh-op-btn",
                                 )
+                                viewer_unwrap_btn = gr.Button(
+                                    "Unwrap UV",
+                                    variant="secondary",
+                                    elem_classes="viewer-mesh-op-btn",
+                                )
+                                viewer_retexture_btn = gr.Button(
+                                    "Edit Texture",
+                                    variant="secondary",
+                                    elem_classes="viewer-mesh-op-btn",
+                                )
                             gr.HTML(
                                 _workspace_ui.viewer_action_stub_bar_html(),
                             )
@@ -1724,59 +1735,43 @@ def build_demo():
                 assets_gallery_html,
             )
 
-        def run_viewer_mesh_op(modality: str, state):
+        def _viewer_job_error_outputs(
+            message: str,
+            state: dict[str, Any],
+            fallback_model: Any,
+            *,
+            preview_extras: str = "",
+        ):
+            (
+                history_dropdown,
+                history_compare_dropdown,
+                history_message,
+                history_overview,
+                create_overview,
+                assets_gallery_html,
+            ) = history_updates()
+            return (
+                fallback_model,
+                _error_report(message),
+                preview_extras,
+                *session_artifact_values(state, download_keys),
+                state,
+                history_dropdown,
+                history_compare_dropdown,
+                history_message,
+                history_overview,
+                create_overview,
+                assets_gallery_html,
+            )
+
+        def _finalize_queued_run_result(
+            result: dict[str, Any],
+            state: dict[str, Any],
+            *,
+            fallback_model: Any,
+        ):
             state = dict(state or {})
-            fallback_model = state.get("model")
-            mesh_path = state.get("model")
-            if not mesh_path or not Path(mesh_path).is_file():
-                (
-                    history_dropdown,
-                    history_compare_dropdown,
-                    history_message,
-                    history_overview,
-                    create_overview,
-                    assets_gallery_html,
-                ) = history_updates()
-                return (
-                    fallback_model,
-                    _error_report(
-                        "Generate a model first, then run Remesh or printability actions."
-                    ),
-                    "",
-                    *session_artifact_values(state, download_keys),
-                    state,
-                    history_dropdown,
-                    history_compare_dropdown,
-                    history_message,
-                    history_overview,
-                    create_overview,
-                    assets_gallery_html,
-                )
-            try:
-                job_request = build_mesh_op_job_request(modality, str(mesh_path))
-                result = run_via_job_queue(job_service, job_request)
-            except (ValueError, RuntimeError) as exc:
-                (
-                    history_dropdown,
-                    history_compare_dropdown,
-                    history_message,
-                    history_overview,
-                    create_overview,
-                    assets_gallery_html,
-                ) = history_updates()
-                return (
-                    fallback_model,
-                    _error_report(str(exc)),
-                    _preview_mesh_extras_html({"parameters": {}, "artifacts": {}}),
-                    *session_artifact_values(state, download_keys),
-                    state,
-                    history_dropdown,
-                    history_compare_dropdown,
-                    history_message,
-                    history_overview,
-                    create_overview,
-                    assets_gallery_html,
-                )
+            fallback_model = fallback_model or state.get("model")
             state["last_run_id"] = result["run_id"]
             artifacts, missing_keys = _verified_artifact_state(
                 orchestrator.store,
@@ -1838,6 +1833,59 @@ def build_demo():
                 history_overview,
                 create_overview,
                 assets_gallery_html,
+            )
+
+        def run_viewer_mesh_op(modality: str, state):
+            state = dict(state or {})
+            fallback_model = state.get("model")
+            mesh_path = state.get("model")
+            if not mesh_path or not Path(mesh_path).is_file():
+                return _viewer_job_error_outputs(
+                    "Generate a model first, then run viewer mesh operations.",
+                    state,
+                    fallback_model,
+                )
+            try:
+                job_request = build_mesh_op_job_request(modality, str(mesh_path))
+                result = run_via_job_queue(job_service, job_request)
+            except (ValueError, RuntimeError) as exc:
+                return _viewer_job_error_outputs(str(exc), state, fallback_model)
+            return _finalize_queued_run_result(
+                result,
+                state,
+                fallback_model=fallback_model,
+            )
+
+        def run_viewer_retexture(
+            primary_image,
+            project_brief,
+            text_prompt,
+            state,
+        ):
+            state = dict(state or {})
+            fallback_model = state.get("model")
+            mesh_path = state.get("model")
+            if not mesh_path or not Path(mesh_path).is_file():
+                return _viewer_job_error_outputs(
+                    "Generate a model first, then run Edit Texture.",
+                    state,
+                    fallback_model,
+                )
+            try:
+                job_request = build_retexture_job_request(
+                    intake_root=config.app.output_dir / "jobs" / "intake",
+                    source_mesh_path=str(mesh_path),
+                    texture_image=primary_image,
+                    prompt_text=text_prompt,
+                    project_brief=project_brief,
+                )
+                result = run_via_job_queue(job_service, job_request)
+            except (ValueError, RuntimeError) as exc:
+                return _viewer_job_error_outputs(str(exc), state, fallback_model)
+            return _finalize_queued_run_result(
+                result,
+                state,
+                fallback_model=fallback_model,
             )
 
         def update_credit_preview(
@@ -1960,6 +2008,7 @@ def build_demo():
             (viewer_remesh_btn, "remesh"),
             (viewer_analyze_btn, "print-analyze"),
             (viewer_repair_btn, "print-repair"),
+            (viewer_unwrap_btn, "unwrap-uv"),
         ):
             mesh_op_button.click(
                 lambda state, mesh_op_modality=mesh_op_modality: run_viewer_mesh_op(
@@ -1969,6 +2018,11 @@ def build_demo():
                 inputs=[session_state],
                 outputs=viewer_mesh_op_outputs,
             )
+        viewer_retexture_btn.click(
+            run_viewer_retexture,
+            inputs=[primary, project_brief, text_prompt, session_state],
+            outputs=viewer_mesh_op_outputs,
+        )
         credit_preview_inputs = [input_modality, generation_lane, quality]
         for control in (input_modality, generation_lane, quality):
             control.change(
