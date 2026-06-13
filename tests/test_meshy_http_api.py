@@ -137,6 +137,7 @@ class MeshyHttpApiTests(unittest.TestCase):
                 task_id = submit_payload["id"]
                 deadline = time.monotonic() + 60.0
                 status = submit_payload["status"]
+                poll_payload = submit_payload
                 while status != "SUCCEEDED" and time.monotonic() < deadline:
                     time.sleep(0.05)
                     with request.urlopen(
@@ -177,6 +178,7 @@ class MeshyHttpApiTests(unittest.TestCase):
                 task_id = submit_payload["id"]
                 deadline = time.monotonic() + 60.0
                 status = submit_payload["status"]
+                poll_payload = submit_payload
                 while status != "SUCCEEDED" and time.monotonic() < deadline:
                     time.sleep(0.05)
                     with request.urlopen(
@@ -218,6 +220,7 @@ class MeshyHttpApiTests(unittest.TestCase):
                 task_id = submit_payload["id"]
                 deadline = time.monotonic() + 60.0
                 status = submit_payload["status"]
+                poll_payload = submit_payload
                 while status != "SUCCEEDED" and time.monotonic() < deadline:
                     time.sleep(0.05)
                     with request.urlopen(
