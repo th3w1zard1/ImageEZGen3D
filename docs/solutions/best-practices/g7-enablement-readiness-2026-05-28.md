@@ -40,6 +40,8 @@ Export-tier hosted smoke re-attested after Meshy program closure; Hunyuan capsto
 
 **Phase 25 (2026-06-13):** Space redeploy (`a149111`) with PR #167 server fixes; full guard stack re-attested post-deploy; see hosted-validation § Phase 25.
 
+**Phase 26 (2026-06-13):** Post-deploy browser E2E (Block, Playwright) closes P10 gap for deploy `a149111`; run id `20260613-095610-69c9a820`; see hosted-validation § Phase 26.
+
 ## Recommended next execution slice
 
 1. Run `PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-dir .` locally (do not commit output JSON).

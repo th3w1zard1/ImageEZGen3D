@@ -55,8 +55,9 @@ After Meshy program closure and Phase 20 Gradio index repair (PR #167, #168 on `
 | 25 | Golden smoke (Block) | `20260613-092927-c307caa4` | Hosted CPU fallback |
 | 25 | Golden smoke (Vase) | `20260613-092931-a8c0384d` | Hosted CPU fallback |
 | 25 | Export-tier draft/balanced | `20260613-092936-9c10235e` / `20260613-092940-bfbd5e37` | Hosted CPU fallback |
+| 26 | Browser E2E (Block) | `20260613-095610-69c9a820` | Hosted CPU fallback — Playwright UI path |
 
-Details: [hosted-validation-2026-05-23.md](../../knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md) § Phase 20–25. **G7/G8/G9 remain OPEN** — not G7 PASS.
+Details: [hosted-validation-2026-05-23.md](../../knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md) § Phase 20–26. **G7/G8/G9 remain OPEN** — not G7 PASS.
 
 ## Local replay commands
 
