@@ -30,9 +30,11 @@ from imageezgen3d.orchestrator import (  # noqa: E402
 )
 from imageezgen3d.jobs import JobService  # noqa: E402
 from imageezgen3d.jobs.gradio_bridge import (  # noqa: E402
+    build_animate_job_request,
     build_job_request_from_gradio,
     build_mesh_op_job_request,
     build_retexture_job_request,
+    capture_retry_snapshot,
     run_via_job_queue,
 )
 from imageezgen3d.preprocess import normalize_image, validate_image  # noqa: E402
@@ -479,8 +481,11 @@ def _run_inspect_extras_html(payload: dict[str, Any]) -> str:
     parts = [
         _workspace_ui.mesh_stats_card_html(_mesh_inspect_parameters(payload)),
         _workspace_ui.pbr_channel_strip_html(artifacts),
-        _workspace_ui.viewer_action_stub_bar_html(),
     ]
+    stub_bar = _workspace_ui.viewer_action_stub_bar_html()
+    parts.append(
+        stub_bar if stub_bar else _workspace_ui.viewer_action_bar_html()
+    )
     return "\n".join(part for part in parts if part)
 
 
@@ -1226,9 +1231,29 @@ def build_demo():
                                     variant="secondary",
                                     elem_classes="viewer-mesh-op-btn",
                                 )
-                            gr.HTML(
-                                _workspace_ui.viewer_action_stub_bar_html(),
-                            )
+                                viewer_retry_btn = gr.Button(
+                                    "Retry",
+                                    variant="secondary",
+                                    elem_classes="viewer-mesh-op-btn",
+                                )
+                                viewer_download_btn = gr.Button(
+                                    "Download",
+                                    variant="secondary",
+                                    elem_classes="viewer-mesh-op-btn",
+                                )
+                                viewer_send_print_btn = gr.Button(
+                                    "Send to Print",
+                                    variant="secondary",
+                                    elem_classes="viewer-mesh-op-btn",
+                                )
+                                viewer_send_animate_btn = gr.Button(
+                                    "Send to Animate",
+                                    variant="secondary",
+                                    elem_classes="viewer-mesh-op-btn",
+                                )
+                            stub_html = _workspace_ui.viewer_action_stub_bar_html()
+                            if stub_html:
+                                gr.HTML(stub_html)
 
                         with gr.Group(elem_classes="workspace-panel validation-panel"):
                             gr.HTML(
@@ -1709,6 +1734,18 @@ def build_demo():
             state["model"] = artifacts.get("glb") or artifacts.get("obj")
             sync_session_artifact_keys(state, artifacts, download_keys)
             state["bundle"] = str(orchestrator.store.archive_run(result["run_id"]))
+            state["retry_snapshot"] = capture_retry_snapshot(
+                starter_flow=starter_flow,
+                project_brief_text=project_brief_text,
+                reference_brief_file=reference_brief_file,
+                adapter_name=adapter_name,
+                quality_name=quality_name,
+                seed_value=int(seed_value or 0),
+                input_modality_name=input_modality_name,
+                text_prompt_value=text_prompt_value,
+                generation_lane_name=generation_lane_name,
+                queue_as_job_enabled=queue_as_job_enabled,
+            )
             (
                 history_dropdown,
                 history_compare_dropdown,
@@ -1888,6 +1925,100 @@ def build_demo():
                 fallback_model=fallback_model,
             )
 
+        def run_retry(
+            primary_image,
+            front_image,
+            back_image,
+            left_image,
+            right_image,
+            state,
+        ):
+            state = dict(state or {})
+            snapshot = state.get("retry_snapshot")
+            if not isinstance(snapshot, dict):
+                return _viewer_job_error_outputs(
+                    "Generate once before retrying the last run settings.",
+                    state,
+                    state.get("model"),
+                )
+            return run_generate(
+                primary_image,
+                front_image,
+                back_image,
+                left_image,
+                right_image,
+                snapshot.get("starter_flow"),
+                snapshot.get("project_brief_text"),
+                snapshot.get("reference_brief_file"),
+                snapshot.get("adapter_name"),
+                snapshot.get("quality_name"),
+                snapshot.get("seed_value"),
+                snapshot.get("input_modality_name"),
+                snapshot.get("text_prompt_value"),
+                snapshot.get("generation_lane_name"),
+                snapshot.get("queue_as_job_enabled"),
+                state,
+            )
+
+        def run_viewer_refresh_downloads(state):
+            state = dict(state or {})
+            fallback_model = state.get("model")
+            if not fallback_model:
+                return _viewer_job_error_outputs(
+                    "Generate once to populate verified downloads.",
+                    state,
+                    fallback_model,
+                )
+            artifact_values = session_artifact_values(state, download_keys)
+            if not any(artifact_values):
+                return _viewer_job_error_outputs(
+                    "No verified download files are available for this session yet.",
+                    state,
+                    fallback_model,
+                )
+            (
+                history_dropdown,
+                history_compare_dropdown,
+                history_message,
+                history_overview,
+                create_overview,
+                assets_gallery_html,
+            ) = history_updates()
+            return (
+                fallback_model,
+                "### Downloads ready\nUse the Outputs panel file components below.",
+                "",
+                *artifact_values,
+                state,
+                history_dropdown,
+                history_compare_dropdown,
+                history_message,
+                history_overview,
+                create_overview,
+                assets_gallery_html,
+            )
+
+        def run_viewer_send_to_animate(state):
+            state = dict(state or {})
+            fallback_model = state.get("model")
+            mesh_path = state.get("model")
+            if not mesh_path or not Path(mesh_path).is_file():
+                return _viewer_job_error_outputs(
+                    "Generate a model first, then send it to the Animate lane.",
+                    state,
+                    fallback_model,
+                )
+            try:
+                job_request = build_animate_job_request(str(mesh_path))
+                result = run_via_job_queue(job_service, job_request)
+            except (ValueError, RuntimeError) as exc:
+                return _viewer_job_error_outputs(str(exc), state, fallback_model)
+            return _finalize_queued_run_result(
+                result,
+                state,
+                fallback_model=fallback_model,
+            )
+
         def update_credit_preview(
             input_modality_name,
             generation_lane_name,
@@ -2021,6 +2152,26 @@ def build_demo():
         viewer_retexture_btn.click(
             run_viewer_retexture,
             inputs=[primary, project_brief, text_prompt, session_state],
+            outputs=viewer_mesh_op_outputs,
+        )
+        viewer_retry_btn.click(
+            run_retry,
+            inputs=[primary, front, back, left, right, session_state],
+            outputs=viewer_mesh_op_outputs,
+        )
+        viewer_download_btn.click(
+            run_viewer_refresh_downloads,
+            inputs=[session_state],
+            outputs=viewer_mesh_op_outputs,
+        )
+        viewer_send_print_btn.click(
+            lambda state: run_viewer_mesh_op("print-analyze", state),
+            inputs=[session_state],
+            outputs=viewer_mesh_op_outputs,
+        )
+        viewer_send_animate_btn.click(
+            run_viewer_send_to_animate,
+            inputs=[session_state],
             outputs=viewer_mesh_op_outputs,
         )
         credit_preview_inputs = [input_modality, generation_lane, quality]
