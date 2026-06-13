@@ -871,6 +871,16 @@ After Phase 25 merge (`78b5ca3` on `main`, PR #172) against Hub deploy commit `a
 - **Mode:** hosted **CPU fallback**; **not** ZeroGPU/Hunyuan neural validation
 - **G7/G8/G9:** remain **OPEN**
 
+## G7 readiness ops arc closure Phase 27
+
+After Phase 26 merge (`241a050` on `main`, PR #173) — **ops attestation arc Phases 20–27 complete** on deploy `a149111`:
+
+- **Local capstones:** `hunyuan_enablement_evidence_capstones.py --record-dir /tmp/phase27-capstones` → `enablement_evidence_capstones_ok=true`, `parity_ok=true`, `g9_enablement_evidence_ready=false`, blocker `configured_adapter_neural_forward_not_ready` (expected on non-tier-C host)
+- **Preflight bundle:** `hunyuan_preflight_bundle.py --record-dir /tmp/phase27-preflight` → ok (`configured=False`, G7/G8/G9 OPEN)
+- **Hosted Vase golden smoke:** run id `20260613-100431-f294b98c` — `hosted_golden_smoke.py` + verify → ok (`g7_false_neural_guard_ok=true`)
+- **Mode:** local baseline + hosted **CPU fallback**; **not** tier-C `--strict`; **not** G7 neural validation
+- **Next:** tier-C GPU workstation only — see [g7-enablement-readiness-2026-05-28.md](../../solutions/best-practices/g7-enablement-readiness-2026-05-28.md) § Tier-C handoff
+
 ## Plan 017 validation (manifest-driven UI)
 
 After PR #9 merge (`507f003` on `main`) and Hub deploy commit `02bc0c29b5780929360d96e2ab6f5c197a20a3fe` (2026-05-24):

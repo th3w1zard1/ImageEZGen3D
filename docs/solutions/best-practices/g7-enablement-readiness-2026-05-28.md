@@ -42,6 +42,29 @@ Export-tier hosted smoke re-attested after Meshy program closure; Hunyuan capsto
 
 **Phase 26 (2026-06-13):** Post-deploy browser E2E (Block, Playwright) closes P10 gap for deploy `a149111`; run id `20260613-095610-69c9a820`; see hosted-validation § Phase 26.
 
+**Phase 27 (2026-06-13):** Ops arc closure — capstone/preflight baseline refresh + Vase golden smoke; see hosted-validation § Phase 27.
+
+## Ops attestation arc closure (Phases 20–27)
+
+Phases 20–27 on `main` (deploy `a149111`) complete the **disabled-adapter honesty** attestation program: guard stack, redeploy, browser E2E, capstone baseline. **Do not repeat** full guard-stack loops on non-GPU hosts unless Space code changes.
+
+| Done on this host | Blocked until tier-C GPU |
+| --- | --- |
+| Golden/export-tier smokes + G7 live probe | `hunyuan_enablement_evidence_capstones.py --strict` |
+| Space redeploy + browser Block E2E | Real Hunyuan neural forward + hosted G7 record |
+| Local capstone baseline (`configured_adapter_neural_forward_not_ready`) | `g9_enablement_evidence_ready=true` |
+| Admission G1–G6 PASS, adapter `configured=False` | Enablement PR per [hunyuan-g9-enablement-runbook.md](../../knowledgebase/hunyuan-g9-enablement-runbook.md) |
+
+### Tier-C handoff (single operator path)
+
+```bash
+# On CUDA workstation with tier-C deps installed:
+PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-dir . --strict
+# Must exit 0 with g9_enablement_evidence_ready=true before Space enablement
+```
+
+Then follow runbook steps 4–7 in **Recommended next execution slice** below.
+
 ## Recommended next execution slice
 
 1. Run `PYTHONPATH=src python scripts/hunyuan_enablement_evidence_capstones.py --record-dir .` locally (do not commit output JSON).
