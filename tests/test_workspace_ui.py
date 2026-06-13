@@ -80,7 +80,12 @@ class WorkspaceUiTests(unittest.TestCase):
             },
         ]
         mesh_only = workspace_ui.filter_asset_runs(runs, phase="mesh-ops")
-        self.assertEqual([item["run_id"] for item in mesh_only], ["run-remesh"])
+        self.assertEqual(
+            {item["run_id"] for item in mesh_only},
+            {"run-remesh", "run-print"},
+        )
+        print_only = workspace_ui.filter_asset_runs(runs, phase="print")
+        self.assertEqual([item["run_id"] for item in print_only], ["run-print"])
         searched = workspace_ui.filter_asset_runs(runs, search="block")
         self.assertEqual([item["run_id"] for item in searched], ["run-gen"])
 
