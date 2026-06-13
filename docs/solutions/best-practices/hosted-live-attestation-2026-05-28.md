@@ -46,8 +46,13 @@ After Meshy program closure and Phase 20 Gradio index repair (PR #167, #168 on `
 | 23 | Golden smoke (Block) | `20260613-091037-26cc856b` | Hosted CPU fallback |
 | 23 | Golden smoke (Vase) | `20260613-091123-f271693b` | Hosted CPU fallback |
 | 23 | G7 live probe | (probe record) | Space rejected `hunyuan-zerogpu`; `hosted_probe.ok=true` |
+| 24 | Golden smoke (Block) | `20260613-092056-22306a7d` | Hosted CPU fallback |
+| 24 | Golden smoke (Vase) | `20260613-092102-ca6e72c5` | Hosted CPU fallback |
+| 24 | Export-tier draft | `20260613-092107-3a5c8011` | Hosted CPU fallback |
+| 24 | Export-tier balanced | `20260613-092112-8764015f` | Hosted CPU fallback |
+| 24 | G7 live probe + preflight bundle | (probe record) | Space rejected `hunyuan-zerogpu`; bundle ok |
 
-Details: [hosted-validation-2026-05-23.md](../../knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md) § Phase 20–23. **G7/G8/G9 remain OPEN** — not G7 PASS.
+Details: [hosted-validation-2026-05-23.md](../../knowledgebase/40-operational-risk/hosted-validation-2026-05-23.md) § Phase 20–24. **G7/G8/G9 remain OPEN** — not G7 PASS.
 
 ## Local replay commands
 
